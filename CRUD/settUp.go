@@ -253,6 +253,7 @@ func readJSONConfig(filename string) (JSON_Data_Connect, error) {
 }
 
 // User Management Functions
+
 // CreateUser creates a new user in the database
 func CreateUser(name, login, role, password string, active bool) error {
 	stmt, err := db.Prepare("CALL goengine.create_user(?, ?, ?, ?, ?)") // Updated to match SQL
@@ -317,7 +318,7 @@ func main() {
 	// Write log
 	currentTime := time.Now()
 	// This needs to be updated so it adds to a new line each time
-	err = WriteLog("3", "Pos", "Message logged successfully", "Engine1", currentTime) // Notice changed logID to "2"
+	err = WriteLog("1", "Pos", "Message logged successfully", "Engine1", currentTime) // Notice changed logID to "2"
 	if err != nil {
 		log.Println("Failed to write log:", err)
 	}
@@ -339,19 +340,19 @@ func main() {
 	// }
 
 	// Insert a new status code
-	err = InsertStatusCode("200", "OK")
-	if err != nil {
-		log.Println("Failed to insert new status code:", err)
-	}
+	//err = InsertStatusCode("200", "OK")
+	//if err != nil {
+	//	log.Println("Failed to insert new status code:", err)
+	//}
 
 	// Create a new user
-	err = CreateUser("John", "john123", "admin", "password", true)
+	err = CreateUser("John", "john123", "ADM", "password", true)
 	if err != nil {
 		log.Println("Failed to create a new user:", err)
 	}
 
 	// Update an existing user
-	err = UpdateUser("1", "John Doe", "john_doe", "admin", "newpassword")
+	err = UpdateUser("1", "John Doe", "john_doe", "ADM", "newpassword")
 	if err != nil {
 		log.Println("Failed to update user:", err)
 	}

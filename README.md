@@ -1,5 +1,3 @@
-# cmpscfa23team2
-
 # PredictAI - The Future of Predictive Analytics
 
 <!--

@@ -153,7 +153,6 @@ END //
 DELIMITER ;
 
 -- PROCEDURE CHECK
-
 -- Set the delimiter for the following function creation
 DELIMITER //
 
@@ -162,17 +161,28 @@ CREATE FUNCTION EncryptsPassword(password NVARCHAR(10)) RETURNS VARBINARY(16)
     DETERMINISTIC
     NO SQL
 BEGIN
+    -- Declare and initialize the variable for the encrypted password
     DECLARE encrypted VARBINARY(16);
-    SET encrypted = AES_ENCRYPT(password, 'IST888IST888');
-    RETURN encrypted;
-END //
-DELIMITER //
 
-CREATE PROCEDURE GetStatusCode(IN statusCode VARCHAR(3)) -- Gets the Status code of the Log
-BEGIN
-    SELECT * FROM log AS l WHERE l.statusCode = statusCode;
+    -- Encrypt the password using AES_ENCRYPT function
+    SET encrypted = AES_ENCRYPT(password, 'IST888IST888');
+
+    -- Return the encrypted password
+RETURN encrypted;
 END //
-DELIMITER // -- Needed to not throw an error because of complex coding
+
+-- Reset the delimiter to the default
+DELIMITER ;
+
+-- Create a stored procedure to get the Status code from the Log
+CREATE PROCEDURE GetStatusCode(IN statusCode VARCHAR(3))
+BEGIN
+    -- Select all entries from the 'log' table where statusCode matches the input
+    SELECT * FROM log AS l WHERE l.statusCode = statusCode;
+END;
+
+-- Reset the delimiter back to default to avoid errors due to complex coding
+DELIMITER //
 
 DELIMITER //
 
@@ -182,38 +192,31 @@ CREATE PROCEDURE InsertLog(
     IN pGoEngineArea VARCHAR(250)
 )
 BEGIN
+    -- Declare variables
     DECLARE pLogID CHAR(36);
+    IF LENGTH(pStatusCode) > 3 THEN
+        -- Handle exceptions here (you can log or take appropriate actions)
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'An error occurred while inserting the log entry';
+    END IF;
+
+    -- Generate a UUID for the log entry
     SET pLogID = UUID();
 
+    -- Start a transaction
+    START TRANSACTION;
+
+    -- Insert the log entry into the 'log' table
     INSERT INTO log (logID, statusCode, message, goEngineArea)
     VALUES (pLogID, pStatusCode, pMessage, pGoEngineArea);
-END//
+
+    -- Commit the transaction
+    COMMIT;
+END;
 
 DELIMITER ;
 
--- USE goengine;
-
--- DELIMITER //
-
--- DROP PROCEDURE IF EXISTS InsertLog;
--- CREATE PROCEDURE InsertLog(
---     IN pStatusCode VARCHAR(3),
---     IN pMessage VARCHAR(250),
---     IN pGoEngineArea VARCHAR(250)
--- )
--- BEGIN
---     DECLARE pLogID CHAR(36);
---     IF LENGTH(pStatusCode) > 3 THEN
---         SIGNAL SQLSTATE '45000'
---         SET MESSAGE_TEXT = 'Data too long for column pStatusCode';
---         RETURN;
---     END IF;
---     SET pLogID = UUID();
---     INSERT INTO log (logID, statusCode, message, goEngineArea)
---     VALUES (pLogID, pStatusCode, pMessage, pGoEngineArea);
--- END//
-
--- DELIMITER ;
 
 DELIMITER //
 

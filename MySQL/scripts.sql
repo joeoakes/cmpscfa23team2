@@ -1,8 +1,8 @@
 /*
 ---------------------------------------------------
--- Produced By: 4Tekies LLC
--- Author: Mahir Khan, Joshua Ferrell & Joseph Oakes
--- Date: 6/27/2023
+-- Produced By: 4Tekies LLC and Penn State Abington - CMPSC 488 Course
+-- Author: Mahir Khan, Joshua Ferrell & Joseph Oakes and Team 2 Members
+-- Date: 6/27/2023, 09/28/2023
 -- Purpose: OurGo holds all necessary MySQL code needed to establish the database
 ---------------------------------------------------
 */
@@ -14,7 +14,7 @@ DROP DATABASE IF EXISTS goengine;
 -- Create the database if it doesn't exist
 CREATE DATABASE IF NOT EXISTS goengine;
 
--- Switch to the goengine database
+-- Switch to the goengine databaselog
 USE goengine;
 
 -- TABLE CHECK
@@ -28,7 +28,6 @@ CREATE TABLE IF NOT EXISTS users_roles_lookup (
 );
 
 -- Create the users table
-use goengine;
 CREATE TABLE IF NOT EXISTS users (
                                      user_id CHAR(36) PRIMARY KEY, -- Unique identifier for the user
                                      user_name NVARCHAR(25), -- Name of the user
@@ -48,15 +47,24 @@ CREATE TABLE IF NOT EXISTS logStatusCodes(
 
 
 -- Creates the Log table
+-- CREATE TABLE IF NOT EXISTS log (
+--                                    logID CHAR (36)PRIMARY KEY, -- GUID for the ID, returns the ID as a case sensitive 36 long string
+--                                    statusCode VARCHAR(3), -- 3 letters to store the status code to the DB
+--                                    FOREIGN KEY (statusCode) REFERENCES logStatusCodes (statusCode), -- references to another table
+--                                    message VARCHAR(250), -- A message about the status of the log
+--                                    goEngineArea VARCHAR(250), -- Where the log status is occurring
+--                                    dateTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- When inserting a value, the dateTime automatically updates to the time it occurred
+-- );
+-- Fix for Duplicate Key Issue:
+-- Adds AUTO_INCREMENT to generate unique logID
 CREATE TABLE IF NOT EXISTS log (
-                                   logID CHAR (36)PRIMARY KEY, -- GUID for the ID, returns the ID as a case sensitive 36 long string
+                                   logID INT AUTO_INCREMENT PRIMARY KEY, -- Auto-generated unique ID
                                    statusCode VARCHAR(3), -- 3 letters to store the status code to the DB
                                    FOREIGN KEY (statusCode) REFERENCES logStatusCodes (statusCode), -- references to another table
                                    message VARCHAR(250), -- A message about the status of the log
                                    goEngineArea VARCHAR(250), -- Where the log status is occurring
                                    dateTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- When inserting a value, the dateTime automatically updates to the time it occurred
 );
-
 -- Creates the webservice table
 CREATE TABLE IF NOT EXISTS webservice(
                                          webServiceID CHAR(36)PRIMARY KEY, -- GUID for creating a unique ID
@@ -76,7 +84,6 @@ CREATE TABLE IF NOT EXISTS urls (
 );
 
 -- Table for TaskManager
-USE goengine;
 CREATE TABLE IF NOT EXISTS tasks (
     task_id CHAR(36) PRIMARY KEY, 
     task_name NVARCHAR(50),
@@ -86,7 +93,6 @@ CREATE TABLE IF NOT EXISTS tasks (
 );
 
 -- Table for MachineLearningModels
-USE goengine;
 CREATE TABLE IF NOT EXISTS machine_learning_models (
     model_id CHAR(36) PRIMARY KEY,
     model_name NVARCHAR(50),
@@ -104,7 +110,6 @@ CREATE TABLE IF NOT EXISTS webcrawlers (
 );
 
 -- Stored Procedure to add a new task
-USE goengine;
 DELIMITER //
 CREATE PROCEDURE create_task(
     IN p_task_name NVARCHAR(50),
@@ -120,7 +125,6 @@ END //
 DELIMITER ;
 
 -- Stored Procedure to add a new machine learning model
-USE goengine;
 DELIMITER //
 CREATE PROCEDURE create_model(
     IN p_model_name NVARCHAR(50),
@@ -136,7 +140,6 @@ END //
 DELIMITER ;
 
 -- Stored Procedure to add a new web crawler
-USE goengine;
 DELIMITER //
 CREATE PROCEDURE create_webcrawler(
     IN p_source_url LONGTEXT
@@ -151,9 +154,6 @@ DELIMITER ;
 
 -- PROCEDURE CHECK
 
--- Switch to the goengine database
-USE goengine;
-
 -- Set the delimiter for the following function creation
 DELIMITER //
 
@@ -167,14 +167,12 @@ BEGIN
     RETURN encrypted;
 END //
 DELIMITER //
+
 CREATE PROCEDURE GetStatusCode(IN statusCode VARCHAR(3)) -- Gets the Status code of the Log
 BEGIN
     SELECT * FROM log AS l WHERE l.statusCode = statusCode;
 END //
 DELIMITER // -- Needed to not throw an error because of complex coding
-
-
-USE goengine;
 
 DELIMITER //
 
@@ -193,7 +191,29 @@ END//
 
 DELIMITER ;
 
-USE goengine;
+-- USE goengine;
+
+-- DELIMITER //
+
+-- DROP PROCEDURE IF EXISTS InsertLog;
+-- CREATE PROCEDURE InsertLog(
+--     IN pStatusCode VARCHAR(3),
+--     IN pMessage VARCHAR(250),
+--     IN pGoEngineArea VARCHAR(250)
+-- )
+-- BEGIN
+--     DECLARE pLogID CHAR(36);
+--     IF LENGTH(pStatusCode) > 3 THEN
+--         SIGNAL SQLSTATE '45000'
+--         SET MESSAGE_TEXT = 'Data too long for column pStatusCode';
+--         RETURN;
+--     END IF;
+--     SET pLogID = UUID();
+--     INSERT INTO log (logID, statusCode, message, goEngineArea)
+--     VALUES (pLogID, pStatusCode, pMessage, pGoEngineArea);
+-- END//
+
+-- DELIMITER ;
 
 DELIMITER //
 
@@ -253,20 +273,12 @@ END //
 
 DELIMITER ;
 
-
-use goengine;
 CALL PopulateLog();
 
-use goengine;
 select * from log
 -- Reset the delimiter back to default
 DELIMITER ;
 
-USE goengine;
-
-DELIMITER //
-
-USE goengine;
 DELIMITER //
 -- CREATE
 CREATE PROCEDURE create_user(
@@ -287,7 +299,6 @@ BEGIN
 
 DELIMITER ;
 -- READ
-USE goengine;
 DELIMITER //
 
 CREATE PROCEDURE get_users()
@@ -299,7 +310,6 @@ END //
 DELIMITER ;
 
 -- UPDATE
-USE goengine;
 DELIMITER //
 
 CREATE PROCEDURE update_user(
@@ -321,7 +331,6 @@ END //
 DELIMITER ;
 
 -- DELETE
-USE goengine;
 DELIMITER //
 
 CREATE PROCEDURE delete_user(
@@ -334,16 +343,12 @@ END //
 
 DELIMITER ;
 
-USE goengine;
-
 DELIMITER //
 CREATE PROCEDURE GetRandomURL()
 BEGIN
     SELECT * FROM urls ORDER BY RAND() LIMIT 1;
 END //
 DELIMITER ;
-
-USE goengine;
 
 
 -- Procedure to retrieve only the 'url' column from the 'urls' table
@@ -357,7 +362,6 @@ END //
 
 DELIMITER ;
 
-use goengine;
 DELIMITER //
 CREATE PROCEDURE GetUrlsAndTags()
 BEGIN
@@ -365,7 +369,6 @@ BEGIN
 END //
 DELIMITER ;
 
-USE goengine;
 -- Insert values into users_roles_lookup table
 INSERT INTO users_roles_lookup (user_role, role_name)
 VALUES
@@ -374,7 +377,6 @@ VALUES
     ('STD', 'Student'),
     ('DEV', 'Developer');
 
-use goengine;
 -- Insert values into users table
 INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
 VALUES
@@ -382,15 +384,12 @@ VALUES
     (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', EncryptsPassword('dev789'), TRUE, CURRENT_TIMESTAMP()),
     (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', EncryptsPassword('std447'), TRUE, CURRENT_TIMESTAMP());
 
-
-USE goengine;
-
 -- Inserting the first record
 INSERT INTO urls (id, url, tags)
 VALUES (UUID(), 'https://sites.google.com/view/mahirbootstrap/home', '{"tag1": "<a>"}');
 
 -- Inserting the second record
-INSERT INTO urls (id, url, tags)
+INSERT INTO urls (id, url, tags)Tables
 VALUES (UUID(), 'https://www.abington.psu.edu/WPL/mahir-khan', '{"tag2": "<img>"}');
 
 -- Inserting the third record

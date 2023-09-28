@@ -248,32 +248,32 @@ END //
 DELIMITER ;
 DELIMITER //
 
-CREATE PROCEDURE PopulateLog()
-BEGIN
-    DECLARE statusCodeExists INT;
+-- CREATE PROCEDURE PopulateLog()
+-- BEGIN
+--     DECLARE statusCodeExists INT;
 
-    SELECT COUNT(*) INTO statusCodeExists FROM logstatuscodes WHERE statusCode IN ('ERR', 'WAR', 'OPR');
+--     SELECT COUNT(*) INTO statusCodeExists FROM logstatuscodes WHERE statusCode IN ('ERR', 'WAR', 'OPR');
 
-    IF statusCodeExists = 3 THEN
-        IF (SELECT COUNT(*) FROM log) = 0 THEN
-            INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
-            VALUES (UUID(), 'ERR', 'An Error has occurred in the following area', 'CARP', NOW());
+--     IF statusCodeExists = 3 THEN
+--         IF (SELECT COUNT(*) FROM log) = 0 THEN
+--             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
+--             VALUES (UUID(), 'ERR', 'An Error has occurred in the following area', 'CARP', NOW());
 
-            INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
-            VALUES (UUID(), 'WAR', 'A Warning has been issued in the following area', 'CRAB', NOW());
+--             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
+--             VALUES (UUID(), 'WAR', 'A Warning has been issued in the following area', 'CRAB', NOW());
 
-            INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
-            VALUES (UUID(), 'OPR', 'Normal Operational Requirements have been met in the following area', 'CUDA', NOW());
-        END IF;
-    ELSE
-        -- If required code is missing from statusCodes, then this error is given
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Missing required status codes in logstatuscodes table.';
-    END IF;
-END //
+--             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
+--             VALUES (UUID(), 'OPR', 'Normal Operational Requirements have been met in the following area', 'CUDA', NOW());
+--         END IF;
+--     ELSE
+--         -- If required code is missing from statusCodes, then this error is given
+--         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Missing required status codes in logstatuscodes table.';
+--     END IF;
+-- END //
 
-DELIMITER ;
+-- DELIMITER ;
 
-CALL PopulateLog();
+-- CALL PopulateLog();
 
 select * from log
 -- Reset the delimiter back to default
@@ -389,7 +389,7 @@ INSERT INTO urls (id, url, tags)
 VALUES (UUID(), 'https://sites.google.com/view/mahirbootstrap/home', '{"tag1": "<a>"}');
 
 -- Inserting the second record
-INSERT INTO urls (id, url, tags)Tables
+INSERT INTO urls (id, url, tags)
 VALUES (UUID(), 'https://www.abington.psu.edu/WPL/mahir-khan', '{"tag2": "<img>"}');
 
 -- Inserting the third record
@@ -401,4 +401,7 @@ INSERT INTO urls (id, url, tags)
 VALUES (UUID(), 'https://sites.google.com/view/golangserver/home', '{"tag4": "<section>"}');
 
 call PopulateLogStatusCodes();
-call PopulateLog();
+INSERT INTO users_roles_lookup (user_role, role_name)
+VALUES ('1', 'User');
+
+-- call PopulateLog();

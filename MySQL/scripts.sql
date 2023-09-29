@@ -226,99 +226,70 @@ BEGIN
 END //
 
 DELIMITER ;
+
+-- Set the delimiter //beginning
 DELIMITER //
 
+-- Populate Log Procedure
 CREATE PROCEDURE PopulateLog()
 BEGIN
     DECLARE statusCodeExists INT;
-
-    SELECT COUNT(*) INTO statusCodeExists FROM logstatuscodes WHERE statusCode IN ('ERR', 'WAR', 'OPR');
-
-    IF statusCodeExists = 3 THEN
+SELECT COUNT(*) INTO statusCodeExists FROM logstatuscodes WHERE statusCode IN ('ERR', 'WAR', 'OPR');
+IF statusCodeExists = 3 THEN
         IF (SELECT COUNT(*) FROM log) = 0 THEN
-            INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
-            VALUES (UUID(), 'ERR', 'An Error has occurred in the following area', 'CARP', NOW());
-
-            INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
-            VALUES (UUID(), 'WAR', 'A Warning has been issued in the following area', 'CRAB', NOW());
-
-            INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
-            VALUES (UUID(), 'OPR', 'Normal Operational Requirements have been met in the following area', 'CUDA', NOW());
-        END IF;
-    ELSE
-        -- If required code is missing from statusCodes, then this error is given
+            INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime) VALUES (UUID(), 'ERR', 'An Error has occurred in the following area', 'CARP', NOW());
+INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime) VALUES (UUID(), 'WAR', 'A Warning has been issued in the following area', 'CRAB', NOW());
+INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime) VALUES (UUID(), 'OPR', 'Normal Operational Requirements have been met in the following area', 'CUDA', NOW());
+END IF;
+ELSE
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Missing required status codes in logstatuscodes table.';
-    END IF;
+END IF;
 END //
-
+-- Reset the delimiter
 DELIMITER ;
 
-
-use goengine;
-CALL PopulateLog();
-
-use goengine;
-select * from log
--- Reset the delimiter back to default
-DELIMITER ;
-
-USE goengine;
-
+-- Create User Procedure //user role removed
 DELIMITER //
-
-USE goengine;
-DELIMITER //
--- CREATE
 CREATE PROCEDURE create_user(
+    IN v_UUID NVARCHAR(25),
+    IN v_account_id NVARCHAR(25), --some redundancy with UUID?
+    IN p_user_login NVARCHAR(25) --also referred to as email
     IN p_user_name NVARCHAR(25),
-    IN p_user_login NVARCHAR(10),
-    IN p_user_role NVARCHAR(5),
-    IN p_user_password VARBINARY(16),
-    IN p_active_or_not BOOLEAN
-)
+    IN p_user_password_hashed VARBINARY(16),
+    IN p_first_name NVARCHAR(25),
+    IN p_last_name NVARCHAR(25),
+    IN p_date_registered DATE
+    IN p_last_login DATE
+        )
 BEGIN
     DECLARE v_user_id CHAR(36);
-
     SET v_user_id = UUID();
-
-    INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
-    VALUES (v_user_id, p_user_name, p_user_login, p_user_role, p_user_password, p_active_or_not, CURRENT_TIMESTAMP());
-    END //
-
+--//user role removed
+INSERT INTO users (UUID, account_id, user_login, user_password_hashed, first_name, last_name, date_registered, last_login) VALUES (v_UUID, v_account_id, p_user_login, p_user_password_hashed, p_first_name, p_last_name, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());
+END //
 DELIMITER ;
--- READ
-USE goengine;
-DELIMITER //
 
+-- Get Users Procedure //user role removed
+DELIMITER //
 CREATE PROCEDURE get_users()
 BEGIN
-    SELECT user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added
-    FROM users;
+SELECT account_id, user_login, user_password_hashed, last_login, date_registered FROM users;
 END //
-
 DELIMITER ;
 
--- UPDATE
-USE goengine;
+-- Update User Procedure //user role removed
 DELIMITER //
-
 CREATE PROCEDURE update_user(
-    IN p_user_id CHAR(36),
-    IN p_user_name NVARCHAR(25),
-    IN p_user_login NVARCHAR(10),
-    IN p_user_role NVARCHAR(5),
-    IN p_user_password VARBINARY(16)
-)
+    IN p_account_id NVARCHAR(25),
+    IN p_user_login NVARCHAR(25), --also referred to as email
+    IN p_user_password_hashed VARBINARY(16),
+    IN p_last_login DATE
+        )
 BEGIN
-    UPDATE users
-    SET user_name = p_user_name,
-        user_login = p_user_login,
-        user_role = p_user_role,
-        user_password = p_user_password
-    WHERE user_id = p_user_id;
+UPDATE users SET account_id = p_account_id, user_login = p_user_login, user_password_hashed = p_user_password_hashed WHERE user_login = p_user_login, last_login = p_last_login;
 END //
-
 DELIMITER ;
+--end evan code
 
 -- DELETE
 USE goengine;

@@ -1,47 +1,116 @@
 package DAL
 
 import (
+	"encoding/json"
 	_ "errors"
 	"fmt"
-	"github.com/gocolly/colly/v2"
-	"log"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/gocolly/colly"
+	"os"
+	"strings"
 )
 
+/*
+Constants for magic values
+And just using this as a placeholder we will be adjusting down the line
+*/
+const (
+	BaseURL  = "https://www.trackingdifferences.com/ETF/ISIN/"
+	Children = 3
+)
+
+// EtfInfo struct holds information about an ETF.
+type EtfInfo struct {
+	Title              string
+	Replication        string
+	Earnings           string
+	TotalExpenseRatio  string
+	TrackingDifference string
+	FundSize           string
+}
+
+// Initialize and configure the Colly collector.
+func setupCollector() *colly.Collector {
+	return colly.NewCollector(colly.AllowedDomains("www.trackingdifferences.com", "trackingdifferences.com"))
+}
+
 func main() {
-	// Create a new collector
-	c := colly.NewCollector()
-	// Set up a callback for when a visited HTML element is found
+	isins := []string{"IE00B1XNHC34", "IE00B4L5Y983", "LU1838002480"}
+	etfInfo := EtfInfo{}
+	etfInfos := make([]EtfInfo, 0, len(isins))
+
+	c := setupCollector()
+
+	// Set headers before making a request
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL)
+		r.Headers.Set("Accept-Language", "en-US;q=0.9")
+		fmt.Printf("Visiting %s\n", r.URL)
 	})
 
-	c.OnError(func(_ *colly.Response, err error) {
-		log.Println("Something went wrong:", err)
+	// Handle any errors during scraping
+	c.OnError(func(r *colly.Response, e error) {
+		fmt.Printf("Error while scraping: %s\n", e.Error())
 	})
 
-	c.OnResponse(func(r *colly.Response) {
-		fmt.Println("Visited", r.Request.URL)
+	// Scrape ETF title
+	c.OnHTML("h1.page-title", func(h *colly.HTMLElement) {
+		etfInfo.Title = h.Text
 	})
 
-	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-		e.Request.Visit(e.Attr("href"))
+	// Scrape various ETF attributes
+	c.OnHTML("div.descfloat p.desc", func(h *colly.HTMLElement) {
+		selection := h.DOM
+
+		// Get all child nodes of the selection
+		childNodes := selection.Children().Nodes
+
+		// Check the number of child nodes to make sure we're looking at the right elements
+		if len(childNodes) == 3 {
+			description := cleanDesc(selection.Find("span.desctitle").Text())
+			value := selection.FindNodes(childNodes[2]).Text()
+
+			// Populate etfInfo based on scraped information
+			switch description {
+			case "Replication":
+				etfInfo.Replication = value
+			case "TER":
+				etfInfo.TotalExpenseRatio = value
+			case "TD":
+				etfInfo.TrackingDifference = value
+			case "Earnings":
+				etfInfo.Earnings = value
+			case "Fund size":
+				etfInfo.FundSize = value
+			}
+		}
 	})
 
-	c.OnHTML("tr td:nth-of-type(1)", func(e *colly.HTMLElement) {
-		fmt.Println("First column of a table row:", e.Text)
-	})
-
-	c.OnXML("//h1", func(e *colly.XMLElement) {
-		fmt.Println(e.Text)
-	})
-
+	// After scraping is complete, append the populated etfInfo to the slice
 	c.OnScraped(func(r *colly.Response) {
-		fmt.Println("Finished", r.Request.URL)
+		etfInfos = append(etfInfos, etfInfo)
+		etfInfo = EtfInfo{} // Reset etfInfo for the next round
 	})
 
-	// Start the web crawl on a specific website
-	err := c.Visit("http://google.com")
-	if err != nil {
-		log.Fatal(err)
+	// Loop through ISINs and perform scraping operations
+	for _, isin := range isins {
+		if err := c.Visit(scrapeUrl(isin)); err != nil {
+			fmt.Printf("Error visiting site: %s", err)
+			continue
+		}
 	}
+
+	// Encode and print the scraped data
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", " ")
+	enc.Encode(etfInfos)
+}
+
+// Cleans up description strings
+func cleanDesc(s string) string {
+	return strings.TrimSpace(s)
+}
+
+// Constructs the URL for scraping based on the ISIN
+func scrapeUrl(isin string) string {
+	return BaseURL + isin
 }

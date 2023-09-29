@@ -16,6 +16,7 @@ import (
 	"time"          // For time manipulation
 
 	_ "github.com/go-sql-driver/mysql" // Import MySQL driver
+	"github.com/google/uuid"           //libraries that generate unique identifiers
 )
 
 // Declare db at the package level for global use
@@ -24,7 +25,7 @@ var db *sql.DB
 // Log struct models the data structure of a log entry in the database
 type Log struct {
 	LogID        string
-	StatusCode   string
+	status_code  string
 	Message      string
 	GoEngineArea string
 	DateTime     []uint8
@@ -56,13 +57,13 @@ func init() {
 }
 
 // WriteLog writes a log entry to the database
-func WriteLog(logID string, statusCode string, message string, goEngineArea string, dateTime time.Time) error {
-	// Validate the statusCode by checking if it exists in the `logstatuscodes` table
+func WriteLog(logID string, status_code string, message string, goEngineArea string, dateTime time.Time) error {
+	// Validate the statusCode by checking if it exists in the `log_status_codes` table
 	var existingStatusCode string
-	err := db.QueryRow("SELECT statusCode FROM logstatuscodes WHERE statusCode = ?", statusCode).Scan(&existingStatusCode)
+	err := db.QueryRow("SELECT status_code FROM log_status_codes WHERE status_code = ?", status_code).Scan(&existingStatusCode)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return fmt.Errorf("Invalid statusCode: %s", statusCode)
+			return fmt.Errorf("Invalid statusCode: %s", status_code)
 		}
 		return err
 	}
@@ -83,8 +84,8 @@ func WriteLog(logID string, statusCode string, message string, goEngineArea stri
 	return nil
 }
 
-// InsertStatusCode inserts a new status code into the `logstatuscodes` table
-func InsertStatusCode(statusCode, description string) error {
+// Insertstatus_code inserts a new status code into the `log_status_codes` table
+func InsertStatusCode(status_code, description string) error {
 	config, err := readJSONConfig("config.json")
 	if err != nil {
 		return err
@@ -95,13 +96,13 @@ func InsertStatusCode(statusCode, description string) error {
 	}
 	defer db.Close()
 
-	stmt, err := db.Prepare("INSERT INTO logstatuscodes(statusCode, statusMessage) VALUES (?, ?)")
+	stmt, err := db.Prepare("INSERT INTO log_status_codes(status_code, status_message) VALUES (?, ?)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, errExec := stmt.Exec(statusCode, description)
+	_, errExec := stmt.Exec(status_code, description)
 	if errExec != nil {
 		return errExec
 	}
@@ -127,7 +128,7 @@ func GetLog() ([]Log, error) {
 	for rows.Next() {
 		var logItem Log
 		var dateTimeStr []uint8
-		err := rows.Scan(&logItem.LogID, &logItem.StatusCode, &logItem.Message, &logItem.GoEngineArea, &dateTimeStr)
+		err := rows.Scan(&logItem.LogID, &logItem.status_code, &logItem.Message, &logItem.GoEngineArea, &dateTimeStr)
 		if err != nil {
 			return nil, err
 		}
@@ -160,7 +161,7 @@ func GetSuccess() ([]Log, error) {
 	for rows.Next() {
 		var logItem Log
 		var dateTimeStr []uint8
-		err := rows.Scan(&logItem.LogID, &logItem.StatusCode, &logItem.Message, &logItem.GoEngineArea, &dateTimeStr)
+		err := rows.Scan(&logItem.LogID, &logItem.status_code, &logItem.Message, &logItem.GoEngineArea, &dateTimeStr)
 		if err != nil {
 			return nil, err
 		}
@@ -175,45 +176,45 @@ func GetSuccess() ([]Log, error) {
 	return logs, nil
 }
 
-// InsertOrUpdateStatusCode either inserts a new status code or updates an existing one
-func InsertOrUpdateStatusCode(statusCode, description string) error {
+// InsertOrUpdatestatus_code either inserts a new status code or updates an existing one
+func InsertOrUpdateStatusCode(status_code, description string) error {
 	// Check if the status code already exists
 	var existingStatusCode string
-	err := db.QueryRow("SELECT statusCode FROM logstatuscodes WHERE statusCode = ?", statusCode).Scan(&existingStatusCode)
+	err := db.QueryRow("SELECT status_code FROM log_status_codes WHERE status_code = ?", status_code).Scan(&existingStatusCode)
 	if err != nil && err != sql.ErrNoRows {
 		return err
 	}
 
 	if err == sql.ErrNoRows {
 		// Insert new status code
-		stmt, err := db.Prepare("INSERT INTO logstatuscodes(statusCode, statusMessage) VALUES (?, ?)")
+		stmt, err := db.Prepare("INSERT INTO log_status_codes(status_code, status_message) VALUES (?, ?)")
 		if err != nil {
 			return err
 		}
-		_, err = stmt.Exec(statusCode, description)
+		_, err = stmt.Exec(status_code, description)
 		stmt.Close()
 		return err
 	} else {
 		// Update existing status code
-		stmt, err := db.Prepare("UPDATE logstatuscodes SET statusMessage = ? WHERE statusCode = ?")
+		stmt, err := db.Prepare("UPDATE log_status_codes SET status_message = ? WHERE status_code = ?")
 		if err != nil {
 			return err
 		}
-		_, err = stmt.Exec(description, statusCode)
+		_, err = stmt.Exec(description, status_code)
 		stmt.Close()
 		return err
 	}
 }
 
 // StoreLog stores a log entry using a stored procedure
-func StoreLog(statusCode string, message string, goEngineArea string) error {
+func StoreLog(status_code string, message string, goEngineArea string) error {
 	stmt, err := db.Prepare("CALL InsertLog(?, ?, ?)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, errExec := stmt.Exec(statusCode, message, goEngineArea)
+	_, errExec := stmt.Exec(status_code, message, goEngineArea)
 	if errExec != nil {
 		return errExec
 	}
@@ -315,10 +316,12 @@ func main() {
 		log.Println("Failed to insert or update status code:", err)
 	}
 
+	// Generate a unique logID
+	uniqueLogID := uuid.New().String()
+
 	// Write log
 	currentTime := time.Now()
-	// This needs to be updated so it adds to a new line each time
-	err = WriteLog("1", "Pos", "Message logged successfully", "Engine1", currentTime) // Notice changed logID to "2"
+	err = WriteLog(uniqueLogID, "Pos", "Message logged successfully", "Engine1", currentTime)
 	if err != nil {
 		log.Println("Failed to write log:", err)
 	}
@@ -345,23 +348,23 @@ func main() {
 	//	log.Println("Failed to insert new status code:", err)
 	//}
 
-	// Create a new user
+	//Create a new user
 	err = CreateUser("John", "john123", "ADM", "password", true)
 	if err != nil {
 		log.Println("Failed to create a new user:", err)
 	}
 
 	// Update an existing user
-	err = UpdateUser("1", "John Doe", "john_doe", "ADM", "newpassword")
+	err = UpdateUser("1", "Hansi Seitaj", "hansi_se", "DEV", "newpassword")
 	if err != nil {
 		log.Println("Failed to update user:", err)
 	}
 
 	// Delete a user
-	err = DeleteUser("1")
-	if err != nil {
-		log.Println("Failed to delete user:", err)
-	}
+	//err = DeleteUser("1")
+	//if err != nil {
+	//	log.Println("Failed to delete user:", err)
+	//}
 
 	// Get and print all "Success" logs
 	//successLogs, err := GetSuccess()

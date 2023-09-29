@@ -40,9 +40,9 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- Creates the logStatusCode lookup table for a reference to the log table
-CREATE TABLE IF NOT EXISTS logStatusCodes(
-                                             statusCode VARCHAR(3) PRIMARY KEY,
-                                             statusMessage VARCHAR(250)
+CREATE TABLE IF NOT EXISTS log_status_codes(
+                                             status_code VARCHAR(3) PRIMARY KEY,
+                                             status_message VARCHAR(250)
 );
 
 
@@ -58,21 +58,21 @@ CREATE TABLE IF NOT EXISTS logStatusCodes(
 -- Fix for Duplicate Key Issue:
 -- Adds AUTO_INCREMENT to generate unique logID
 CREATE TABLE IF NOT EXISTS log (
-                                   logID INT AUTO_INCREMENT PRIMARY KEY, -- Auto-generated unique ID
-                                   statusCode VARCHAR(3), -- 3 letters to store the status code to the DB
-                                   FOREIGN KEY (statusCode) REFERENCES logStatusCodes (statusCode), -- references to another table
+                                   log_ID INT AUTO_INCREMENT PRIMARY KEY, -- Auto-generated unique ID
+                                   status_code VARCHAR(3), -- 3 letters to store the status code to the DB
+                                   FOREIGN KEY (status_code) REFERENCES log_status_codes (status_code), -- references to another table
                                    message VARCHAR(250), -- A message about the status of the log
-                                   goEngineArea VARCHAR(250), -- Where the log status is occurring
-                                   dateTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- When inserting a value, the dateTime automatically updates to the time it occurred
+                                   go_engine_area VARCHAR(250), -- Where the log status is occurring
+                                   date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- When inserting a value, the dateTime automatically updates to the time it occurred
 );
 -- Creates the webservice table
-CREATE TABLE IF NOT EXISTS webservice(
-                                         webServiceID CHAR(36)PRIMARY KEY, -- GUID for creating a unique ID
-                                         webServiceDescription VARCHAR(250), -- A description of the service being offered
-                                         customerID CHAR(36), -- We are using CHAR(36) for our GUID's, but other options exist
-                                         accessToken LONGTEXT, -- This lets the customer access the website. LONGTEXT is used to store JWT's of varying lengths
-                                         dateActive DATE, -- When the token is activated
-                                         isActive BOOLEAN -- If the webservice is currently active or not
+CREATE TABLE IF NOT EXISTS web_service(
+                                         web_service_ID CHAR(36)PRIMARY KEY, -- GUID for creating a unique ID
+                                         web_service_description VARCHAR(250), -- A description of the service being offered
+                                         customer_ID CHAR(36), -- We are using CHAR(36) for our GUID's, but other options exist
+                                         access_token LONGTEXT, -- This lets the customer access the website. LONGTEXT is used to store JWT's of varying lengths
+                                         date_active DATE, -- When the token is activated
+                                         is_active BOOLEAN -- If the webservice is currently active or not
 );
 
 -- Creating url table for CRAB
@@ -173,7 +173,7 @@ BEGIN
     INSERT INTO scraper_engine(engine_id, engine_name, engine_description)
     VALUES (v_engine_id, p_engine_name, p_engine_description);
 END //
-DELIMITER;
+DELIMITER ;
 
 -- PROCEDURE CHECK
 
@@ -193,7 +193,7 @@ DELIMITER //
 
 CREATE PROCEDURE GetStatusCode(IN statusCode VARCHAR(3)) -- Gets the Status code of the Log
 BEGIN
-    SELECT * FROM log AS l WHERE l.statusCode = statusCode;
+    SELECT * FROM log AS l WHERE l.status_code = statusCode;
 END //
 DELIMITER // -- Needed to not throw an error because of complex coding
 
@@ -208,7 +208,7 @@ BEGIN
     DECLARE pLogID CHAR(36);
     SET pLogID = UUID();
 
-    INSERT INTO log (logID, statusCode, message, goEngineArea)
+    INSERT INTO log (log_ID, status_code, message, go_engine_area)
     VALUES (pLogID, pStatusCode, pMessage, pGoEngineArea);
 END//
 
@@ -242,7 +242,7 @@ DELIMITER //
 
 CREATE PROCEDURE SelectAllLogs()
 BEGIN
-    SELECT logID, statusCode, message, goEngineArea, dateTime
+    SELECT log_ID, status_code, message, go_engine_area, date_time
     FROM log;
 END //
 
@@ -251,9 +251,9 @@ DELIMITER //
 DELIMITER //
 CREATE PROCEDURE SelectAllLogsByStatusCode(IN pStatusCode VARCHAR(3))
 BEGIN
-    SELECT logID, statusCode, message, goEngineArea, dateTime
+    SELECT log_ID, status_code, message, go_engine_area, date_time
     FROM log
-    WHERE statusCode = pStatusCode;
+    WHERE status_code = pStatusCode;
 END //
 
 DELIMITER //
@@ -261,10 +261,10 @@ DELIMITER //
 CREATE PROCEDURE PopulateLogStatusCodes() -- Populates the Log's if they aren't already
 
 BEGIN
-    IF (SELECT COUNT(*) FROM logStatusCodes) = 0 THEN
-        INSERT INTO logStatusCodes (statusCode, statusMessage) VALUES ('OPR', 'Normal operational mode');
-        INSERT INTO logStatusCodes (statusCode, statusMessage) VALUES ('WAR', 'Warring issue application still functional');
-        INSERT INTO logStatusCodes (statusCode, statusMessage) VALUES ('ERR', 'Severe error application not functional');
+    IF (SELECT COUNT(*) FROM log_status_codes) = 0 THEN
+        INSERT INTO log_status_codes (status_code, status_message) VALUES ('OPR', 'Normal operational mode');
+        INSERT INTO log_status_codes (status_code, status_message) VALUES ('WAR', 'Warring issue application still functional');
+        INSERT INTO log_status_codes (status_code, status_message) VALUES ('ERR', 'Severe error application not functional');
     END IF;
 END //
 

@@ -1,11 +1,9 @@
 package DAL
 
-/*
 import (
-	"colly"
 	_ "errors"
 	"fmt"
-	_ "github.com/gocolly/colly/..."
+	"github.com/gocolly/colly/v2"
 	"log"
 )
 
@@ -47,4 +45,3 @@ func main() {
 		log.Fatal(err)
 	}
 }
-*/

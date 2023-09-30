@@ -383,3 +383,96 @@ func Connection(config JsonDataConnect) (*sql.DB, error) {
 
 	return connDB, nil
 }
+
+// Added the main function where you need to test all the methods above, some of the testing structure is below
+// Note: Don't worry about some that are missing you can comment them out
+// main function to test all existing methods
+func main() {
+
+	// Initialize database connection
+	if db == nil {
+		log.Fatal("Database connection is not initialized.")
+	}
+
+	// Insert or Update status code
+	err := InsertOrUpdateStatusCode("POS", "noth")
+	if err != nil {
+		log.Println("Failed to insert or update status code:", err)
+	}
+
+	_, err = FetchUserID("jxo19")
+	if err != nil {
+		log.Fatalf("Failed to fetch user ID: %v", err)
+	}
+
+	// Update User
+	err = UpdateUser("NewName", "jxo19", "ADM", "newpassword")
+	if err != nil {
+		fmt.Printf("Failed to update user: %s\n", err)
+	} else {
+		fmt.Println("Successfully updated user")
+	}
+
+	// Delete User
+	err = DeleteUser("jxo19")
+	if err != nil {
+		fmt.Printf("Failed to delete user: %s\n", err)
+	} else {
+		fmt.Println("Successfully deleted user")
+	}
+
+	//Generate a unique logID
+	uniqueLogID := uuid.New().String()
+
+	//Write log
+	currentTime := time.Now()
+	err = WriteLog(uniqueLogID, "Pos", "Message logged successfully", "Engine1", currentTime)
+	if err != nil {
+		log.Println("Failed to write log:", err)
+	}
+
+	// Get and print all logs
+	logs, err := GetLog()
+	if err != nil {
+		log.Println("Failed to get logs:", err)
+	} else {
+		for _, logItem := range logs {
+			fmt.Println(logItem)
+		}
+	}
+
+	//Store log using a stored procedure (uncomment if needed)
+	err = StoreLog("Success", "Stored using procedure", "Engine1")
+	if err != nil {
+		log.Println("Failed to store log using stored procedure:", err)
+	}
+
+	//Insert a new status code
+	err = InsertStatusCode("200", "OK")
+	if err != nil {
+		log.Println("Failed to insert new status code:", err)
+	}
+
+	//Create a new user
+	err = CreateUser("John", "john123", "ADM", "password", true)
+	if err != nil {
+		log.Println("Failed to create a new user:", err)
+	}
+
+	//Delete a user
+	//err = DeleteUser("john123")
+	//if err != nil {
+	//	log.Println("Failed to delete user:", err)
+	//}
+	//
+	////Get and print all "Success" logs
+	//successLogs, err := GetSuccess()
+	//if err != nil {
+	//	log.Println("Failed to get success logs:", err)
+	//} else {
+	//	fmt.Println("Success Logs:")
+	//	for _, logItem := range successLogs {
+	//		fmt.Println(logItem)
+	//	}
+	//}
+}

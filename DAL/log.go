@@ -385,7 +385,8 @@ func Connection(config JsonDataConnect) (*sql.DB, error) {
 }
 
 // Added the main function where you need to test all the methods above, some of the testing structure is below
-// Note: Don't worry about some that are missing you can comment them out
+// Note: Don't worry about some that are missing you can comment them out 
+// Or, you can find those methods in the CRUD/setup.go
 // main function to test all existing methods
 func main() {
 

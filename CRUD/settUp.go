@@ -69,7 +69,7 @@ func WriteLog(logID string, status_code string, message string, goEngineArea str
 	}
 
 	// Prepare the SQL statement for inserting into the log table
-	stmt, err := db.Prepare("INSERT INTO log(logID, status_code, message, go_engine_area, date_time) VALUES (? ,? ,? ,? ,?)")
+	stmt, err := db.Prepare("INSERT INTO log(log_ID, status_code, message, go_engine_area, date_time) VALUES (? ,? ,? ,? ,?)")
 	if err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func InsertStatusCode(status_code, description string) error {
 
 // GetLog retrieves all logs from the database
 func GetLog() ([]Log, error) {
-	stmt, err := db.Prepare("CALL SelectAllLogs()")
+	stmt, err := db.Prepare("CALL select_all_logs()")
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +145,7 @@ func GetLog() ([]Log, error) {
 
 // GetSuccess fetches all logs with a "Success" status code
 func GetSuccess() ([]Log, error) {
-	stmt, err := db.Prepare("CALL SelectAllLogsByStatusCode(?)")
+	stmt, err := db.Prepare("CALL select_all_logs_by_status_code(?)")
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +206,7 @@ func GetSuccess() ([]Log, error) {
 
 // StoreLog stores a log entry using a stored procedure
 func StoreLog(status_code string, message string, goEngineArea string) error {
-	stmt, err := db.Prepare("CALL InsertLog(?, ?, ?)")
+	stmt, err := db.Prepare("CALL insert_log(?,?,?)")
 	if err != nil {
 		return err
 	}

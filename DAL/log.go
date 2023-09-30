@@ -15,6 +15,8 @@ import (
 	"time"
 )
 
+var db *sql.DB
+
 type JsonDataConnect struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
@@ -22,9 +24,10 @@ type JsonDataConnect struct {
 	Database string `json:"database"`
 }
 
+// Log struct models the data structure of a log entry in the database
 type Log struct {
 	LogID        string
-	StatusCode   string
+	status_code  string
 	Message      string
 	GoEngineArea string
 	DateTime     []uint8
@@ -258,36 +261,26 @@ func readJSONConfig(filename string) (JsonDataConnect, error) {
 }
 
 // WriteLog writes a log entry to the database
-func WriteLog(logID string, statusCode string, message string, goEngineArea string, dateTime time.Time) error {
-	config, err := ReadJSONConfig("config.json", []byte("IST440WSRA440WGE"))
+func WriteLog(logID string, status_code string, message string, goEngineArea string, dateTime time.Time) error {
+	// Validate the statusCode by checking if it exists in the `log_status_codes` table
+	var existingStatusCode string
+	err := db.QueryRow("SELECT status_code FROM log_status_codes WHERE status_code = ?", status_code).Scan(&existingStatusCode)
 	if err != nil {
-		return err
-	}
-
-	// Create the connection string using the configuration values
-	connectionString := fmt.Sprintf("%s:%s@tcp(%s)/%s",
-		config.Username, config.Password, config.Hostname, config.Database)
-
-	// Open a connection to the MySQL database
-	db, err := sql.Open("mysql", connectionString)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		// Close the database connection when finished
-		closeErr := db.Close()
-		if closeErr != nil {
-			log.Println("Error closing database connection:", closeErr)
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("Invalid statusCode: %s", status_code)
 		}
-	}()
+		return err
+	}
 
-	stmt, err := db.Prepare("INSERT INTO log(log_ID, status_code, message, go_engine_area, date_Time) VALUES (? ,? ,? ,? ,?)")
+	// Prepare the SQL statement for inserting into the log table
+	stmt, err := db.Prepare("INSERT INTO log(log_ID, status_code, message, go_engine_area, date_time) VALUES (? ,? ,? ,? ,?)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, errExec := stmt.Exec(logID, statusCode, message, goEngineArea, dateTime)
+	// Execute the SQL statement
+	_, errExec := stmt.Exec(logID, existingStatusCode, message, goEngineArea, dateTime)
 	if errExec != nil {
 		return errExec
 	}
@@ -297,17 +290,6 @@ func WriteLog(logID string, statusCode string, message string, goEngineArea stri
 
 // GetLog - Reads the log
 func GetLog() ([]Log, error) {
-	config, err := readJSONConfig("config.json")
-	if err != nil {
-		return nil, err
-	}
-
-	db, err := Connection(config)
-	if err != nil {
-		return nil, err
-	}
-	defer db.Close()
-
 	stmt, err := db.Prepare("CALL select_all_logs()")
 	if err != nil {
 		return nil, err
@@ -324,14 +306,11 @@ func GetLog() ([]Log, error) {
 	for rows.Next() {
 		var logItem Log
 		var dateTimeStr []uint8
-		err := rows.Scan(&logItem.LogID, &logItem.StatusCode, &logItem.Message, &logItem.GoEngineArea, &dateTimeStr)
+		err := rows.Scan(&logItem.LogID, &logItem.status_code, &logItem.Message, &logItem.GoEngineArea, &dateTimeStr)
 		if err != nil {
 			return nil, err
 		}
-
-		// Assign the dateTimeStr directly to the DateTime field
 		logItem.DateTime = dateTimeStr
-
 		logs = append(logs, logItem)
 	}
 
@@ -344,23 +323,12 @@ func GetLog() ([]Log, error) {
 
 // GetSuccess - Uses a Procedure to gather all the 'Success' rows in the DB
 func GetSuccess() ([]Log, error) {
-	config, err := readJSONConfig("config.json")
-	if err != nil {
-		return nil, err
-	}
-	db, err := Connection(config)
-	if err != nil {
-		return nil, err
-	}
-	defer db.Close()
-
 	stmt, err := db.Prepare("CALL select_all_logs_by_status_code(?)")
 	if err != nil {
 		return nil, err
 	}
 	defer stmt.Close()
 
-	// Modify the argument to the desired status code
 	rows, err := stmt.Query("Success")
 	if err != nil {
 		return nil, err
@@ -371,16 +339,14 @@ func GetSuccess() ([]Log, error) {
 	for rows.Next() {
 		var logItem Log
 		var dateTimeStr []uint8
-		err := rows.Scan(&logItem.LogID, &logItem.StatusCode, &logItem.Message, &logItem.GoEngineArea, &dateTimeStr)
+		err := rows.Scan(&logItem.LogID, &logItem.status_code, &logItem.Message, &logItem.GoEngineArea, &dateTimeStr)
 		if err != nil {
 			return nil, err
 		}
-
-		// Assign the dateTimeStr directly to the DateTime field
 		logItem.DateTime = dateTimeStr
-
 		logs = append(logs, logItem)
 	}
+
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
@@ -388,25 +354,14 @@ func GetSuccess() ([]Log, error) {
 	return logs, nil
 }
 
-func StoreLog(statusCode string, message string, goEngineArea string) error {
-	config, err := readJSONConfig("config.json")
-	if err != nil {
-		return err
-	}
-
-	db, err := Connection(config)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-
-	stmt, err := db.Prepare("CALL insert_log(?, ?, ?)")
+func StoreLog(status_code string, message string, goEngineArea string) error {
+	stmt, err := db.Prepare("CALL insert_log(?,?,?)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, errExec := stmt.Exec(statusCode, message, goEngineArea)
+	_, errExec := stmt.Exec(status_code, message, goEngineArea)
 	if errExec != nil {
 		return errExec
 	}
@@ -416,15 +371,15 @@ func StoreLog(statusCode string, message string, goEngineArea string) error {
 
 // Connection - Establishes connection to the database
 func Connection(config JsonDataConnect) (*sql.DB, error) {
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", config.Username, config.Password, config.Hostname, config.Database))
+	connDB, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", config.Username, config.Password, config.Hostname, config.Database))
 	if err != nil {
 		return nil, err
 	}
 
-	err = db.Ping()
+	err = connDB.Ping()
 	if err != nil {
 		return nil, err
 	}
 
-	return db, nil
+	return connDB, nil
 }

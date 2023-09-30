@@ -181,7 +181,7 @@ DELIMITER ;
 DELIMITER //
 
 -- Create a function to encrypt passwords
-CREATE FUNCTION EncryptsPassword(password NVARCHAR(10)) RETURNS VARBINARY(16)
+CREATE FUNCTION encrypts_password(password NVARCHAR(10)) RETURNS VARBINARY(16)
     DETERMINISTIC
     NO SQL
 BEGIN
@@ -191,7 +191,7 @@ BEGIN
 END //
 DELIMITER //
 
-CREATE PROCEDURE GetStatusCode(IN statusCode VARCHAR(3)) -- Gets the Status code of the Log
+CREATE PROCEDURE get_status_code(IN statusCode VARCHAR(3)) -- Gets the Status code of the Log
 BEGIN
     SELECT * FROM log AS l WHERE l.status_code = statusCode;
 END //
@@ -199,7 +199,7 @@ DELIMITER // -- Needed to not throw an error because of complex coding
 
 DELIMITER //
 
-CREATE PROCEDURE InsertLog(
+CREATE PROCEDURE insert_log(
     IN pStatusCode VARCHAR(3),
     IN pMessage VARCHAR(250),
     IN pGoEngineArea VARCHAR(250)
@@ -214,33 +214,11 @@ END//
 
 DELIMITER ;
 
--- USE goengine;
 
--- DELIMITER //
-
--- DROP PROCEDURE IF EXISTS InsertLog;
--- CREATE PROCEDURE InsertLog(
---     IN pStatusCode VARCHAR(3),
---     IN pMessage VARCHAR(250),
---     IN pGoEngineArea VARCHAR(250)
--- )
--- BEGIN
---     DECLARE pLogID CHAR(36);
---     IF LENGTH(pStatusCode) > 3 THEN
---         SIGNAL SQLSTATE '45000'
---         SET MESSAGE_TEXT = 'Data too long for column pStatusCode';
---         RETURN;
---     END IF;
---     SET pLogID = UUID();
---     INSERT INTO log (logID, statusCode, message, goEngineArea)
---     VALUES (pLogID, pStatusCode, pMessage, pGoEngineArea);
--- END//
-
--- DELIMITER ;
 
 DELIMITER //
 
-CREATE PROCEDURE SelectAllLogs()
+CREATE PROCEDURE select_all_logs()
 BEGIN
     SELECT log_ID, status_code, message, go_engine_area, date_time
     FROM log;
@@ -249,7 +227,7 @@ END //
 DELIMITER //
 
 DELIMITER //
-CREATE PROCEDURE SelectAllLogsByStatusCode(IN pStatusCode VARCHAR(3))
+CREATE PROCEDURE select_all_logs_by_status_code(IN pStatusCode VARCHAR(3))
 BEGIN
     SELECT log_ID, status_code, message, go_engine_area, date_time
     FROM log
@@ -258,45 +236,18 @@ END //
 
 DELIMITER //
 DELIMITER //
-CREATE PROCEDURE PopulateLogStatusCodes() -- Populates the Log's if they aren't already
-
+CREATE PROCEDURE populate_log_status_codes() -- Populates the log's status codes if they aren't already
 BEGIN
     IF (SELECT COUNT(*) FROM log_status_codes) = 0 THEN
         INSERT INTO log_status_codes (status_code, status_message) VALUES ('OPR', 'Normal operational mode');
-        INSERT INTO log_status_codes (status_code, status_message) VALUES ('WAR', 'Warring issue application still functional');
-        INSERT INTO log_status_codes (status_code, status_message) VALUES ('ERR', 'Severe error application not functional');
+        INSERT INTO log_status_codes (status_code, status_message) VALUES ('WAR', 'Warning: issue, application still functional');
+        INSERT INTO log_status_codes (status_code, status_message) VALUES ('ERR', 'Severe error, application not functional');
     END IF;
 END //
 
 DELIMITER ;
 DELIMITER //
 
--- CREATE PROCEDURE PopulateLog()
--- BEGIN
---     DECLARE statusCodeExists INT;
-
---     SELECT COUNT(*) INTO statusCodeExists FROM logstatuscodes WHERE statusCode IN ('ERR', 'WAR', 'OPR');
-
---     IF statusCodeExists = 3 THEN
---         IF (SELECT COUNT(*) FROM log) = 0 THEN
---             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
---             VALUES (UUID(), 'ERR', 'An Error has occurred in the following area', 'CARP', NOW());
-
---             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
---             VALUES (UUID(), 'WAR', 'A Warning has been issued in the following area', 'CRAB', NOW());
-
---             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
---             VALUES (UUID(), 'OPR', 'Normal Operational Requirements have been met in the following area', 'CUDA', NOW());
---         END IF;
---     ELSE
---         -- If required code is missing from statusCodes, then this error is given
---         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Missing required status codes in logstatuscodes table.';
---     END IF;
--- END //
-
--- DELIMITER ;
-
--- CALL PopulateLog();
 
 select * from log
 -- Reset the delimiter back to default
@@ -316,7 +267,7 @@ BEGIN
 
     SET v_id = UUID();
 
-    INSERT INTO users (id, name, login, role, password, active, date_added)
+    INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
     VALUES (v_id, p_name, p_login, p_role, p_password, p_active, CURRENT_TIMESTAMP());
     END //
 
@@ -326,7 +277,7 @@ DELIMITER //
 
 CREATE PROCEDURE get_users()
 BEGIN
-    SELECT id, name, login, role, password, active, date_added
+    SELECT user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added
     FROM users;
 END //
 
@@ -344,11 +295,11 @@ CREATE PROCEDURE update_user(
 )
 BEGIN
     UPDATE users
-    SET name = p_name,
-        login = p_login,
-        role = role,
-        password = p_password
-    WHERE id = p_id;
+    SET user_id = p_name,
+        user_login = p_login,
+        user_role = p_role,
+        user_password = p_password
+    WHERE user_id = p_id;
 END //
 
 DELIMITER ;
@@ -367,26 +318,24 @@ END //
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE GetRandomURL()
+CREATE PROCEDURE get_random_url()
 BEGIN
     SELECT * FROM urls ORDER BY RAND() LIMIT 1;
 END //
 DELIMITER ;
 
-
 -- Procedure to retrieve only the 'url' column from the 'urls' table
 DELIMITER //
 
-CREATE PROCEDURE GetURLsOnly()
+CREATE PROCEDURE get_urls_only()
 BEGIN
     -- Select only the 'url' column from the 'urls' table
     SELECT url FROM urls;
 END //
-
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE GetUrlsAndTags()
+CREATE PROCEDURE get_urls_and_tags()
 BEGIN
     SELECT url, tags FROM urls;
 END //
@@ -403,9 +352,10 @@ VALUES
 -- Insert values into users table
 INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
 VALUES
-    (UUID(), 'Joesph Oakes', 'jxo19', 'ADM', EncryptsPassword('admin123'), TRUE, CURRENT_TIMESTAMP()),
-    (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', EncryptsPassword('dev789'), TRUE, CURRENT_TIMESTAMP()),
-    (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', EncryptsPassword('std447'), TRUE, CURRENT_TIMESTAMP());
+    (UUID(), 'Joseph Oakes', 'jxo19', 'ADM', encrypts_password('admin123'), TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', encrypts_password('dev789'), TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', encrypts_password('std447'), TRUE, CURRENT_TIMESTAMP());
+
 
 -- Inserting the first record
 INSERT INTO urls (id, url, tags)
@@ -423,7 +373,7 @@ VALUES (UUID(), 'https://sites.google.com/view/mahirbootstrap/signup?authuser=0'
 INSERT INTO urls (id, url, tags)
 VALUES (UUID(), 'https://sites.google.com/view/golangserver/home', '{"tag4": "<section>"}');
 
-call PopulateLogStatusCodes();
+CALL populate_log_status_codes();
 INSERT INTO users_roles_lookup (user_role, role_name)
 VALUES ('1', 'User');
 

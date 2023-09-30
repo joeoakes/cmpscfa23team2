@@ -305,19 +305,19 @@ DELIMITER ;
 DELIMITER //
 -- CREATE
 CREATE PROCEDURE create_user(
-    IN p_user_name NVARCHAR(25),
-    IN p_user_login NVARCHAR(10),
-    IN p_user_role NVARCHAR(5),
-    IN p_user_password VARBINARY(16),
-    IN p_active_or_not BOOLEAN
+    IN p_name NVARCHAR(25),
+    IN p_login NVARCHAR(10),
+    IN p_role NVARCHAR(5),
+    IN p_password VARBINARY(16),
+    IN p_active BOOLEAN
 )
 BEGIN
-    DECLARE v_user_id CHAR(36);
+    DECLARE v_id CHAR(36);
 
-    SET v_user_id = UUID();
+    SET v_id = UUID();
 
-    INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
-    VALUES (v_user_id, p_user_name, p_user_login, p_user_role, p_user_password, p_active_or_not, CURRENT_TIMESTAMP());
+    INSERT INTO users (id, name, login, role, password, active, date_added)
+    VALUES (v_id, p_name, p_login, p_role, p_password, p_active, CURRENT_TIMESTAMP());
     END //
 
 DELIMITER ;
@@ -326,7 +326,7 @@ DELIMITER //
 
 CREATE PROCEDURE get_users()
 BEGIN
-    SELECT user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added
+    SELECT id, name, login, role, password, active, date_added
     FROM users;
 END //
 
@@ -336,19 +336,19 @@ DELIMITER ;
 DELIMITER //
 
 CREATE PROCEDURE update_user(
-    IN p_user_id CHAR(36),
-    IN p_user_name NVARCHAR(25),
-    IN p_user_login NVARCHAR(10),
-    IN p_user_role NVARCHAR(5),
-    IN p_user_password VARBINARY(16)
+    IN p_id CHAR(36),
+    IN p_name NVARCHAR(25),
+    IN p_login NVARCHAR(10),
+    IN p_role NVARCHAR(5),
+    IN p_password VARBINARY(16)
 )
 BEGIN
     UPDATE users
-    SET user_name = p_user_name,
-        user_login = p_user_login,
-        user_role = p_user_role,
-        user_password = p_user_password
-    WHERE user_id = p_user_id;
+    SET name = p_name,
+        login = p_login,
+        role = role,
+        password = p_password
+    WHERE id = p_id;
 END //
 
 DELIMITER ;

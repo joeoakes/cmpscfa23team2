@@ -8,7 +8,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"testing"
 	"time"
 )
 
@@ -21,26 +20,9 @@ type Userdata struct {
 	user_date_added time.Time
 }
 
-// updating the user calling upon the sproc
-func updateUser(db *sql.DB, user_id string, user_name string, user_role string) {
-	_, err := db.Exec("CALL update_user(?, ?, ?)", user_id, user_name, user_role)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 // creating the user calling upon the sproc
 func createUser(db *sql.DB, user_id string, user_name string, user_role string, user_password string) error {
 	_, err := db.Exec("CALL create_user(?, ?, ?, ?, ?)", user_name, user_id, user_role, user_password, true)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return nil
-}
-
-// deleting the user
-func deleteUser(db *sql.DB, user_id string) error {
-	_, err := db.Exec("CALL delete_user(?)", user_id)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -122,6 +104,8 @@ func GetGitHubUser(username string) (*GitHubUser, error) {
 
 	return &user, nil
 }
+
+/*
 func createUsertest(t *testing.T) {
 	db, err := sql.Open("MySQL", "goengine")
 	err = createUser(db, "user_id", "user_name", "user_role", "user_password")
@@ -142,5 +126,5 @@ func createUsertest(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// does this work?
-}
+
+*/

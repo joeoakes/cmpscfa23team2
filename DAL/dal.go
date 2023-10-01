@@ -1,90 +1,77 @@
-package DAL
+package main
 
 import (
 	"database/sql"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"log"
 )
 
-type User struct {
-	ID   int
-	Name string
-	Age  int
+type DBConfig struct {
+	Username string
+	Password string
+	HostName string
+	Database string
 }
 
-type DAL struct {
-	DB *sql.DB
+var db *sql.DB
+
+func Connection(config DBConfig) (*sql.DB, error) {
+	connDB, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", config.Username, config.Password, config.HostName, config.Database))
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = connDB.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	return connDB, nil
 }
 
-/*
+func CloseDb() {
+	if db != nil {
+		err := db.Close()
+		if err != nil {
+			log.Fatalf("Could not establish a connection with the database: %v", err)
+		}
+	}
+}
+
+func CreateUserDAL(user_id string, user_name string, user_login string, user_role string, user_password string, active_or_not bool) error {
+	return CreateUser(db, user_name, user_login, user_role, user_password, active_or_not)
+}
+
+func UpdateUserDAL(user_id string, user_name string, user_login string, user_role string, user_password string) error {
+	return UpdateUser(db, user_id, user_name, user_login, user_role, user_password)
+}
+
 func main() {
-	// Open a connection to the MySQL database
-	db, err := sql.Open("mysql", "root:password@tcp(localhost:3306)/localhost")
-	if err != nil {
-		log.Fatal(err)
+	config := DBConfig{
+		Username: "root",
+		Password: "Matthew@1499.",
+		HostName: "localhost:3306",
+		Database: "goengine",
 	}
-	defer db.Close()
-	da
-	fmt.Println("Success!")
-
-}
-
-// NewDAL creates a new instance of DAL.
-func NewDAL() *DAL {
-	return &DAL{}
-}
-
-type Log struct {
-	// Define your Log struct fields here
-}
-
-type JSON_Data_Connect struct {
-	// Define your JSON_Data_Connect struct fields here
-}
-
-func NewDAL(dataSourceName string) (*DAL, error) {
-	db, err := sql.Open("mysql", dataSourceName)
+	var err error
+	db, err = Connection(config) // Notice the removal of the := which creates a new local variable
 	if err != nil {
-		return nil, err
+		log.Fatalf("Failed to initialize database: %s", err)
+	}
+	defer CloseDb()
+	err = CreateUserDAL("user3", "matt4", "mfa54", "dev", "pass2", true)
+	if err != nil {
+		log.Printf("Failed to create a user: %s", err)
+	} else {
+		log.Println("Successfully created user.")
 	}
 
-	err = db.Ping()
+	err = UpdateUserDAL("user3", "Matt5", "mfa34", "adm", "newPass")
 	if err != nil {
-		return nil, err
+		log.Printf("Failed to update user: %s", err)
+	} else {
+		log.Println("Successfully updated user.")
 	}
-
-	return &DAL{DB: db}, nil
 }
-
-func (d *DAL) WriteLog(logID string, statusCode string, message string, goEngineArea string, dateTime time.Time) error {
-	// Implement WriteLog function logic here
-}
-
-func (d *DAL) GetLog() ([]Log, error) {
-	// Implement GetLog function logic here
-}
-
-func (d *DAL) GetSuccess() ([]Log, error) {
-	// Implement GetSuccess function logic here
-}
-
-func (d *DAL) StoreLog(statusCode string, message string, goEngineArea string) error {
-	// Implement StoreLog function logic here
-}
-
-// Other shared database functions can be added here
-
-func readJSONConfig(filename string) (JSON_Data_Connect, error) {
-	var config JSON_Data_Connect
-	file, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return config, err
-	}
-
-	err = json.Unmarshal(file, &config)
-	if err != nil {
-		return config, err
-	}
-
-	return config, nil
-}
-*/

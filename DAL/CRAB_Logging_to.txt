@@ -1,0 +1,8 @@
+2023/09/30 19:35:11 Error 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+2023/09/30 19:35:50 Error 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+2023/09/30 19:39:31 Error 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+2023/09/30 19:41:11 Error 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+2023/09/30 19:41:37 Error 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+2023/09/30 19:45:05 Error 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+2023/09/30 19:45:39 could not open database: invalid DSN: missing the slash separating the database name
+2023/09/30 19:45:42 could not open database: invalid DSN: missing the slash separating the database name

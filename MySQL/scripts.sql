@@ -42,33 +42,23 @@ CREATE TABLE IF NOT EXISTS users (
 -- Creates the logStatusCode lookup table for a reference to the log table
 CREATE TABLE IF NOT EXISTS log_status_codes(
                                              status_code VARCHAR(3) PRIMARY KEY,
-                                             status_message VARCHAR(250)
+                                             status_message VARCHAR(255)
 );
 
-
--- Creates the Log table
--- CREATE TABLE IF NOT EXISTS log (
---                                    logID CHAR (36)PRIMARY KEY, -- GUID for the ID, returns the ID as a case sensitive 36 long string
---                                    statusCode VARCHAR(3), -- 3 letters to store the status code to the DB
---                                    FOREIGN KEY (statusCode) REFERENCES logStatusCodes (statusCode), -- references to another table
---                                    message VARCHAR(250), -- A message about the status of the log
---                                    goEngineArea VARCHAR(250), -- Where the log status is occurring
---                                    dateTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- When inserting a value, the dateTime automatically updates to the time it occurred
--- );
 -- Fix for Duplicate Key Issue:
 -- Adds AUTO_INCREMENT to generate unique logID
 CREATE TABLE IF NOT EXISTS log (
                                    log_ID INT AUTO_INCREMENT PRIMARY KEY, -- Auto-generated unique ID
                                    status_code VARCHAR(3), -- 3 letters to store the status code to the DB
                                    FOREIGN KEY (status_code) REFERENCES log_status_codes (status_code), -- references to another table
-                                   message VARCHAR(250), -- A message about the status of the log
-                                   go_engine_area VARCHAR(250), -- Where the log status is occurring
+                                   message VARCHAR(255), -- A message about the status of the log
+                                   go_engine_area VARCHAR(255), -- Where the log status is occurring
                                    date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- When inserting a value, the dateTime automatically updates to the time it occurred
 );
 -- Creates the webservice table
 CREATE TABLE IF NOT EXISTS web_service(
                                          web_service_ID CHAR(36)PRIMARY KEY, -- GUID for creating a unique ID
-                                         web_service_description VARCHAR(250), -- A description of the service being offered
+                                         web_service_description VARCHAR(255), -- A description of the service being offered
                                          customer_ID CHAR(36), -- We are using CHAR(36) for our GUID's, but other options exist
                                          access_token LONGTEXT, -- This lets the customer access the website. LONGTEXT is used to store JWT's of varying lengths
                                          date_active DATE, -- When the token is activated
@@ -82,6 +72,22 @@ CREATE TABLE IF NOT EXISTS urls (
                                     tags JSON, -- Optional JSON field for storing tags related to the URL
                                     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP() -- The timestamp of when the URL was created/added
 );
+
+-- Stored Procedure to add a new prediction
+-- DELIMITER //
+-- CREATE PROCEDURE create_prediction(
+-- 	IN p_engine_id CHAR(36),
+-- 	IN p_prediction_info JSON
+-- )
+-- BEGIN
+-- 	DECLARE v_prediction_id CHAR(36);
+--     -- generate a unique identifier for the prediction and assign it to v_prediction_id
+--     SET v_prediction_id = UUID();
+--     INSERT INTO prerdictions (prediction_id, engine_id, prediction_info)
+--     VALUES (v_prediction_id, p_engine_id, p_prediction_info);
+-- END //
+-- DELIMITER;
+
 
 -- Table for TaskManager
 CREATE TABLE IF NOT EXISTS tasks (
@@ -117,6 +123,32 @@ CREATE TABLE IF NOT EXISTS scraper_engine (
     time_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
+
+CREATE TABLE IF NOT EXISTS predictions (
+    prediction_id INT PRIMARY KEY AUTO_INCREMENT,
+    engine_id CHAR(36),
+    prediction_tag CHAR(64),  -- New field for clustering similar predictions
+    input_data TEXT,
+    prediction_info JSON,
+    prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (engine_id) REFERENCES scraper_engine (engine_id)
+);
+
+-- Stored Procedure to add a new prediction
+DELIMITER //
+CREATE PROCEDURE create_prediction(
+    IN p_engine_id CHAR(36),
+    IN p_prediction_tag CHAR(64),  -- New parameter
+    IN p_prediction_info JSON
+)
+BEGIN
+    INSERT INTO predictions (engine_id, prediction_tag, prediction_info)
+    VALUES (p_engine_id, p_prediction_tag, p_prediction_info);
+END //
+DELIMITER ;
+
+
+
 -- Stored Procedure to add a new task
 DELIMITER //
 CREATE PROCEDURE create_task(
@@ -144,6 +176,48 @@ BEGIN
     SET v_model_id = UUID();
     INSERT INTO machine_learning_models (model_id, model_name, weights, biases)
     VALUES (v_model_id, p_model_name, p_weights, p_biases);
+END //
+DELIMITER ;
+
+-- New Stored Procedures
+-- Stored Procedure to update a machine learning model
+DELIMITER //
+CREATE PROCEDURE update_model(
+    IN p_model_id CHAR(36),
+    IN p_weights LONGTEXT,
+    IN p_biases LONGTEXT
+)
+BEGIN
+    UPDATE machine_learning_models
+    SET weights = p_weights,
+        biases = p_biases
+    WHERE model_id = p_model_id;
+END //
+DELIMITER ;
+
+-- Stored Procedure to delete a machine learning model
+DELIMITER //
+CREATE PROCEDURE delete_model(
+    IN p_model_id CHAR(36)
+)
+BEGIN
+    DELETE FROM machine_learning_models
+    WHERE model_id = p_model_id;
+END //
+DELIMITER ;
+
+-- Stored Procedure to update a task
+DELIMITER //
+CREATE PROCEDURE update_task(
+    IN p_task_id CHAR(36),
+    IN p_priority INT,
+    IN p_status NVARCHAR(20)
+)
+BEGIN
+    UPDATE tasks
+    SET priority = p_priority,
+        status = p_status
+    WHERE task_id = p_task_id;
 END //
 DELIMITER ;
 
@@ -181,7 +255,7 @@ DELIMITER ;
 DELIMITER //
 
 -- Create a function to encrypt passwords
-CREATE FUNCTION encrypts_password(password NVARCHAR(10)) RETURNS VARBINARY(16)
+CREATE FUNCTION EncryptsPassword(password NVARCHAR(10)) RETURNS VARBINARY(16)
     DETERMINISTIC
     NO SQL
 BEGIN
@@ -191,7 +265,8 @@ BEGIN
 END //
 DELIMITER //
 
-CREATE PROCEDURE get_status_code(IN statusCode VARCHAR(3)) -- Gets the Status code of the Log
+
+CREATE PROCEDURE GetStatusCode(IN statusCode VARCHAR(3)) -- Gets the Status code of the Log
 BEGIN
     SELECT * FROM log AS l WHERE l.status_code = statusCode;
 END //
@@ -199,7 +274,7 @@ DELIMITER // -- Needed to not throw an error because of complex coding
 
 DELIMITER //
 
-CREATE PROCEDURE insert_log(
+CREATE PROCEDURE InsertLog(
     IN pStatusCode VARCHAR(3),
     IN pMessage VARCHAR(250),
     IN pGoEngineArea VARCHAR(250)
@@ -214,11 +289,58 @@ END//
 
 DELIMITER ;
 
+DELIMITER //
+CREATE PROCEDURE InsertOrUpdateStatusCode(
+    IN p_status_code VARCHAR(3),
+    IN p_status_message VARCHAR(255)
+)
+BEGIN
+    DECLARE existing_count INT;
 
+    -- Check if the status code already exists
+    SELECT COUNT(*) INTO existing_count FROM log_status_codes WHERE status_code = p_status_code;
+
+    IF existing_count = 0 THEN
+        -- Insert a new status code
+        INSERT INTO log_status_codes (status_code, status_message)
+        VALUES (p_status_code, p_status_message);
+    ELSE
+        -- Update the existing status code
+        UPDATE log_status_codes
+        SET status_message = p_status_message
+        WHERE status_code = p_status_code;
+    END IF;
+END //
+DELIMITER ;
+
+
+-- USE goengine;
+
+-- DELIMITER //
+
+-- DROP PROCEDURE IF EXISTS InsertLog;
+-- CREATE PROCEDURE InsertLog(
+--     IN pStatusCode VARCHAR(3),
+--     IN pMessage VARCHAR(250),
+--     IN pGoEngineArea VARCHAR(250)
+-- )
+-- BEGIN
+--     DECLARE pLogID CHAR(36);
+--     IF LENGTH(pStatusCode) > 3 THEN
+--         SIGNAL SQLSTATE '45000'
+--         SET MESSAGE_TEXT = 'Data too long for column pStatusCode';
+--         RETURN;
+--     END IF;
+--     SET pLogID = UUID();
+--     INSERT INTO log (logID, statusCode, message, goEngineArea)
+--     VALUES (pLogID, pStatusCode, pMessage, pGoEngineArea);
+-- END//
+
+-- DELIMITER ;
 
 DELIMITER //
 
-CREATE PROCEDURE select_all_logs()
+CREATE PROCEDURE SelectAllLogs()
 BEGIN
     SELECT log_ID, status_code, message, go_engine_area, date_time
     FROM log;
@@ -227,7 +349,7 @@ END //
 DELIMITER //
 
 DELIMITER //
-CREATE PROCEDURE select_all_logs_by_status_code(IN pStatusCode VARCHAR(3))
+CREATE PROCEDURE SelectAllLogsByStatusCode(IN pStatusCode VARCHAR(3))
 BEGIN
     SELECT log_ID, status_code, message, go_engine_area, date_time
     FROM log
@@ -236,18 +358,45 @@ END //
 
 DELIMITER //
 DELIMITER //
-CREATE PROCEDURE populate_log_status_codes() -- Populates the log's status codes if they aren't already
+CREATE PROCEDURE PopulateLogStatusCodes() -- Populates the Log's if they aren't already
+
 BEGIN
     IF (SELECT COUNT(*) FROM log_status_codes) = 0 THEN
         INSERT INTO log_status_codes (status_code, status_message) VALUES ('OPR', 'Normal operational mode');
-        INSERT INTO log_status_codes (status_code, status_message) VALUES ('WAR', 'Warning: issue, application still functional');
-        INSERT INTO log_status_codes (status_code, status_message) VALUES ('ERR', 'Severe error, application not functional');
+        INSERT INTO log_status_codes (status_code, status_message) VALUES ('WAR', 'Warring issue application still functional');
+        INSERT INTO log_status_codes (status_code, status_message) VALUES ('ERR', 'Severe error application not functional');
     END IF;
 END //
 
 DELIMITER ;
 DELIMITER //
 
+-- CREATE PROCEDURE PopulateLog()
+-- BEGIN
+--     DECLARE statusCodeExists INT;
+
+--     SELECT COUNT(*) INTO statusCodeExists FROM logstatuscodes WHERE statusCode IN ('ERR', 'WAR', 'OPR');
+
+--     IF statusCodeExists = 3 THEN
+--         IF (SELECT COUNT(*) FROM log) = 0 THEN
+--             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
+--             VALUES (UUID(), 'ERR', 'An Error has occurred in the following area', 'CARP', NOW());
+
+--             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
+--             VALUES (UUID(), 'WAR', 'A Warning has been issued in the following area', 'CRAB', NOW());
+
+--             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
+--             VALUES (UUID(), 'OPR', 'Normal Operational Requirements have been met in the following area', 'CUDA', NOW());
+--         END IF;
+--     ELSE
+--         -- If required code is missing from statusCodes, then this error is given
+--         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Missing required status codes in logstatuscodes table.';
+--     END IF;
+-- END //
+
+-- DELIMITER ;
+
+-- CALL PopulateLog();
 
 select * from log
 -- Reset the delimiter back to default
@@ -256,19 +405,19 @@ DELIMITER ;
 DELIMITER //
 -- CREATE
 CREATE PROCEDURE create_user(
-    IN p_name NVARCHAR(25),
-    IN p_login NVARCHAR(10),
-    IN p_role NVARCHAR(5),
-    IN p_password VARBINARY(16),
-    IN p_active BOOLEAN
+    IN p_user_name NVARCHAR(25),
+    IN p_user_login NVARCHAR(10),
+    IN p_user_role NVARCHAR(5),
+    IN p_user_password VARBINARY(16),
+    IN p_active_or_not BOOLEAN
 )
 BEGIN
-    DECLARE v_id CHAR(36);
+    DECLARE v_user_id CHAR(36);
 
-    SET v_id = UUID();
+    SET v_user_id = UUID();
 
     INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
-    VALUES (v_id, p_name, p_login, p_role, p_password, p_active, CURRENT_TIMESTAMP());
+    VALUES (v_user_id, p_user_name, p_user_login, p_user_role, p_user_password, p_active_or_not, CURRENT_TIMESTAMP());
     END //
 
 DELIMITER ;
@@ -287,19 +436,19 @@ DELIMITER ;
 DELIMITER //
 
 CREATE PROCEDURE update_user(
-    IN p_id CHAR(36),
-    IN p_name NVARCHAR(25),
-    IN p_login NVARCHAR(10),
-    IN p_role NVARCHAR(5),
-    IN p_password VARBINARY(16)
+    IN p_user_id CHAR(36),
+    IN p_user_name NVARCHAR(25),
+    IN p_user_login NVARCHAR(10),
+    IN p_user_role NVARCHAR(5),
+    IN p_user_password VARBINARY(16)
 )
 BEGIN
     UPDATE users
-    SET user_id = p_name,
-        user_login = p_login,
-        user_role = p_role,
-        user_password = p_password
-    WHERE user_id = p_id;
+    SET user_name = p_user_name,
+        user_login = p_user_login,
+        user_role = p_user_role,
+        user_password = p_user_password
+    WHERE user_id = p_user_id;
 END //
 
 DELIMITER ;
@@ -318,7 +467,7 @@ END //
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE get_random_url()
+CREATE PROCEDURE GetRandomURL()
 BEGIN
     SELECT * FROM urls ORDER BY RAND() LIMIT 1;
 END //
@@ -327,15 +476,28 @@ DELIMITER ;
 -- Procedure to retrieve only the 'url' column from the 'urls' table
 DELIMITER //
 
-CREATE PROCEDURE get_urls_only()
+CREATE PROCEDURE GetURLsOnly()
 BEGIN
     -- Select only the 'url' column from the 'urls' table
     SELECT url FROM urls;
 END //
+
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE get_urls_and_tags()
+
+CREATE PROCEDURE fetch_user_id(
+    IN p_user_name NVARCHAR(25)
+)
+BEGIN
+    SELECT user_id FROM users WHERE user_name = p_user_name;
+END //
+
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE GetUrlsAndTags()
 BEGIN
     SELECT url, tags FROM urls;
 END //
@@ -352,10 +514,9 @@ VALUES
 -- Insert values into users table
 INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
 VALUES
-    (UUID(), 'Joseph Oakes', 'jxo19', 'ADM', encrypts_password('admin123'), TRUE, CURRENT_TIMESTAMP()),
-    (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', encrypts_password('dev789'), TRUE, CURRENT_TIMESTAMP()),
-    (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', encrypts_password('std447'), TRUE, CURRENT_TIMESTAMP());
-
+    (UUID(), 'Joesph Oakes', 'jxo19', 'ADM', EncryptsPassword('admin123'), TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', EncryptsPassword('dev789'), TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', EncryptsPassword('std447'), TRUE, CURRENT_TIMESTAMP());
 
 -- Inserting the first record
 INSERT INTO urls (id, url, tags)
@@ -373,7 +534,7 @@ VALUES (UUID(), 'https://sites.google.com/view/mahirbootstrap/signup?authuser=0'
 INSERT INTO urls (id, url, tags)
 VALUES (UUID(), 'https://sites.google.com/view/golangserver/home', '{"tag4": "<section>"}');
 
-CALL populate_log_status_codes();
+call PopulateLogStatusCodes();
 INSERT INTO users_roles_lookup (user_role, role_name)
 VALUES ('1', 'User');
 

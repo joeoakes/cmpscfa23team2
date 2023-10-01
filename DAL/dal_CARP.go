@@ -141,7 +141,6 @@ func createUsertest(t *testing.T) {
 	err = createUser(db, user_id, user_name, user_role, user_password)
 	if err != nil {
 		log.Fatal(err)
-
 	}
 	// does this work?
 }

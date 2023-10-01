@@ -42,33 +42,23 @@ CREATE TABLE IF NOT EXISTS users (
 -- Creates the logStatusCode lookup table for a reference to the log table
 CREATE TABLE IF NOT EXISTS log_status_codes(
                                              status_code VARCHAR(3) PRIMARY KEY,
-                                             status_message VARCHAR(250)
+                                             status_message VARCHAR(255)
 );
 
-
--- Creates the Log table
--- CREATE TABLE IF NOT EXISTS log (
---                                    logID CHAR (36)PRIMARY KEY, -- GUID for the ID, returns the ID as a case sensitive 36 long string
---                                    statusCode VARCHAR(3), -- 3 letters to store the status code to the DB
---                                    FOREIGN KEY (statusCode) REFERENCES logStatusCodes (statusCode), -- references to another table
---                                    message VARCHAR(250), -- A message about the status of the log
---                                    goEngineArea VARCHAR(250), -- Where the log status is occurring
---                                    dateTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- When inserting a value, the dateTime automatically updates to the time it occurred
--- );
 -- Fix for Duplicate Key Issue:
 -- Adds AUTO_INCREMENT to generate unique logID
 CREATE TABLE IF NOT EXISTS log (
                                    log_ID INT AUTO_INCREMENT PRIMARY KEY, -- Auto-generated unique ID
                                    status_code VARCHAR(3), -- 3 letters to store the status code to the DB
                                    FOREIGN KEY (status_code) REFERENCES log_status_codes (status_code), -- references to another table
-                                   message VARCHAR(250), -- A message about the status of the log
-                                   go_engine_area VARCHAR(250), -- Where the log status is occurring
+                                   message VARCHAR(255), -- A message about the status of the log
+                                   go_engine_area VARCHAR(255), -- Where the log status is occurring
                                    date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- When inserting a value, the dateTime automatically updates to the time it occurred
 );
 -- Creates the webservice table
 CREATE TABLE IF NOT EXISTS web_service(
                                          web_service_ID CHAR(36)PRIMARY KEY, -- GUID for creating a unique ID
-                                         web_service_description VARCHAR(250), -- A description of the service being offered
+                                         web_service_description VARCHAR(255), -- A description of the service being offered
                                          customer_ID CHAR(36), -- We are using CHAR(36) for our GUID's, but other options exist
                                          access_token LONGTEXT, -- This lets the customer access the website. LONGTEXT is used to store JWT's of varying lengths
                                          date_active DATE, -- When the token is activated
@@ -82,6 +72,22 @@ CREATE TABLE IF NOT EXISTS urls (
                                     tags JSON, -- Optional JSON field for storing tags related to the URL
                                     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP() -- The timestamp of when the URL was created/added
 );
+
+-- Stored Procedure to add a new prediction
+-- DELIMITER //
+-- CREATE PROCEDURE create_prediction(
+-- 	IN p_engine_id CHAR(36),
+-- 	IN p_prediction_info JSON
+-- )
+-- BEGIN
+-- 	DECLARE v_prediction_id CHAR(36);
+--     -- generate a unique identifier for the prediction and assign it to v_prediction_id
+--     SET v_prediction_id = UUID();
+--     INSERT INTO prerdictions (prediction_id, engine_id, prediction_info)
+--     VALUES (v_prediction_id, p_engine_id, p_prediction_info);
+-- END //
+-- DELIMITER;
+
 
 -- Table for TaskManager
 CREATE TABLE IF NOT EXISTS tasks (
@@ -117,6 +123,32 @@ CREATE TABLE IF NOT EXISTS scraper_engine (
     time_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
+
+CREATE TABLE IF NOT EXISTS predictions (
+    prediction_id INT PRIMARY KEY AUTO_INCREMENT,
+    engine_id CHAR(36),
+    prediction_tag CHAR(64),  -- New field for clustering similar predictions
+    input_data TEXT,
+    prediction_info JSON,
+    prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (engine_id) REFERENCES scraper_engine (engine_id)
+);
+
+-- Stored Procedure to add a new prediction
+DELIMITER //
+CREATE PROCEDURE create_prediction(
+    IN p_engine_id CHAR(36),
+    IN p_prediction_tag CHAR(64),  -- New parameter
+    IN p_prediction_info JSON
+)
+BEGIN
+    INSERT INTO predictions (engine_id, prediction_tag, prediction_info)
+    VALUES (p_engine_id, p_prediction_tag, p_prediction_info);
+END //
+DELIMITER ;
+
+
+
 -- Stored Procedure to add a new task
 DELIMITER //
 CREATE PROCEDURE create_task(
@@ -144,6 +176,48 @@ BEGIN
     SET v_model_id = UUID();
     INSERT INTO machine_learning_models (model_id, model_name, weights, biases)
     VALUES (v_model_id, p_model_name, p_weights, p_biases);
+END //
+DELIMITER ;
+
+-- New Stored Procedures
+-- Stored Procedure to update a machine learning model
+DELIMITER //
+CREATE PROCEDURE update_model(
+    IN p_model_id CHAR(36),
+    IN p_weights LONGTEXT,
+    IN p_biases LONGTEXT
+)
+BEGIN
+    UPDATE machine_learning_models
+    SET weights = p_weights,
+        biases = p_biases
+    WHERE model_id = p_model_id;
+END //
+DELIMITER ;
+
+-- Stored Procedure to delete a machine learning model
+DELIMITER //
+CREATE PROCEDURE delete_model(
+    IN p_model_id CHAR(36)
+)
+BEGIN
+    DELETE FROM machine_learning_models
+    WHERE model_id = p_model_id;
+END //
+DELIMITER ;
+
+-- Stored Procedure to update a task
+DELIMITER //
+CREATE PROCEDURE update_task(
+    IN p_task_id CHAR(36),
+    IN p_priority INT,
+    IN p_status NVARCHAR(20)
+)
+BEGIN
+    UPDATE tasks
+    SET priority = p_priority,
+        status = p_status
+    WHERE task_id = p_task_id;
 END //
 DELIMITER ;
 
@@ -191,6 +265,7 @@ BEGIN
 END //
 DELIMITER //
 
+
 CREATE PROCEDURE GetStatusCode(IN statusCode VARCHAR(3)) -- Gets the Status code of the Log
 BEGIN
     SELECT * FROM log AS l WHERE l.status_code = statusCode;
@@ -213,6 +288,31 @@ BEGIN
 END//
 
 DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE InsertOrUpdateStatusCode(
+    IN p_status_code VARCHAR(3),
+    IN p_status_message VARCHAR(255)
+)
+BEGIN
+    DECLARE existing_count INT;
+
+    -- Check if the status code already exists
+    SELECT COUNT(*) INTO existing_count FROM log_status_codes WHERE status_code = p_status_code;
+
+    IF existing_count = 0 THEN
+        -- Insert a new status code
+        INSERT INTO log_status_codes (status_code, status_message)
+        VALUES (p_status_code, p_status_message);
+    ELSE
+        -- Update the existing status code
+        UPDATE log_status_codes
+        SET status_message = p_status_message
+        WHERE status_code = p_status_code;
+    END IF;
+END //
+DELIMITER ;
+
 
 -- USE goengine;
 
@@ -373,7 +473,6 @@ BEGIN
 END //
 DELIMITER ;
 
-
 -- Procedure to retrieve only the 'url' column from the 'urls' table
 DELIMITER //
 
@@ -384,6 +483,18 @@ BEGIN
 END //
 
 DELIMITER ;
+
+DELIMITER //
+
+CREATE PROCEDURE fetch_user_id(
+    IN p_user_name NVARCHAR(25)
+)
+BEGIN
+    SELECT user_id FROM users WHERE user_name = p_user_name;
+END //
+
+DELIMITER ;
+
 
 DELIMITER //
 CREATE PROCEDURE GetUrlsAndTags()

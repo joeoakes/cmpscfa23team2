@@ -145,6 +145,3 @@ func createUsertest(t *testing.T) {
 	}
 
 }
-func main() {
-
-}

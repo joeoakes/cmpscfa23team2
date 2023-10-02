@@ -10,7 +10,7 @@ import (
 	"log"
 )
 
-var DB *sql.DB
+var db *sql.DB
 
 // DBConfig holds the database configuration
 type DBConfig struct {

@@ -42,6 +42,7 @@
     &quot;git-widget-placeholder&quot;: &quot;greenpatel&quot;,
     &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
     &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/ThePalad1n/go/cmpscfa23team2&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -49,7 +50,21 @@
     &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
 }</component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Go Build.go build DAL/">
+    <configuration name="go build DAL/" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="cmpscfa23team2" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="DIRECTORY" />
+      <directory value="$PROJECT_DIR$/DAL" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build cmpscfa23team2/" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="cmpscfa23team2" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="DIRECTORY" />
+      <directory value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
     <configuration name="go build dal_CRAB.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="cmpscfa23team2" />
       <working_directory value="$PROJECT_DIR$" />
@@ -58,8 +73,29 @@
       <filePath value="$PROJECT_DIR$/DAL/dal_CRAB.go" />
       <method v="2" />
     </configuration>
+    <configuration name="go build settUp.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="cmpscfa23team2" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/CRUD/settUp.go" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go test cmpscfa23team2" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="cmpscfa23team2" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="DIRECTORY" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Build.go build DAL/" />
+        <item itemvalue="Go Build.go build cmpscfa23team2/" />
+        <item itemvalue="Go Test.go test cmpscfa23team2" />
+        <item itemvalue="Go Build.go build settUp.go" />
         <item itemvalue="Go Build.go build dal_CRAB.go" />
       </list>
     </recent_temporary>

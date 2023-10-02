@@ -41,7 +41,7 @@ func CloseDb() {
 func main() {
 	config := DBConfig{
 		Username: "root",
-		Password: "EniSwat2233",
+		Password: "Password",
 		HostName: "localhost:3306",
 		Database: "goengine",
 	}

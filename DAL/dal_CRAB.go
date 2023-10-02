@@ -15,28 +15,22 @@ Constants for magic values
 And just using this as a placeholder we will be adjusting down the line
 */
 
-// Declare db at the package level for global use
 var db *sql.DB
 
-// Log struct models the data structure of a log entry in the database
 type Log struct {
 	LogID        string
-	status_code  string
+	StatusCode   string
 	Message      string
 	GoEngineArea string
 	DateTime     []uint8
 }
 
-// Prediction struct models the data structure of a prediction in the database
-type Prediction struct {
-	PredictionID string
-	EngineID     string
-	InputData    string
-	ScrapInfo    string
-	ScrapTime    string
+type Scrape struct {
+	Title string
+	Data  string
+	URL   string
 }
 
-// JSON_Data_Connect struct models the structure of database credentials in config.json
 type JSON_Data_Connect struct {
 	Username string
 	Password string
@@ -44,7 +38,6 @@ type JSON_Data_Connect struct {
 	Database string
 }
 
-// init initializes the program, reading the database configuration and establishing a connection
 func init() {
 	config, err := readJSONConfig("config.json")
 	if err != nil {
@@ -58,7 +51,6 @@ func init() {
 	}
 }
 
-// Connection establishes a new database connection based on provided credentials
 func Connection(config JSON_Data_Connect) (*sql.DB, error) {
 	connDB, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", config.Username, config.Password, config.Hostname, config.Database))
 	if err != nil {
@@ -73,7 +65,6 @@ func Connection(config JSON_Data_Connect) (*sql.DB, error) {
 	return connDB, nil
 }
 
-// readJSONConfig reads database credentials from a JSON file
 func readJSONConfig(filename string) (JSON_Data_Connect, error) {
 	var config JSON_Data_Connect
 	file, err := ioutil.ReadFile(filename)
@@ -89,15 +80,108 @@ func readJSONConfig(filename string) (JSON_Data_Connect, error) {
 	return config, nil
 }
 
-// Function to check if the engine_id exists in scraper_engine table
-func engineIDExists(engineID string) (bool, error) {
-	var exists bool
-	query := "SELECT EXISTS(SELECT 1 FROM scraper_engine WHERE engine_id=?)"
-	err := db.QueryRow(query, engineID).Scan(&exists)
-	if err != nil {
-		return false, err
+func InsertLog(log Log) error {
+	query := "INSERT INTO logs (LogID, StatusCode, Message, GoEngineArea, DateTime) VALUES (?, ?, ?, ?, ?)"
+	_, err := db.Exec(query, log.LogID, log.StatusCode, log.Message, log.GoEngineArea, log.DateTime)
+	return err
+}
+
+func UpdateLog(log Log) error {
+	query := "UPDATE logs SET StatusCode = ?, Message = ?, GoEngineArea = ?, DateTime = ? WHERE LogID = ?"
+	_, err := db.Exec(query, log.StatusCode, log.Message, log.GoEngineArea, log.DateTime, log.LogID)
+	return err
+}
+
+func DeleteLog(logID string) error {
+	query := "DELETE FROM logs WHERE LogID = ?"
+	_, err := db.Exec(query, logID)
+	return err
+}
+
+func InsertScrape(scrape Scrape) error {
+	query := "INSERT INTO scrapes (Title, Data, URL) VALUES (?, ?, ?)"
+	_, err := db.Exec(query, scrape.Title, scrape.Data, scrape.URL)
+	return err
+}
+
+func UpdateScrape(scrape Scrape) error {
+	query := "UPDATE scrapes SET Title = ?, Data = ?, URL = ? WHERE Title = ?"
+	_, err := db.Exec(query, scrape.Title, scrape.Data, scrape.URL, scrape.Title)
+	return err
+}
+
+func DeleteScrape(title string) error {
+	query := "DELETE FROM scrapes WHERE Title = ?"
+	_, err := db.Exec(query, title)
+	return err
+}
+
+func main() {
+	//test for each of the log functionalities
+	newLog := Log{
+		LogID:        "1",
+		StatusCode:   "200",
+		Message:      "Operation successful",
+		GoEngineArea: "Auth",
+		DateTime:     []uint8("2023-10-01"),
 	}
-	return exists, nil
+	err := InsertLog(newLog)
+	if err != nil {
+		log.Fatal("Error inserting new log:", err)
+	}
+	fmt.Println("Inserted new log.")
+
+	// Update an existing log
+	updatedLog := Log{
+		LogID:        "1",
+		StatusCode:   "201",
+		Message:      "updated",
+		GoEngineArea: "auth",
+		DateTime:     []uint8("2023-10-03"),
+	}
+	err = UpdateLog(updatedLog)
+	if err != nil {
+		log.Fatal("Error updating log:", err)
+	}
+	fmt.Println("Updated log.")
+
+	// Delete a log
+	err = DeleteLog("1")
+	if err != nil {
+		log.Fatal("Error deleting log:", err)
+	}
+	fmt.Println("Deleted log.")
+
+	//test for each of the scrape functionalities
+	newScrape := Scrape{
+		Title: "webtitle",
+		Data:  "data scraped new",
+		URL:   "https://abcupdate.com",
+	}
+	err = InsertScrape(newScrape)
+	if err != nil {
+		log.Fatal("Error inserting new scrape:", err)
+	}
+	fmt.Println("Inserted new scrape.")
+
+	// Update an existing scrape
+	updatedScrape := Scrape{
+		Title: "webtitle update",
+		Data:  "data scraped update",
+		URL:   "https://abcupdate.com",
+	}
+	err = UpdateScrape(updatedScrape)
+	if err != nil {
+		log.Fatal("Error updating scrape:", err)
+	}
+	fmt.Println("Updated scrape.")
+
+	// Delete a scrape
+	err = DeleteScrape("webtitle")
+	if err != nil {
+		log.Fatal("Error deleting scrape:", err)
+	}
+	fmt.Println("Deleted scrape.")
 }
 
 //const (

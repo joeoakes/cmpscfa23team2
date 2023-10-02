@@ -116,7 +116,8 @@ func DeleteScrape(title string) error {
 	return err
 }
 
-func main() {
+/*
+func testcase() {
 	//test for each of the log functionalities
 	newLog := Log{
 		LogID:        "1",
@@ -183,7 +184,9 @@ func main() {
 	}
 	fmt.Println("Deleted scrape.")
 }
+*/
 
+//functional scraper accidentally made
 //const (
 //	BaseURL  = "https://www.trackingdifferences.com/ETF/ISIN/"
 //	Children = 3

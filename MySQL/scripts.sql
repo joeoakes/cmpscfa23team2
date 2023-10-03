@@ -7,7 +7,7 @@
 ---------------------------------------------------
 */
 -- Drop the database if it exists
-DROP DATABASE IF EXISTS goengine;
+# DROP DATABASE IF EXISTS goengine;
 
 -- DATABASE CHECK
 -- This is used to see if the Database exists on the local computer
@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS urls (
                                     id CHAR(36) PRIMARY KEY, -- Unique identifier for the URLs using GUID
                                     url LONGTEXT NOT NULL, -- The URL string for storing the urls
                                     tags JSON, -- Optional JSON field for storing tags related to the URL
+                                    domain LONGTEXT, --
                                     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP() -- The timestamp of when the URL was created/added
 );
 
@@ -134,21 +135,10 @@ CREATE TABLE IF NOT EXISTS predictions (
     FOREIGN KEY (engine_id) REFERENCES scraper_engine (engine_id)
 );
 
--- Stored Procedure to add a new prediction
-DELIMITER //
-CREATE PROCEDURE create_prediction(
-    IN p_engine_id CHAR(36),
-    IN p_prediction_tag CHAR(64),  -- New parameter
-    IN p_prediction_info JSON
-)
-BEGIN
-    INSERT INTO predictions (engine_id, prediction_tag, prediction_info)
-    VALUES (p_engine_id, p_prediction_tag, p_prediction_info);
-END //
-DELIMITER ;
 
-
-
+-- ================================================
+-- SECTION: TASK MANAGER SPROCS
+-- ================================================
 -- Stored Procedure to add a new task
 DELIMITER //
 CREATE PROCEDURE create_task(
@@ -161,6 +151,38 @@ BEGIN
     SET v_task_id = UUID();
     INSERT INTO tasks (task_id, task_name, priority, status)
     VALUES (v_task_id, p_task_name, p_priority, p_status);
+END //
+DELIMITER ;
+
+-- Stored Procedure to update a task
+DELIMITER //
+CREATE PROCEDURE update_task(
+    IN p_task_id CHAR(36),
+    IN p_priority INT,
+    IN p_status NVARCHAR(20)
+)
+BEGIN
+    UPDATE tasks
+    SET priority = p_priority,
+        status = p_status
+    WHERE task_id = p_task_id;
+END //
+DELIMITER ;
+
+-- ================================================
+-- SECTION: CUDA SPROCS
+-- ================================================
+
+-- Stored Procedure to add a new prediction
+DELIMITER //
+CREATE PROCEDURE create_prediction(
+    IN p_engine_id CHAR(36),
+    IN p_prediction_tag CHAR(64),  -- New parameter
+    IN p_prediction_info JSON
+)
+BEGIN
+    INSERT INTO predictions (engine_id, prediction_tag, prediction_info)
+    VALUES (p_engine_id, p_prediction_tag, p_prediction_info);
 END //
 DELIMITER ;
 
@@ -194,9 +216,10 @@ BEGIN
     WHERE model_id = p_model_id;
 END //
 DELIMITER ;
+-- Setting the delimiter for the entire script
+DELIMITER //
 
 -- Stored Procedure to delete a machine learning model
-DELIMITER //
 CREATE PROCEDURE delete_model(
     IN p_model_id CHAR(36)
 )
@@ -204,93 +227,33 @@ BEGIN
     DELETE FROM machine_learning_models
     WHERE model_id = p_model_id;
 END //
-DELIMITER ;
 
--- Stored Procedure to update a task
-DELIMITER //
-CREATE PROCEDURE update_task(
-    IN p_task_id CHAR(36),
-    IN p_priority INT,
-    IN p_status NVARCHAR(20)
+-- Stored Procedure to delete a machine learning model
+CREATE PROCEDURE delete_model(
+    IN p_model_id CHAR(36)
 )
 BEGIN
-    UPDATE tasks
-    SET priority = p_priority,
-        status = p_status
-    WHERE task_id = p_task_id;
+    DELETE FROM machine_learning_models
+    WHERE model_id = p_model_id;
 END //
-DELIMITER ;
 
--- Stored Procedure to add a new web crawler
-DELIMITER //
-CREATE PROCEDURE create_webcrawler(
-    IN p_source_url LONGTEXT
-)
-BEGIN
-    DECLARE v_crawler_id CHAR(36);
-    SET v_crawler_id = UUID();
-    INSERT INTO webcrawlers (crawler_id, source_url)
-    VALUES (v_crawler_id, p_source_url);
-END //
-DELIMITER ;
-
--- Stored Procedure to add a new scraper engine
-DELIMITER //
-CREATE PROCEDURE create_scraper_engine(
-	IN p_engine_name NVARCHAR(50),
-    IN p_engine_description VARCHAR(250)
-)
-BEGIN
-	DECLARE v_engine_id CHAR(36);
-    -- Generating a unique identifier and assigning it to v_engine_id
-    SET v_engine_id = UUID();
-    INSERT INTO scraper_engine(engine_id, engine_name, engine_description)
-    VALUES (v_engine_id, p_engine_name, p_engine_description);
-END //
-DELIMITER ;
-
--- PROCEDURE CHECK
-
--- Set the delimiter for the following function creation
-DELIMITER //
-
--- Create a function to encrypt passwords
-CREATE FUNCTION EncryptsPassword(password NVARCHAR(10)) RETURNS VARBINARY(16)
-    DETERMINISTIC
-    NO SQL
-BEGIN
-    DECLARE encrypted VARBINARY(16);
-    SET encrypted = AES_ENCRYPT(password, 'IST888IST888');
-    RETURN encrypted;
-END //
-DELIMITER //
-
-
-CREATE PROCEDURE GetStatusCode(IN statusCode VARCHAR(3)) -- Gets the Status code of the Log
+-- ================================================
+-- SECTION: LOG SPROCS
+-- ================================================
+-- Procedure to get status code
+CREATE PROCEDURE get_status_code(IN statusCode VARCHAR(3))
 BEGIN
     SELECT * FROM log AS l WHERE l.status_code = statusCode;
 END //
-DELIMITER // -- Needed to not throw an error because of complex coding
 
-DELIMITER //
+-- Resetting the delimiter back to ;
+DELIMITER ;
 
-CREATE PROCEDURE InsertLog(
-    IN pStatusCode VARCHAR(3),
-    IN pMessage VARCHAR(250),
-    IN pGoEngineArea VARCHAR(250)
-)
-BEGIN
-    DECLARE pLogID CHAR(36);
-    SET pLogID = UUID();
-
-    INSERT INTO log (log_ID, status_code, message, go_engine_area)
-    VALUES (pLogID, pStatusCode, pMessage, pGoEngineArea);
-END//
 
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE InsertOrUpdateStatusCode(
+CREATE PROCEDURE insert_or_update_status_code(
     IN p_status_code VARCHAR(3),
     IN p_status_message VARCHAR(255)
 )
@@ -313,7 +276,6 @@ BEGIN
 END //
 DELIMITER ;
 
-
 -- USE goengine;
 
 -- DELIMITER //
@@ -335,12 +297,11 @@ DELIMITER ;
 --     INSERT INTO log (logID, statusCode, message, goEngineArea)
 --     VALUES (pLogID, pStatusCode, pMessage, pGoEngineArea);
 -- END//
-
 -- DELIMITER ;
 
 DELIMITER //
 
-CREATE PROCEDURE SelectAllLogs()
+CREATE PROCEDURE select_all_logs()
 BEGIN
     SELECT log_ID, status_code, message, go_engine_area, date_time
     FROM log;
@@ -349,7 +310,7 @@ END //
 DELIMITER //
 
 DELIMITER //
-CREATE PROCEDURE SelectAllLogsByStatusCode(IN pStatusCode VARCHAR(3))
+CREATE PROCEDURE select_all_logs_by_status_code(IN pStatusCode VARCHAR(3))
 BEGIN
     SELECT log_ID, status_code, message, go_engine_area, date_time
     FROM log
@@ -358,7 +319,7 @@ END //
 
 DELIMITER //
 DELIMITER //
-CREATE PROCEDURE PopulateLogStatusCodes() -- Populates the Log's if they aren't already
+CREATE PROCEDURE populate_log_status_codes() -- Populates the Log's if they aren't already
 
 BEGIN
     IF (SELECT COUNT(*) FROM log_status_codes) = 0 THEN
@@ -402,6 +363,9 @@ select * from log
 -- Reset the delimiter back to default
 DELIMITER ;
 
+-- ================================================
+-- SECTION: CARP SPROCS
+-- ================================================
 DELIMITER //
 -- CREATE
 CREATE PROCEDURE create_user(
@@ -422,15 +386,65 @@ BEGIN
 
 DELIMITER ;
 -- READ
+-- A SPROC to get a specific user
 DELIMITER //
+CREATE PROCEDURE get_user_by_ID(IN p_user_id CHAR(36))
+BEGIN
+    SELECT * FROM users WHERE user_id = p_user_id;
+END //
+DELIMITER ;
 
+-- A SPROC to get all users in a specific role
+DELIMITER //
+CREATE PROCEDURE get_users_by_role(IN p_role NVARCHAR(5))
+BEGIN
+    SELECT * FROM users WHERE user_role = p_role;
+END //
+DELIMITER ;
+
+-- A SPROC to get all users
+DELIMITER //
 CREATE PROCEDURE get_users()
 BEGIN
     SELECT user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added
     FROM users;
 END //
-
 DELIMITER ;
+
+-- A SPROC to fetch user using username
+DELIMITER //
+CREATE PROCEDURE fetch_user_id(
+    IN p_user_name NVARCHAR(25)
+)
+BEGIN
+    SELECT user_id FROM users WHERE user_name = p_user_name;
+END //
+DELIMITER ;
+
+DELIMITER //
+
+-- Create a function to encrypt passwords
+CREATE FUNCTION encrypts_password(password NVARCHAR(10)) RETURNS VARBINARY(16)
+    DETERMINISTIC
+    NO SQL
+BEGIN
+    DECLARE encrypted VARBINARY(16);
+    SET encrypted = AES_ENCRYPT(password, 'IST888IST888');
+    RETURN encrypted;
+END //
+DELIMITER //
+
+-- A SPROC to validate user credentials
+DELIMITER //
+CREATE PROCEDURE `validate_user`(IN userLogin VARCHAR(255), IN userPassword NVARCHAR(10))
+BEGIN
+    DECLARE encryptedPwd VARBINARY(16);
+    SET encryptedPwd = encrypts_password(userPassword);
+    SELECT COUNT(*) FROM users WHERE user_login = userLogin AND user_password = encryptedPwd INTO @exists;
+    SELECT IF(@exists > 0, TRUE, FALSE) AS valid;
+END //
+DELIMITER ;
+
 
 -- UPDATE
 DELIMITER //
@@ -466,8 +480,41 @@ END //
 
 DELIMITER ;
 
+
+-- ================================================
+-- SECTION: CRAB SPROCS
+-- ================================================
+
+-- Stored Procedure to add a new web crawler
 DELIMITER //
-CREATE PROCEDURE GetRandomURL()
+CREATE PROCEDURE create_webcrawler(
+    IN p_source_url LONGTEXT
+)
+BEGIN
+    DECLARE v_crawler_id CHAR(36);
+    SET v_crawler_id = UUID();
+    INSERT INTO webcrawlers (crawler_id, source_url)
+    VALUES (v_crawler_id, p_source_url);
+END //
+DELIMITER ;
+
+-- Stored Procedure to add a new scraper engine
+DELIMITER //
+CREATE PROCEDURE create_scraper_engine(
+    IN p_engine_name NVARCHAR(50),
+    IN p_engine_description VARCHAR(250)
+)
+BEGIN
+    DECLARE v_engine_id CHAR(36);
+    -- Generating a unique identifier and assigning it to v_engine_id
+    SET v_engine_id = UUID();
+    INSERT INTO scraper_engine(engine_id, engine_name, engine_description)
+    VALUES (v_engine_id, p_engine_name, p_engine_description);
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE get_random_url()
 BEGIN
     SELECT * FROM urls ORDER BY RAND() LIMIT 1;
 END //
@@ -476,7 +523,7 @@ DELIMITER ;
 -- Procedure to retrieve only the 'url' column from the 'urls' table
 DELIMITER //
 
-CREATE PROCEDURE GetURLsOnly()
+CREATE PROCEDURE get_urls_only()
 BEGIN
     -- Select only the 'url' column from the 'urls' table
     SELECT url FROM urls;
@@ -486,18 +533,8 @@ DELIMITER ;
 
 DELIMITER //
 
-CREATE PROCEDURE fetch_user_id(
-    IN p_user_name NVARCHAR(25)
-)
-BEGIN
-    SELECT user_id FROM users WHERE user_name = p_user_name;
-END //
-
-DELIMITER ;
-
-
 DELIMITER //
-CREATE PROCEDURE GetUrlsAndTags()
+CREATE PROCEDURE get_urls_and_tags()
 BEGIN
     SELECT url, tags FROM urls;
 END //
@@ -514,9 +551,9 @@ VALUES
 -- Insert values into users table
 INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
 VALUES
-    (UUID(), 'Joesph Oakes', 'jxo19', 'ADM', EncryptsPassword('admin123'), TRUE, CURRENT_TIMESTAMP()),
-    (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', EncryptsPassword('dev789'), TRUE, CURRENT_TIMESTAMP()),
-    (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', EncryptsPassword('std447'), TRUE, CURRENT_TIMESTAMP());
+    (UUID(), 'Joesph Oakes', 'jxo19', 'ADM', encrypts_password('admin123'), TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', encrypts_password('dev789'), TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', encrypts_password('std447'), TRUE, CURRENT_TIMESTAMP());
 
 -- Inserting the first record
 INSERT INTO urls (id, url, tags)
@@ -534,8 +571,7 @@ VALUES (UUID(), 'https://sites.google.com/view/mahirbootstrap/signup?authuser=0'
 INSERT INTO urls (id, url, tags)
 VALUES (UUID(), 'https://sites.google.com/view/golangserver/home', '{"tag4": "<section>"}');
 
-call PopulateLogStatusCodes();
+call populate_log_status_codes();
 INSERT INTO users_roles_lookup (user_role, role_name)
 VALUES ('1', 'User');
 
--- call PopulateLog();

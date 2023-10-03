@@ -301,6 +301,19 @@ DELIMITER ;
 
 DELIMITER //
 
+CREATE PROCEDURE insert_log(
+    IN pStatusCode VARCHAR(3),
+    IN pMessage VARCHAR(250),
+    IN pGoEngineArea VARCHAR(250)
+)
+BEGIN
+    DECLARE pLogID CHAR(36);
+    SET pLogID = UUID();
+
+    INSERT INTO log (log_ID, status_code, message, go_engine_area)
+    VALUES (pLogID, pStatusCode, pMessage, pGoEngineArea);
+END//
+
 CREATE PROCEDURE select_all_logs()
 BEGIN
     SELECT log_ID, status_code, message, go_engine_area, date_time

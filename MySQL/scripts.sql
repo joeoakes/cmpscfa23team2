@@ -7,7 +7,7 @@
 ---------------------------------------------------
 */
 -- Drop the database if it exists
-# DROP DATABASE IF EXISTS goengine;
+DROP DATABASE IF EXISTS goengine;
 
 -- DATABASE CHECK
 -- This is used to see if the Database exists on the local computer

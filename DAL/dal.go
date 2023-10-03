@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"log"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 type JSON_Data_Connect struct {
@@ -105,4 +105,31 @@ func main() {
 	} else {
 		log.Printf("Converting prediction to JSON is successful! %s", result)
 	}
+
+	// testing creating the web crawler
+	err = CreateWebCrawler("http://www.abc.com")
+	if err != nil {
+		fmt.Println("Error creating web crawler:", err)
+	} else {
+		log.Printf("Success creating the web crawler!")
+	}
+
+	// the below tests work but the crab needs to be modified so that it matches the script
+
+	//// testing creating the scraper engine
+	//err = CreateScraperEngine("ScraperTest", "This is a test scraper")
+	//if err != nil {
+	//	fmt.Println("Error creating ScraperEngine:", err)
+	//} else {
+	//	log.Printf("Success creating the scraper engine!")
+	//}
+	//
+	//// testing insert scraped data
+	//// Insert some scraped data (this is just an example, your actual scraping logic will go here)
+	//err = InsertScrapedData("http://www.abc.com", "This is some scraped data from site.")
+	//if err != nil {
+	//	fmt.Println("Error inserting ScrapedData:", err)
+	//} else {
+	//	log.Printf("Success inserting scraped data")
+	//}
 }

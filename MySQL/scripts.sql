@@ -513,6 +513,47 @@ BEGIN
 END //
 DELIMITER ;
 
+-- SPROC to insert URL records into the URLs table
+DELIMITER //
+CREATE PROCEDURE insert_url(IN p_url LONGTEXT, IN p_tags JSON, IN p_domain LONGTEXT)
+BEGIN
+    INSERT INTO urls (id, url, tags, domain, created_time)
+    VALUES (UUID(), p_url, p_tags, p_domain, CURRENT_TIMESTAMP);
+END //
+DELIMITER ;
+
+-- SPROC to update URL
+DELIMITER //
+CREATE PROCEDURE update_url(IN p_id CHAR(36), IN p_url LONGTEXT, IN p_tags JSON, IN p_domain LONGTEXT)
+BEGIN
+    UPDATE urls SET url = p_url, tags = p_tags, domain = p_domain WHERE id = p_id;
+END //
+DELIMITER ;
+
+-- SPROC for domain-specific queries: get URL tags and domain
+DELIMITER //
+CREATE PROCEDURE get_url_tags_and_domain(IN p_id CHAR(36))
+BEGIN
+    SELECT tags, domain FROM urls WHERE id = p_id;
+END //
+DELIMITER ;
+
+-- SPROC to get URLs from a specific domain
+DELIMITER //
+CREATE PROCEDURE get_urls_from_domain(IN p_domain LONGTEXT)
+BEGIN
+    SELECT * FROM urls WHERE domain = p_domain;
+END //
+DELIMITER ;
+
+-- SPROC to get UUID from URL and domain
+DELIMITER //
+CREATE PROCEDURE get_Uuid_from_URL_and_domain(IN p_url LONGTEXT, IN p_domain LONGTEXT)
+BEGIN
+    SELECT id FROM urls WHERE url = p_url AND domain = p_domain;
+END //
+DELIMITER ;
+
 DELIMITER //
 CREATE PROCEDURE get_random_url()
 BEGIN

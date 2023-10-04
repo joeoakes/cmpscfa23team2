@@ -10,15 +10,15 @@ import (
 	"log"
 )
 
-var db *sql.DB
-
 // DBConfig holds the database configuration
 type DBConfig struct {
 	Username string `json:"Username"`
 	Password string `json:"Password"`
 	Port     string `json:"Port"`
-	DBName   string `json:"dbname"`
+	DBName   string `json:"DBName"`
 }
+
+var db *sql.DB
 
 func init() {
 	// Read the config.json file
@@ -43,18 +43,18 @@ func init() {
 	}
 }
 
-func CreateWebCrawler(sourceURL string) error {
-	_, err := db.Exec("CALL create_webcrawler(?)", sourceURL)
+func CreateWebCrawler(urls string) error {
+	_, err := db.Exec("CALL create_webcrawler(?)", urls)
 	return err
 }
 
-func CreateScraperEngine(name, description string) error {
-	_, err := db.Exec("CALL create_scraper_engine(?, ?)", name, description)
+func CreateScraperEngine(urls, id, tags string) error {
+	_, err := db.Exec("CALL create_scraper_engine(?, ?)", id, tags)
 	return err
 }
 
-func InsertScrapedData(url, data string) error {
-	_, err := db.Exec("INSERT INTO scraped_data (url, data) VALUES (?, ?)", url, data)
+func InsertScrapedData(url, id, tags string) error {
+	_, err := db.Exec("INSERT INTO urls (id, url, tags) VALUES (?, ?)", id, tags)
 	return err
 }
 
@@ -64,13 +64,13 @@ func main() {
 		fmt.Println("Error creating web crawler:", err)
 	}
 
-	err = CreateScraperEngine("ScraperTest", "This is a test scraper")
+	err = CreateScraperEngine("http://www.abc.com", "1", "ScraperTest")
 	if err != nil {
 		fmt.Println("Error creating ScraperEngine:", err)
 	}
 
 	// Insert some scraped data (this is just an example, your actual scraping logic will go here)
-	err = InsertScrapedData("http://www.abc.com", "This is some scraped data from site.")
+	err = InsertScrapedData("http://www.abc.com", "1", "ScraperTest")
 	if err != nil {
 		fmt.Println("Error inserting ScrapedData:", err)
 	}

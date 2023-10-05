@@ -34,7 +34,7 @@ func readJSONConfig(filename string) (JSON_Data_Connect, error) {
 }
 
 func InitDB() error {
-	config, err := readJSONConfig("../config.json")
+	config, err := readJSONConfig("config.json")
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func main() {
 	defer CloseDb()
 
 	// Test: CreateUser
-	userID, err := CreateUser("John Doe", "jdoe", "std", "password123", true)
+	userID, err := CreateUser("John Doe", "jdoe", "STD", "password123", true)
 	if err != nil {
 		log.Printf("Error creating user: %s", err)
 	} else {
@@ -148,4 +148,43 @@ func main() {
 	} else {
 		log.Printf("User with ID %s deleted successfully!", userID)
 	}
+
+	// Additional functionality goes here
+	predictionResult := performMLPrediction("Test Data")
+	log.Printf(predictionResult)
+
+	// testing converting prediction to JSON
+	result, err := convertPredictionToJSON(predictionResult)
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		log.Printf("Converting prediction to JSON is successful! %s", result)
+	}
+
+	// testing creating the web crawler
+	err = CreateWebCrawler("http://www.abc.com")
+	if err != nil {
+		fmt.Println("Error creating web crawler:", err)
+	} else {
+		log.Printf("Success creating the web crawler!")
+	}
+
+	// the below tests work but the crab needs to be modified so that it matches the script
+
+	//// testing creating the scraper engine
+	//err = CreateScraperEngine("ScraperTest", "This is a test scraper")
+	//if err != nil {
+	//	fmt.Println("Error creating ScraperEngine:", err)
+	//} else {
+	//	log.Printf("Success creating the scraper engine!")
+	//}
+	//
+	//// testing insert scraped data
+	//// Insert some scraped data (this is just an example, your actual scraping logic will go here)
+	//err = InsertScrapedData("http://www.abc.com", "This is some scraped data from site.")
+	//if err != nil {
+	//	fmt.Println("Error inserting ScrapedData:", err)
+	//} else {
+	//	log.Printf("Success inserting scraped data")
+	//}
 }

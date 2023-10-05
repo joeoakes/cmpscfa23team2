@@ -6,8 +6,7 @@ import (
 	//	_ "github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"log"
-	"os"
-	"path/filepath"
+	"net/http"
 	"time"
 )
 
@@ -20,16 +19,19 @@ type Userdata struct {
 	user_date_added time.Time
 }
 
-// ReadSQLFile reads an SQL file located in the project directory and returns its content as a string.
-// Most likely won't be utilizing this function as much (will be kept for test purposes).
-func ReadSQLFile(filename string) (string, error) {
-	// Get the absolute path to the project directory
 
-	projectDirectory, err := os.Getwd()
+// creating the user calling upon the sproc
+func createUser(db *sql.DB, user_id string, user_name string, user_role string, user_password string) error {
+	_, err := db.Exec("CALL create_user(?, ?, ?, ?, ?)", user_name, user_id, user_role, user_password, true)
+
 	if err != nil {
 		return "", err
 	}
 
+
+// get users. scans rows
+func getUsers(db *sql.DB) ([]Userdata, error) {
+	rows, err := db.Query("CALL get_users()")
 	// Construct the full path to the SQL file
 	filePath := filepath.Join(projectDirectory, filename)
 	// Read the content of the SQL file
@@ -37,7 +39,6 @@ func ReadSQLFile(filename string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	return string(sqlContent), nil
 }
 
@@ -78,9 +79,16 @@ func ValidUser(db *sql.DB, userLogin, userPassword string) (bool, error) {
 	return true, nil
 }
 
+
+
+func createUsertest(t *testing.T) {
+	db, err := sql.Open("MySQL", "goengine")
+	err = createUser(db, "user_id", "user_name", "user_role", "user_password")
+
 // updating the user calling upon the sproc
 func updateUser(db *sql.DB, user_id string, user_name string, user_role string) {
 	_, err := db.Exec("CALL update_user(?, ?, ?)", user_id, user_name, user_role)
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -92,5 +100,10 @@ func deleteUser(db *sql.DB, user_id string) error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+
+
+
 	return nil
 }
+

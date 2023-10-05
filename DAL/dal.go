@@ -69,7 +69,7 @@ func main() {
 		log.Fatalf("Failed to initialize the database: %s", err)
 	}
 	defer CloseDb()
-
+	// dal_CARP.go Functions Testing
 	// Test: CreateUser
 	userID, err := CreateUser("John Doe", "jdoe", "STD", "password123", true)
 	if err != nil {
@@ -85,7 +85,7 @@ func main() {
 		log.Printf("Fetched User ID: %s", fetchedUserID)
 	}
 	// Test: GetUserByID
-	user, err := GetUserByID("8e46234a-631e-11ee-8fa9-30d042e80ac3")
+	user, err := GetUserByID(fetchedUserID)
 	if err != nil {
 		log.Printf("Error fetching user by ID: %s", err)
 	} else {
@@ -150,23 +150,15 @@ func main() {
 	}
 
 	// Additional functionality goes here
-	predictionResult := performMLPrediction("Test Data")
+	predictionResult := PerformMLPrediction("Test Data")
 	log.Printf(predictionResult)
 
 	// testing converting prediction to JSON
-	result, err := convertPredictionToJSON(predictionResult)
+	result, err := ConvertPredictionToJSON(predictionResult)
 	if err != nil {
 		log.Fatal(err)
 	} else {
 		log.Printf("Converting prediction to JSON is successful! %s", result)
-	}
-
-	// testing creating the web crawler
-	err = CreateWebCrawler("http://www.abc.com")
-	if err != nil {
-		fmt.Println("Error creating web crawler:", err)
-	} else {
-		log.Printf("Success creating the web crawler!")
 	}
 
 	// the below tests work but the crab needs to be modified so that it matches the script
@@ -187,4 +179,102 @@ func main() {
 	//} else {
 	//	log.Printf("Success inserting scraped data")
 	//}
+
+	// dal.CRAB function testing
+	// Test: CreateWebCrawler
+	crawlerID, err := CreateWebCrawler("http://example.com")
+	if err != nil {
+		log.Printf("Error creating web crawler: %s", err)
+	} else {
+		log.Printf("Web crawler created with ID: %s", crawlerID)
+	}
+
+	// Test: CreateScraperEngine
+	engineID, err := CreateScraperEngine("EngineName", "ScraperEngine")
+	if err != nil {
+		log.Printf("Error creating scraper engine: %s", err)
+	} else {
+		log.Printf("Scraper engine created with ID: %s", engineID)
+	}
+
+	// Test: InsertURL
+	tags := map[string]interface{}{
+		"tag1": "value1",
+		"tag2": "value2",
+	}
+	urlID, err := InsertURL("http://example.com/page1", "example.com", tags)
+	if err != nil {
+		log.Printf("Error inserting URL: %s", err)
+	} else {
+		log.Printf("URL inserted with ID: %s", urlID)
+	}
+
+	// Test: UpdateURL
+	updatedTags := map[string]interface{}{
+		"tag1": "updatedValue1",
+		"tag2": "updatedValue2",
+	}
+	err = UpdateURL(urlID, "http://example.com/updatedPage", "example.com", updatedTags)
+	if err != nil {
+		log.Printf("Error updating URL: %s", err)
+	} else {
+		log.Println("URL updated successfully!")
+	}
+
+	// Then, let's fetch it to check the update
+	tags, domain, err := GetURLTagsAndDomain(urlID)
+	if err != nil {
+		log.Printf("Error fetching updated URL details: %s", err)
+	} else {
+		log.Printf("Domain: %s, Tags: %v", domain, tags)
+	}
+
+	// Test: GetURLTagsAndDomain
+	returnedTags, returnedDomain, err := GetURLTagsAndDomain(urlID)
+	if err != nil {
+		log.Printf("Error getting URL tags and domain: %s", err)
+	} else {
+		log.Printf("Tags: %v, Domain: %s", returnedTags, returnedDomain)
+	}
+
+	// Test: GetURLsFromDomain
+	urls, err := GetURLsFromDomain("example.com")
+	if err != nil {
+		log.Printf("Error getting URLs from domain: %s", err)
+	} else {
+		log.Printf("URLs from domain: %v", urls)
+	}
+
+	// Test: GetUUIDFromURLAndDomain
+	//uuid, err := GetUUIDFromURLAndDomain("http://example.com/page1", "example.com")
+	//if err != nil {
+	//	log.Printf("Error getting UUID from URL and domain: %s", err)
+	//} else {
+	//	log.Printf("UUID for given URL and domain: %s", uuid)
+	//}
+
+	// Test: GetRandomURL
+	//randomURL, err := GetRandomURL()
+	//if err != nil {
+	//	log.Printf("Error getting random URL: %s", err)
+	//} else {
+	//	log.Printf("Random URL: %s", randomURL)
+	//}
+
+	// Test: GetURLsOnly
+	allURLs, err := GetURLsOnly()
+	if err != nil {
+		log.Printf("Error getting all URLs: %s", err)
+	} else {
+		log.Printf("All URLs: %v", allURLs)
+	}
+
+	// Test: GetURLsAndTags
+	urlsAndTags, err := GetURLsAndTags()
+	if err != nil {
+		log.Printf("Error getting URLs and tags: %s", err)
+	} else {
+		log.Printf("All URLs and tags: %v", urlsAndTags)
+	}
+
 }

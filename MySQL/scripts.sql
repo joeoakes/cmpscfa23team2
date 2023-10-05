@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS users (
                                      user_name NVARCHAR(25), -- Name of the user
                                      user_login NVARCHAR(10), -- login credentials for user
                                      user_role NVARCHAR(5), -- User's role
-                                     user_password VARBINARY(16), -- Encrypted password
+                                     user_password VARBINARY(255), -- Encrypted password
                                      active_or_not BOOLEAN DEFAULT TRUE, -- Flag indicating if the user is active or not
                                      user_date_added DATETIME DEFAULT CURRENT_TIMESTAMP(), -- Date and time the user was added
                                      FOREIGN KEY (user_role) REFERENCES users_roles_lookup (user_role) -- Foreign key referencing user roles
@@ -228,14 +228,6 @@ BEGIN
     WHERE model_id = p_model_id;
 END //
 
--- Stored Procedure to delete a machine learning model
-CREATE PROCEDURE delete_model(
-    IN p_model_id CHAR(36)
-)
-BEGIN
-    DELETE FROM machine_learning_models
-    WHERE model_id = p_model_id;
-END //
 
 -- ================================================
 -- SECTION: LOG SPROCS
@@ -395,6 +387,7 @@ BEGIN
 
     INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
     VALUES (v_user_id, p_user_name, p_user_login, p_user_role, p_user_password, p_active_or_not, CURRENT_TIMESTAMP());
+    SELECT v_user_id;
     END //
 
 DELIMITER ;
@@ -437,26 +430,23 @@ DELIMITER ;
 DELIMITER //
 
 -- Create a function to encrypt passwords
-CREATE FUNCTION encrypts_password(password NVARCHAR(10)) RETURNS VARBINARY(16)
+CREATE FUNCTION encrypts_password(password NVARCHAR(255)) RETURNS VARBINARY(255)
     DETERMINISTIC
     NO SQL
 BEGIN
-    DECLARE encrypted VARBINARY(16);
+    DECLARE encrypted VARBINARY(255);
     SET encrypted = AES_ENCRYPT(password, 'IST888IST888');
     RETURN encrypted;
-END //
-DELIMITER //
+END;
 
 -- A SPROC to validate user credentials
-DELIMITER //
-CREATE PROCEDURE `validate_user`(IN userLogin VARCHAR(255), IN userPassword NVARCHAR(10))
+CREATE PROCEDURE `validate_user`(IN userLogin VARCHAR(255), IN userPassword NVARCHAR(255))
 BEGIN
-    DECLARE encryptedPwd VARBINARY(16);
+    DECLARE encryptedPwd VARBINARY(255);
     SET encryptedPwd = encrypts_password(userPassword);
     SELECT COUNT(*) FROM users WHERE user_login = userLogin AND user_password = encryptedPwd INTO @exists;
     SELECT IF(@exists > 0, TRUE, FALSE) AS valid;
-END //
-DELIMITER ;
+END;
 
 
 -- UPDATE
@@ -598,6 +588,7 @@ DELIMITER ;
 INSERT INTO users_roles_lookup (user_role, role_name)
 VALUES
     ('ADM', 'Administrator'),
+    ('1', 'User'),
     ('FAC', 'Faculty'),
     ('STD', 'Student'),
     ('DEV', 'Developer');
@@ -626,6 +617,4 @@ INSERT INTO urls (id, url, tags)
 VALUES (UUID(), 'https://sites.google.com/view/golangserver/home', '{"tag4": "<section>"}');
 
 call populate_log_status_codes();
-INSERT INTO users_roles_lookup (user_role, role_name)
-VALUES ('1', 'User');
 

@@ -1,122 +1,151 @@
 package main
 
 import (
-    "database/sql"
-    "fmt"
-    _ "github.com/go-sql-driver/mysql"
-    "log"
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"log"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
-type DBConfig struct {
-    Username string
-    Password string
-    HostName string
-    Database string
+type JSON_Data_Connect struct {
+	Username string `json:"Username"`
+	Password string `json:"Password"`
+	Hostname string `json:"Hostname"`
+	Database string `json:"Database"`
 }
 
 var db *sql.DB
 
-func Connection(config DBConfig) (*sql.DB, error) {
-    connDB, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", config.Username, config.Password, config.HostName, config.Database))
+// Read database credentials from a JSON file
+func readJSONConfig(filename string) (JSON_Data_Connect, error) {
+	var config JSON_Data_Connect
+	file, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return config, err
+	}
+	err = json.Unmarshal(file, &config)
+	if err != nil {
+		return config, err
+	}
+	return config, nil
+}
 
-    if err != nil {
-       return nil, err
-    }
+func InitDB() error {
+	config, err := readJSONConfig("../config.json")
+	if err != nil {
+		return err
+	}
 
-    err = connDB.Ping()
-    if err != nil {
-       return nil, err
-    }
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s", config.Username, config.Password, config.Hostname, config.Database)
+	db, err = sql.Open("mysql", dsn)
+	if err != nil {
+		return err
+	}
 
-    return connDB, nil
+	err = db.Ping()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func CloseDb() {
-    if db != nil {
-       err := db.Close()
-       if err != nil {
-          log.Fatalf("Could not establish a connection with the database: %v", err)
-       }
-    }
+	if db != nil {
+		err := db.Close()
+		if err != nil {
+			log.Printf("Error closing the database: %v", err)
+		}
+	}
 }
 
-func CreateUserDAL(user_id string, user_name string, user_login string, user_role string, user_password string, active_or_not bool) error {
-    return CreateUser(db, user_name, user_login, user_role, user_password, active_or_not)
-}
-
-func UpdateUserDAL(user_id string, user_name string, user_login string, user_role string, user_password string) error {
-    return UpdateUser(db, user_id, user_name, user_login, user_role, user_password)
-}
-
-func DeleteUsersDAL(user_id string) error {
-    return DeleteUser(db, user_id)
-}
-
-// GetUser isnt working properly need to be updated and then can properly implement function here
-//
-//  func GetUsersDAL([]Userdata, error) {
-//     return GetUsers(db)
-//  }
-func GetGitHubUserData(username string) (*GitHubUser, error) {
-
-    return GetGitHubUser(username)
-
-}
 func main() {
-    config := DBConfig{
-       Username: "root",
-       Password: "password",
-       HostName: "localhost:3306",
-       Database: "goengine",
-    }
-    var err error
-    db, err = Connection(config) // Notice the removal of the := which creates a new local variable
-    if err != nil {
-       log.Fatalf("Failed to initialize database: %s", err)
-    }
-    defer CloseDb()
-    //err = CreateUserDAL("user3", "matt4", "mfa54", "dev", "pass2", true)
-    //if err != nil {
-    // log.Printf("Failed to create a user: %s", err)
-    //} else {
-    // log.Println("Successfully created user.")
-    //}
+	// Initialize the database connection
+	err := InitDB()
+	if err != nil {
+		log.Fatalf("Failed to initialize the database: %s", err)
+	}
+	defer CloseDb()
 
-    err = UpdateUserDAL("2e52d4b4-6013-11ee-a9a7-00ffd9472baa", "Matt7", "mfa34", "adm", "newPass")
-    if err != nil {
-       log.Printf("Failed to update user: %s", err)
-    } else {
-       log.Println("Successfully updated user.")
-    }
-    err = DeleteUsersDAL("eed05ded-6012-11ee-a9a7-00ffd9472baa")
-    if err != nil {
-       log.Printf("Failed to delete user: @%s", err)
-    } else {
-       log.Println("Successfully deleted user.")
-    }
-    //users, err := GetUsersDAL()if err != nil {
-    //
-    // log.Printf("Failed to get users: %s", err)
-    //
-    //} else {
-    //
-    // log.Println("Successfully retrieved users:")
-    //
-    // for _, user := range users {
-    //
-    //    log.Printf("User ID: %s, User Name: %s, User Login: %s, User Role: %s, User Password: %s, Active: %v, User Date Added: %s",
-    //
-    //       user.user_id, user.user_name, user.user_login, user.user_role, user.user_password, user.active_or_not, user.user_date_added)
-    //
-    // }
-    //
-    //}
+	// Test: CreateUser
+	userID, err := CreateUser("John Doe", "jdoe", "std", "password123", true)
+	if err != nil {
+		log.Printf("Error creating user: %s", err)
+	} else {
+		log.Printf("User created with ID: %s", userID)
+	}
+	// Test: FetchUserIDByName
+	fetchedUserID, err := FetchUserIDByName("Joesph Oakes")
+	if err != nil {
+		log.Printf("Error fetching user ID by name: %s", err)
+	} else {
+		log.Printf("Fetched User ID: %s", fetchedUserID)
+	}
+	// Test: GetUserByID
+	user, err := GetUserByID("8e46234a-631e-11ee-8fa9-30d042e80ac3")
+	if err != nil {
+		log.Printf("Error fetching user by ID: %s", err)
+	} else {
+		log.Printf("User Details: %+v", user)
+	}
 
-    githubUser, err := GetGitHubUser("Matt5")
-    if err != nil {
-       log.Printf("Failed to fetch GitHub user: %s", err)
-    } else {
-       log.Printf("Successfully fetched GitHub user: %+v", githubUser)
-    }
+	// Test: GetUsersByRole
+	users, err := GetUsersByRole("DEV")
+	if err != nil {
+		log.Printf("Error fetching users by role: %s", err)
+	} else {
+		for _, user := range users {
+			log.Printf("User by Role: %+v", user)
+		}
+	}
+
+	// Test: GetAllUsers
+	allUsers, err := GetAllUsers()
+	if err != nil {
+		log.Printf("Error fetching all users: %s", err)
+	} else {
+		log.Println("All users:")
+		for _, user := range allUsers {
+			log.Printf("User: %+v", user)
+		}
+	}
+
+	// Test: ValidateUserCredentials
+	isValid, err := ValidateUserCredentials("jdoe", "password123")
+	if err != nil {
+		log.Printf("Error validating user: %s", err)
+	} else if isValid {
+		log.Println("User user credentials are valid!")
+	} else {
+		log.Println("User credentials are invalid!")
+	}
+
+	// Test: UpdateUser
+	err = UpdateUser(userID, "John Updated", "jupdated", "FAC", ("newpassword123"))
+	if err != nil {
+		log.Printf("Error updating user: %s", err)
+	} else {
+		log.Println("User details updated successfully!")
+	}
+
+	// Validate the user with updated credentials
+	isValid, err = ValidateUserCredentials("jupdated", "newpassword123")
+	if err != nil {
+		log.Printf("Error validating user after update: %s", err)
+	} else if isValid {
+		log.Println("User's updated credentials are valid!")
+	} else {
+		log.Println("User's updated credentials are invalid!")
+	}
+
+	// Test: DeleteUser
+	err = DeleteUser(userID)
+	if err != nil {
+		log.Printf("Error deleting user: %s", err)
+	} else {
+		log.Printf("User with ID %s deleted successfully!", userID)
+	}
 }
- 

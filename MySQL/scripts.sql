@@ -490,6 +490,7 @@ DELIMITER ;
 
 -- Stored Procedure to add a new web crawler
 DELIMITER //
+DELIMITER //
 CREATE PROCEDURE create_webcrawler(
     IN p_source_url LONGTEXT
 )
@@ -498,6 +499,7 @@ BEGIN
     SET v_crawler_id = UUID();
     INSERT INTO webcrawlers (crawler_id, source_url)
     VALUES (v_crawler_id, p_source_url);
+    SELECT v_crawler_id;
 END //
 DELIMITER ;
 
@@ -513,6 +515,7 @@ BEGIN
     SET v_engine_id = UUID();
     INSERT INTO scraper_engine(engine_id, engine_name, engine_description)
     VALUES (v_engine_id, p_engine_name, p_engine_description);
+    SELECT v_engine_id;
 END //
 DELIMITER ;
 
@@ -520,10 +523,14 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE insert_url(IN p_url LONGTEXT, IN p_tags JSON, IN p_domain LONGTEXT)
 BEGIN
+    DECLARE v_id CHAR(36);
+    SET v_id = UUID();
     INSERT INTO urls (id, url, tags, domain, created_time)
-    VALUES (UUID(), p_url, p_tags, p_domain, CURRENT_TIMESTAMP);
+    VALUES (v_id, p_url, p_tags, p_domain, CURRENT_TIMESTAMP);
+    SELECT v_id; -- This line returns the generated ID.
 END //
 DELIMITER ;
+
 
 -- SPROC to update URL
 DELIMITER //

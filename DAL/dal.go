@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"log"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type JSON_Data_Connect struct {
@@ -69,29 +70,83 @@ func main() {
 	}
 	defer CloseDb()
 
-	// Assuming these functions are elsewhere in your code:
-	// Test CreateUser
-	err = CreateUser("test_name", "test_login", "adm", "test_password", true)
+	// Test: CreateUser
+	userID, err := CreateUser("John Doe", "jdoe", "STD", "password123", true)
 	if err != nil {
-		log.Printf("Failed to create a user: %s", err)
+		log.Printf("Error creating user: %s", err)
 	} else {
-		log.Println("Successfully created user.")
+		log.Printf("User created with ID: %s", userID)
+	}
+	// Test: FetchUserIDByName
+	fetchedUserID, err := FetchUserIDByName("Joesph Oakes")
+	if err != nil {
+		log.Printf("Error fetching user ID by name: %s", err)
+	} else {
+		log.Printf("Fetched User ID: %s", fetchedUserID)
+	}
+	// Test: GetUserByID
+	user, err := GetUserByID("8e46234a-631e-11ee-8fa9-30d042e80ac3")
+	if err != nil {
+		log.Printf("Error fetching user by ID: %s", err)
+	} else {
+		log.Printf("User Details: %+v", user)
 	}
 
-	// Test UpdateUser
-	err = UpdateUser("some_user_id", "updated_name", "login", "dev", "updated_password")
+	// Test: GetUsersByRole
+	users, err := GetUsersByRole("DEV")
 	if err != nil {
-		log.Printf("Failed to update user: %s", err)
+		log.Printf("Error fetching users by role: %s", err)
 	} else {
-		log.Println("Successfully updated user.")
+		for _, user := range users {
+			log.Printf("User by Role: %+v", user)
+		}
 	}
 
-	// Test DeleteUser
-	err = DeleteUser("some_user_id")
+	// Test: GetAllUsers
+	allUsers, err := GetAllUsers()
 	if err != nil {
-		log.Printf("Failed to delete user: %s", err)
+		log.Printf("Error fetching all users: %s", err)
 	} else {
-		log.Println("Successfully deleted user.")
+		log.Println("All users:")
+		for _, user := range allUsers {
+			log.Printf("User: %+v", user)
+		}
+	}
+
+	// Test: ValidateUserCredentials
+	isValid, err := ValidateUserCredentials("jdoe", "password123")
+	if err != nil {
+		log.Printf("Error validating user: %s", err)
+	} else if isValid {
+		log.Println("User user credentials are valid!")
+	} else {
+		log.Println("User credentials are invalid!")
+	}
+
+	// Test: UpdateUser
+	err = UpdateUser(userID, "John Updated", "jupdated", "FAC", ("newpassword123"))
+	if err != nil {
+		log.Printf("Error updating user: %s", err)
+	} else {
+		log.Println("User details updated successfully!")
+	}
+
+	// Validate the user with updated credentials
+	isValid, err = ValidateUserCredentials("jupdated", "newpassword123")
+	if err != nil {
+		log.Printf("Error validating user after update: %s", err)
+	} else if isValid {
+		log.Println("User's updated credentials are valid!")
+	} else {
+		log.Println("User's updated credentials are invalid!")
+	}
+
+	// Test: DeleteUser
+	err = DeleteUser(userID)
+	if err != nil {
+		log.Printf("Error deleting user: %s", err)
+	} else {
+		log.Printf("User with ID %s deleted successfully!", userID)
 	}
 
 	// Additional functionality goes here

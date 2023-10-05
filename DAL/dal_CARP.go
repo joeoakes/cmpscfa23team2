@@ -1,109 +1,103 @@
-package DAL
+package main
 
 import (
-	"database/sql"
-	"errors"
-	//	_ "github.com/go-sql-driver/mysql"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"time"
+	_ "github.com/go-sql-driver/mysql"
 )
 
-type Userdata struct {
-	user_id         string
-	user_name       string
-	user_role       string
-	user_password   string
-	active_or_not   bool
-	user_date_added time.Time
+type User struct {
+	UserID        string
+	UserName      string
+	UserLogin     string
+	UserRole      string
+	UserPassword  []byte
+	ActiveOrNot   bool
+	UserDateAdded string
 }
 
-
-// creating the user calling upon the sproc
-func createUser(db *sql.DB, user_id string, user_name string, user_role string, user_password string) error {
-	_, err := db.Exec("CALL create_user(?, ?, ?, ?, ?)", user_name, user_id, user_role, user_password, true)
-
+// CreateUser inserts a new user into the database.
+func CreateUser(userName, userLogin, userRole string, userPassword string, activeOrNot bool) (string, error) {
+	var userID string
+	err := db.QueryRow("CALL create_user(?, ?, ?, AES_ENCRYPT(?, 'IST888IST888'), ?)", userName, userLogin, userRole, userPassword, activeOrNot).Scan(&userID)
 	if err != nil {
 		return "", err
 	}
+	return userID, nil
+}
 
+// GetUserByID retrieves a specific user by their ID.
+func GetUserByID(userID string) (*User, error) {
+	var u User
+	row := db.QueryRow("CALL get_user_by_ID(?)", userID)
+	if err := row.Scan(&u.UserID, &u.UserName, &u.UserLogin, &u.UserRole, &u.UserPassword, &u.ActiveOrNot, &u.UserDateAdded); err != nil {
+		return nil, err
+	}
+	return &u, nil
+}
 
-// get users. scans rows
-func getUsers(db *sql.DB) ([]Userdata, error) {
+// GetUsersByRole fetches all users with a specific role.
+func GetUsersByRole(role string) ([]*User, error) {
+	rows, err := db.Query("CALL get_users_by_role(?)", role)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*User
+	for rows.Next() {
+		var u User
+		if err := rows.Scan(&u.UserID, &u.UserName, &u.UserLogin, &u.UserRole, &u.UserPassword, &u.ActiveOrNot, &u.UserDateAdded); err != nil {
+			return nil, err
+		}
+		users = append(users, &u)
+	}
+	return users, rows.Err()
+}
+
+// GetAllUsers retrieves all registered users.
+func GetAllUsers() ([]*User, error) {
 	rows, err := db.Query("CALL get_users()")
-	// Construct the full path to the SQL file
-	filePath := filepath.Join(projectDirectory, filename)
-	// Read the content of the SQL file
-	sqlContent, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*User
+	for rows.Next() {
+		var u User
+		if err := rows.Scan(&u.UserID, &u.UserName, &u.UserLogin, &u.UserRole, &u.UserPassword, &u.ActiveOrNot, &u.UserDateAdded); err != nil {
+			return nil, err
+		}
+		users = append(users, &u)
+	}
+	return users, rows.Err()
+}
+
+// FetchUserIDByName retrieves a user's ID using their username.
+func FetchUserIDByName(userName string) (string, error) {
+	var userID string
+	err := db.QueryRow("CALL fetch_user_id(?)", userName).Scan(&userID)
 	if err != nil {
 		return "", err
 	}
-	return string(sqlContent), nil
+	return userID, nil
 }
 
-// ValidUser checks if a user with the given login and password exists in the database.
-// It returns true if a matching user is found, false otherwise, along with any errors encountered.
-func ValidUser(db *sql.DB, userLogin, userPassword string) (bool, error) {
-	// Read the SQL query from the "scripts.sql" file
-	sqlQuery, err := ReadSQLFile("scripts.sql")
-	if err != nil {
-		return false, err
-	}
-
-	// Update the SQL query to reference the "users" table
-	// For example, if your query is something like "SELECT * FROM users WHERE username = ? AND password = ?",
-	// you don't need to change it since it already references the "users" table.
-
-	// Prepare the SQL statement
-	preparedStatement, err := db.Prepare(sqlQuery)
-	if err != nil {
-		return false, err
-	}
-	defer preparedStatement.Close()
-
-	// Execute the query and check if a user with the given userLogin and userPassword exists
-	var rowCount int
-	err = preparedStatement.QueryRow(userLogin, userPassword).Scan(&rowCount)
-	if err != nil {
-		// Handle the error from the SQL query
-		return false, err
-	}
-
-	if rowCount == 0 {
-		// No matching user found, return a custom error
-		return false, errors.New("username and password do not match")
-	}
-
-	// A matching user was found
-	return true, nil
+// ValidateUserCredentials verifies user login details.
+func ValidateUserCredentials(userLogin, userPassword string) (bool, error) {
+	var isValid bool
+	err := db.QueryRow("CALL validate_user(?, ?)", userLogin, userPassword).Scan(&isValid)
+	return isValid, err
 }
 
-
-
-func createUsertest(t *testing.T) {
-	db, err := sql.Open("MySQL", "goengine")
-	err = createUser(db, "user_id", "user_name", "user_role", "user_password")
-
-// updating the user calling upon the sproc
-func updateUser(db *sql.DB, user_id string, user_name string, user_role string) {
-	_, err := db.Exec("CALL update_user(?, ?, ?)", user_id, user_name, user_role)
-
-	if err != nil {
-		log.Fatal(err)
-	}
+// UpdateUser updates the details of a user.
+func UpdateUser(userID, userName, userLogin, userRole, userPassword string) error {
+	_, err := db.Exec("CALL update_user(?, ?, ?, ?, AES_ENCRYPT(?, 'IST888IST888'))", userID, userName, userLogin, userRole, userPassword)
+	return err
 }
 
-// deleting the user
-func deleteUser(db *sql.DB, user_id string) error {
-	_, err := db.Exec("CALL delete_user(?)", user_id)
-	if err != nil {
-		log.Fatal(err)
-	}
+// DeleteUser removes a user from the database.
+func DeleteUser(userID string) error {
+	_, err := db.Exec("CALL delete_user(?)", userID)
+	return err
 
-
-
-
-	return nil
 }
-

@@ -148,7 +148,34 @@ func main() {
 	} else {
 		log.Printf("User with ID %s deleted successfully!", userID)
 	}
+	// CUDA Testing
 
+	//testing inserting engine id
+	sampleEngineID := "sample_engine_id10"
+	sampleEngineName := "Sample Engine"
+	sampleEngineDescription := "This is a sample engine."
+
+	err = InsertSampleEngine(sampleEngineID, sampleEngineName, sampleEngineDescription)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Sample engine with ID %s inserted successfully.\n", sampleEngineID)
+	//testing if engine id exists
+	exists, err := EngineIDExists(sampleEngineID)
+	if exists {
+		fmt.Printf("Engine with ID %s exists.\n", "sample_engine_id")
+	} else {
+		fmt.Printf("Engine with ID %s does not exist.\n", "sample_engine_id")
+	}
+	engineID := "sample_engine_id5"          // Replace with an existing engine ID
+	predictionInfo := "{\"key\": \"value\"}" // Replace with valid JSON data
+
+	err = InsertPrediction(engineID, predictionInfo)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Prediction for engine %s inserted successfully.\n", engineID)
 	// Additional functionality goes here
 	predictionResult := PerformMLPrediction("Test Data")
 	log.Printf(predictionResult)
@@ -190,7 +217,7 @@ func main() {
 	}
 
 	// Test: CreateScraperEngine
-	engineID, err := CreateScraperEngine("EngineName", "ScraperEngine")
+	engineID, err = CreateScraperEngine("EngineName", "ScraperEngine")
 	if err != nil {
 		log.Printf("Error creating scraper engine: %s", err)
 	} else {

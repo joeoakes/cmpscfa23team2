@@ -439,6 +439,8 @@ BEGIN
     RETURN encrypted;
 END;
 
+
+DELIMITER // 
 -- A SPROC to validate user credentials
 CREATE PROCEDURE `validate_user`(IN userLogin VARCHAR(255), IN userPassword NVARCHAR(255))
 BEGIN
@@ -624,4 +626,3 @@ INSERT INTO urls (id, url, tags)
 VALUES (UUID(), 'https://sites.google.com/view/golangserver/home', '{"tag4": "<section>"}');
 
 call populate_log_status_codes();
-

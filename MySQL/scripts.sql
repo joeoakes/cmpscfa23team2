@@ -55,6 +55,21 @@ CREATE TABLE IF NOT EXISTS log (
                                    go_engine_area VARCHAR(255), -- Where the log status is occurring
                                    date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- When inserting a value, the dateTime automatically updates to the time it occurred
 );
+
+-- Periodically clean the log (anything older than 30 days) 
+-- Temporarily disable safe update mode
+SET SQL_SAFE_UPDATES = 0;
+DELETE FROM log
+WHERE date_time < DATE_SUB(NOW(), INTERVAL 30 DAY);
+
+-- Retrieve logs from the start of the day
+SELECT* FROM log
+WHERE date_time >= CURDATE();
+
+-- get logs from the start of the week
+SELECT* FROM log
+WHERE date_time >= SUBDATE(CURDATE(), DAYOFWEEK(CURDATE()) - 1);
+
 -- Creates the webservice table
 CREATE TABLE IF NOT EXISTS web_service(
                                          web_service_ID CHAR(36)PRIMARY KEY, -- GUID for creating a unique ID
@@ -124,7 +139,7 @@ CREATE TABLE IF NOT EXISTS scraper_engine (
     time_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
-
+-- Table for predictions
 CREATE TABLE IF NOT EXISTS predictions (
     prediction_id INT PRIMARY KEY AUTO_INCREMENT,
     engine_id CHAR(36),
@@ -134,6 +149,7 @@ CREATE TABLE IF NOT EXISTS predictions (
     prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (engine_id) REFERENCES scraper_engine (engine_id)
 );
+
 
 
 -- ================================================

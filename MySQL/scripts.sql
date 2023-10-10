@@ -371,6 +371,7 @@ DELIMITER ;
 -- ================================================
 -- SECTION: CARP SPROCS
 -- ================================================
+
 DELIMITER //
 -- CREATE
 CREATE PROCEDURE create_user(
@@ -591,7 +592,73 @@ BEGIN
 END //
 DELIMITER ;
 
--- Insert values into users_roles_lookup table
+
+
+ -- ================================================
+-- SECTION: VALIDATE TOKEN:
+-- ================================================
+
+ #Tables are not created yet
+ #Tables left to create user_sessions, user_permissions
+
+-- Setting the delimiter for stored procedures
+DELIMITER //
+
+-- Procedure to create a new session for a user
+CREATE PROCEDURE create_session(
+    IN p_user_id CHAR(36),
+    IN p_token TEXT
+)
+BEGIN
+    -- Inserting a new session with details and setting an expiration time of 1 hour
+    INSERT INTO user_sessions (session_id, user_id, token, time_to_live, last_activity, scope)
+    VALUES (UUID(), p_user_id, p_token, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 HOUR), CURRENT_TIMESTAMP, 'default');
+END //
+DELIMITER ;
+
+-- Procedure to validate a user's token
+DELIMITER //
+CREATE PROCEDURE validate_token(
+    IN p_token TEXT
+)
+BEGIN
+    -- Checking if the token is valid and still within its active time frame
+    SELECT user_id, time_to_live > CURRENT_TIMESTAMP AS is_valid
+    FROM user_sessions
+    WHERE token = p_token;
+END //
+DELIMITER ;
+
+-- Procedure to add a new permission for a user role
+DELIMITER //
+CREATE PROCEDURE add_permission(
+    IN p_user_role NVARCHAR(5),
+    IN p_action_name NVARCHAR(100),
+    IN p_resource_name NVARCHAR(100)
+)
+BEGIN
+    -- Inserting a new permission record for the given user role, action, and resource
+    INSERT INTO user_permissions (permission_id, user_role, action_name, resource_name)
+    VALUES (UUID(), p_user_role, p_action_name, p_resource_name);
+END //
+DELIMITER ;
+
+-- Procedure to check if a user role has a specific permission
+DELIMITER //
+CREATE PROCEDURE check_permission(
+    IN p_user_role NVARCHAR(5),
+    IN p_action_name NVARCHAR(100),
+    IN p_resource_name NVARCHAR(100)
+)
+BEGIN
+    -- Checking if a permission exists for the given user role, action, and resource
+    SELECT COUNT(*) > 0 AS has_permission
+    FROM user_permissions
+    WHERE user_role = p_user_role AND action_name = p_action_name AND resource_name = p_resource_name;
+END //
+DELIMITER ;
+
+-- Inserting predefined roles into the user roles lookup table
 INSERT INTO users_roles_lookup (user_role, role_name)
 VALUES
     ('ADM', 'Administrator'),
@@ -600,28 +667,20 @@ VALUES
     ('STD', 'Student'),
     ('DEV', 'Developer');
 
--- Insert values into users table
+-- Inserting sample users into the users table
 INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
 VALUES
     (UUID(), 'Joesph Oakes', 'jxo19', 'ADM', encrypts_password('admin123'), TRUE, CURRENT_TIMESTAMP()),
     (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', encrypts_password('dev789'), TRUE, CURRENT_TIMESTAMP()),
     (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', encrypts_password('std447'), TRUE, CURRENT_TIMESTAMP());
 
--- Inserting the first record
+-- Inserting sample URLs into the URLs table
 INSERT INTO urls (id, url, tags)
-VALUES (UUID(), 'https://sites.google.com/view/mahirbootstrap/home', '{"tag1": "<a>"}');
+VALUES
+    (UUID(), 'https://sites.google.com/view/mahirbootstrap/home', '{"tag1": "<a>"}'),
+    (UUID(), 'https://www.abington.psu.edu/WPL/mahir-khan', '{"tag2": "<img>"}'),
+    (UUID(), 'https://sites.google.com/view/mahirbootstrap/signup?authuser=0', '{"tag3": "<label>"}'),
+    (UUID(), 'https://sites.google.com/view/golangserver/home', '{"tag4": "<section>"}');
 
--- Inserting the second record
-INSERT INTO urls (id, url, tags)
-VALUES (UUID(), 'https://www.abington.psu.edu/WPL/mahir-khan', '{"tag2": "<img>"}');
-
--- Inserting the third record
-INSERT INTO urls (id, url, tags)
-VALUES (UUID(), 'https://sites.google.com/view/mahirbootstrap/signup?authuser=0', '{"tag3": "<label>"}');
-
--- Inserting the fourth record
-INSERT INTO urls (id, url, tags)
-VALUES (UUID(), 'https://sites.google.com/view/golangserver/home', '{"tag4": "<section>"}');
-
-call populate_log_status_codes();
-
+-- Call to the procedure to populate log status codes
+CALL populate_log_status_codes();

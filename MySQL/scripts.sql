@@ -135,6 +135,18 @@ CREATE TABLE IF NOT EXISTS predictions (
     FOREIGN KEY (engine_id) REFERENCES scraper_engine (engine_id)
 );
 
+-- A SPROC for user login
+DELIMITER //
+CREATE PROCEDURE user_login(
+    IN p_user_login NVARCHAR(10),
+    IN p_user_password VARBINARY(16)
+)
+BEGIN
+    SELECT user_id, user_name, user_role
+    FROM users
+    WHERE user_login = p_user_login AND user_password = p_user_password AND active_or_not = TRUE;
+END //
+DELIMITER ;
 
 -- ================================================
 -- SECTION: TASK MANAGER SPROCS
@@ -439,7 +451,6 @@ BEGIN
     RETURN encrypted;
 END;
 
-
 DELIMITER // 
 -- A SPROC to validate user credentials
 CREATE PROCEDURE `validate_user`(IN userLogin VARCHAR(255), IN userPassword NVARCHAR(255))
@@ -484,6 +495,141 @@ BEGIN
 END //
 
 DELIMITER ;
+
+
+-- ================================================
+-- SECTION: Authentication and Authorization SPROCS
+-- ================================================
+
+-- SPROC for authenticating a user
+DELIMITER //
+CREATE PROCEDURE authenticate_user(
+    IN p_user_login NVARCHAR(10),
+    IN p_user_password VARBINARY(255)
+)
+BEGIN
+    DECLARE v_user_id CHAR(36);
+    DECLARE v_authenticated BOOLEAN;
+
+    -- Check if the login and hashed password match any user
+    SELECT user_id INTO v_user_id FROM users
+    WHERE user_login = p_user_login AND user_password = p_user_password;
+
+    -- Determine if the user is authenticated
+    SET v_authenticated = (v_user_id IS NOT NULL);
+
+    SELECT v_authenticated, v_user_id;
+END //
+DELIMITER ;
+
+-- SPROC for getting the role of a user
+DELIMITER //
+CREATE PROCEDURE get_user_role(
+    IN p_user_id CHAR(36)
+)
+BEGIN
+    DECLARE v_user_role NVARCHAR(5);
+
+    -- Fetch the role of the user
+    SELECT user_role INTO v_user_role FROM users WHERE user_id = p_user_id;
+
+    SELECT v_user_role;
+END //
+DELIMITER ;
+
+-- SPROC for checking if a user is active
+DELIMITER //
+CREATE PROCEDURE is_user_active(
+    IN p_user_id CHAR(36)
+)
+BEGIN
+    DECLARE v_active BOOLEAN;
+
+    -- Fetch the active status of the user
+    SELECT active_or_not INTO v_active FROM users WHERE user_id = p_user_id;
+
+    SELECT v_active;
+END //
+DELIMITER ;
+
+-- SPROC for authorizing a user based on role
+DELIMITER //
+CREATE PROCEDURE authorize_user(
+    IN p_user_id CHAR(36),
+    IN required_role NVARCHAR(5)
+)
+BEGIN
+    DECLARE v_user_role NVARCHAR(5);
+
+    -- Fetch the role of the user
+    SELECT user_role INTO v_user_role FROM users WHERE user_id = p_user_id;
+
+    -- Check if the user is authorized to perform the operation
+    IF v_user_role = required_role THEN
+        SELECT TRUE AS is_authorized;
+    ELSE
+        SELECT FALSE AS is_authorized;
+    END IF;
+END //
+DELIMITER ;
+
+-- Reset the delimiter back to default
+DELIMITER ;
+
+-- UPDATE
+-- A SPROC to update a user's role
+DELIMITER //
+CREATE PROCEDURE update_user_role(
+    IN p_user_id CHAR(36),
+    IN p_new_role NVARCHAR(5)
+)
+BEGIN
+    UPDATE users
+    SET user_role = p_new_role
+    WHERE user_id = p_user_id;
+END //
+DELIMITER ;
+
+-- A SPROC to update a user's password
+DELIMITER //
+CREATE PROCEDURE update_user_password(
+    IN p_user_id CHAR(36),
+    IN p_new_password VARBINARY(16)
+)
+BEGIN
+    UPDATE users
+    SET user_password = p_new_password
+    WHERE user_id = p_user_id;
+END //
+DELIMITER ;
+
+-- A SPROC to deactivate a user
+DELIMITER //
+CREATE PROCEDURE deactivate_user(
+    IN p_user_id CHAR(36)
+)
+BEGIN
+    UPDATE users
+    SET active_or_not = FALSE
+    WHERE user_id = p_user_id;
+END //
+DELIMITER ;
+
+-- A SPROC for user registration
+DELIMITER //
+CREATE PROCEDURE user_registration(
+    IN p_user_name NVARCHAR(25),
+    IN p_user_login NVARCHAR(10),
+    IN p_user_role NVARCHAR(5),
+    IN p_user_password VARBINARY(16),
+    IN p_active_or_not BOOLEAN
+)
+BEGIN
+    CALL create_user(p_user_name, p_user_login, p_user_role, p_user_password, p_active_or_not);
+END //
+DELIMITER ;
+
+
 
 
 -- ================================================
@@ -624,5 +770,10 @@ VALUES (UUID(), 'https://sites.google.com/view/mahirbootstrap/signup?authuser=0'
 -- Inserting the fourth record
 INSERT INTO urls (id, url, tags)
 VALUES (UUID(), 'https://sites.google.com/view/golangserver/home', '{"tag4": "<section>"}');
+
+use goengine;
+
+CALL user_registration('test_user', 'test_login', 'STD', 'test_password', true);
+
 
 call populate_log_status_codes();

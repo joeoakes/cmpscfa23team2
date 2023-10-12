@@ -54,6 +54,8 @@ func GetUsersByRole(role string) ([]*User, error) {
 		var u User
 		if err := rows.Scan(&u.UserID, &u.UserName, &u.UserLogin, &u.UserRole, &u.UserPassword, &u.ActiveOrNot, &u.UserDateAdded); err != nil {
 			return nil, err
+		} else {
+			log.Printf("Scan Rows: %+v", rows)
 		}
 		users = append(users, &u)
 		log.Printf("Get Users by Role: %+v", u)

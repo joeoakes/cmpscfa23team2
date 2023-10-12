@@ -99,12 +99,12 @@ func WriteJSONConfig(configFile string, config *JsonDataConnect, key []byte) err
 	encryptedUsername, err := encryptAES([]byte(config.Username), key)
 	if err != nil {
 		return err
-	}
+	} else {log.Println("Successfully encrypted username")}
 
 	encryptedPassword, err := encryptAES([]byte(config.Password), key)
 	if err != nil {
 		return err
-	}
+	} else {log.Println("Successfully encrypted password")}
 
 	encryptedConfig := JsonDataConnect{
 		Username: base64.StdEncoding.EncodeToString(encryptedUsername),
@@ -117,13 +117,13 @@ func WriteJSONConfig(configFile string, config *JsonDataConnect, key []byte) err
 	data, err := json.Marshal(encryptedConfig)
 	if err != nil {
 		return err
-	}
+	} else {log.Println("Successfully marshalled encrypted config")}
 
 	// Write the encrypted JSON configuration to file
 	err = ioutil.WriteFile(configFile, data, 0644)
 	if err != nil {
 		return err
-	}
+	} else {log.Println("Successfully wrote encrypted config to file")}
 
 	return nil
 }
@@ -133,7 +133,7 @@ func encryptAES(data []byte, key []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
-	}
+	} else {log.Println("Successfully created new cipher")}
 
 	blockSize := block.BlockSize()
 	paddedData := padPKCS7(data, blockSize)
@@ -149,6 +149,7 @@ func encryptAES(data []byte, key []byte) ([]byte, error) {
 func padPKCS7(data []byte, blockSize int) []byte {
 	padding := blockSize - (len(data) % blockSize)
 	paddedData := append(data, bytes.Repeat([]byte{byte(padding)}, padding)...)
+	log.Printf("Padded data: %v", paddedData)
 	return paddedData
 }
 
@@ -157,33 +158,33 @@ func ReadJSONConfig(configFile string, key []byte) (*JsonDataConnect, error) {
 	data, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		return nil, err
-	}
+	} else{log.Printf("Successfully read JSON config file: %v", data)}
 
 	var encryptedConfig JsonDataConnect
 	err = json.Unmarshal(data, &encryptedConfig)
 	if err != nil {
 		return nil, err
-	}
+	} else{log.Printf("Successfully unmarshalled JSON config: %v", encryptedConfig)}
 
 	decryptedUsername, err := base64.StdEncoding.DecodeString(encryptedConfig.Username)
 	if err != nil {
 		return nil, err
-	}
+	} else{log.Println("Successfully decoded username")}
 
 	decryptedPassword, err := base64.StdEncoding.DecodeString(encryptedConfig.Password)
 	if err != nil {
 		return nil, err
-	}
+	} else{log.Println("Successfully decoded password")}
 
 	username, err := decryptAES(decryptedUsername, key)
 	if err != nil {
 		return nil, err
-	}
+	} else{log.Println("Successfully decrypted username")}
 
 	password, err := decryptAES(decryptedPassword, key)
 	if err != nil {
 		return nil, err
-	}
+	} else{log.Println("Successfully decrypted password")}
 
 	decryptedConfig := JsonDataConnect{
 		Username: string(username),
@@ -200,12 +201,12 @@ func decryptAES(data []byte, key []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
-	}
+	} else{log.Println("Successfully created new cipher")}
 
 	blockSize := block.BlockSize()
 	if len(data)%blockSize != 0 {
 		return nil, errors.New("ciphertext length is not a multiple of the block size")
-	}
+	} else{log.Printf("Block size: %v", blockSize)}
 
 	mode := cipher.NewCBCDecrypter(block, key[:blockSize])
 	decryptedData := make([]byte, len(data))
@@ -239,7 +240,8 @@ func init() {
 	file, err := os.OpenFile("CRAB_Logging_to.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatal(err)
-	}
+	} else{
+		log.Println("Successfully opened log file")}
 
 	log.SetOutput(file)
 }
@@ -250,13 +252,14 @@ func readJSONConfig(filename string) (JsonDataConnect, error) {
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return config, err
-	}
+	} else{log.Println("Successfully read JSON config file")}
 
 	err = json.Unmarshal(file, &config)
 	if err != nil {
 		return config, err
-	}
+	} else{log.Println("Successfully unmarshalled JSON config")}
 
+	log.Printf("JSON config: %+v", config)
 	return config, nil
 }
 
@@ -268,22 +271,27 @@ func WriteLog(logID string, status_code string, message string, goEngineArea str
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return fmt.Errorf("Invalid statusCode: %s", status_code)
-		}
+		} else {log.Println("Error checking if statusCode exists:", err))}
+
+		log.Printf("Existing status code: %s", existingStatusCode)
 		return err
 	}
 	// Prepare the SQL statement for inserting into the log table
 	stmt, err := db.Prepare("INSERT INTO log(log_ID, status_code, message, go_engine_area, date_time) VALUES (? ,? ,? ,? ,?)")
 	if err != nil {
 		return err
-	}
+	} else{log.Println("Successfully prepared SQL statement")}
+
+	log.Printf("Log ID: %s, Status Code: %s, Message: %s, Go Engine Area: %s, Date Time: %s", logID, existingStatusCode, message, goEngineArea, dateTime)
 	defer stmt.Close()
 
 	// Execute the SQL statement
 	_, errExec := stmt.Exec(logID, existingStatusCode, message, goEngineArea, dateTime)
 	if errExec != nil {
 		return errExec
-	}
+	} else{log.Println("Successfully executed SQL statement")}
 
+	log.Printf("Log ID: %s, Status Code: %s, Message: %s, Go Engine Area: %s, Date Time: %s", logID, existingStatusCode, message, goEngineArea, dateTime)
 	return nil
 }
 
@@ -292,13 +300,15 @@ func GetLog() ([]Log, error) {
 	stmt, err := db.Prepare("CALL select_all_logs()")
 	if err != nil {
 		return nil, err
-	}
+	} else{log.Println("Successfully prepared SQL statement")}
+	log.Printf("SQL statement: %v", stmt)
 	defer stmt.Close()
 
 	rows, err := stmt.Query()
 	if err != nil {
 		return nil, err
-	}
+	} else{log.Println("Successfully queried SQL statement")}
+	log.Printf("Rows: %v", rows)
 	defer rows.Close()
 
 	var logs []Log
@@ -308,14 +318,18 @@ func GetLog() ([]Log, error) {
 		err := rows.Scan(&logItem.LogID, &logItem.status_code, &logItem.Message, &logItem.GoEngineArea, &dateTimeStr)
 		if err != nil {
 			return nil, err
-		}
+		} else{log.Println("Successfully scanned rows")}
+
 		logItem.DateTime = dateTimeStr
 		logs = append(logs, logItem)
+		log.Printf("Log item: %+v", logItem)
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, err
-	}
+	} else{log.Println("Successfully iterated over rows")}
+
+	log.Printf("Logs: %+v", logs)
 
 	return logs, nil
 }
@@ -325,13 +339,14 @@ func GetSuccess() ([]Log, error) {
 	stmt, err := db.Prepare("CALL select_all_logs_by_status_code(?)")
 	if err != nil {
 		return nil, err
-	}
+	} else{log.Println("Successfully prepared SQL statement")}
 	defer stmt.Close()
 
 	rows, err := stmt.Query("Success")
 	if err != nil {
 		return nil, err
-	}
+	} else{log.Println("Successfully queried SQL statement")}
+	log.Printf("Rows: %v", rows)
 	defer rows.Close()
 
 	var logs []Log
@@ -341,15 +356,17 @@ func GetSuccess() ([]Log, error) {
 		err := rows.Scan(&logItem.LogID, &logItem.status_code, &logItem.Message, &logItem.GoEngineArea, &dateTimeStr)
 		if err != nil {
 			return nil, err
-		}
+		} else{log.Println("Successfully scanned rows")}
 		logItem.DateTime = dateTimeStr
 		logs = append(logs, logItem)
+		log.Printf("Log item: %+v", logItem)
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, err
-	}
+	} else{log.Println("Successfully iterated over rows")}
 
+	log.Printf("Logs: %+v", logs)
 	return logs, nil
 }
 
@@ -357,14 +374,15 @@ func StoreLog(status_code string, message string, goEngineArea string) error {
 	stmt, err := db.Prepare("CALL insert_log(?,?,?)")
 	if err != nil {
 		return err
-	}
+	} else{log.Println("Successfully prepared SQL statement")}
 	defer stmt.Close()
 
 	_, errExec := stmt.Exec(status_code, message, goEngineArea)
 	if errExec != nil {
 		return errExec
-	}
+	} else{log.Println("Successfully executed SQL statement")}
 
+	log.Printf("Status Code: %s, Message: %s, Go Engine Area: %s", status_code, message, goEngineArea)
 	return nil
 }
 
@@ -373,13 +391,14 @@ func Connection(config JsonDataConnect) (*sql.DB, error) {
 	connDB, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", config.Username, config.Password, config.Hostname, config.Database))
 	if err != nil {
 		return nil, err
-	}
+	} else{log.Println("Successfully opened database connection")}
 
 	err = connDB.Ping()
 	if err != nil {
 		return nil, err
-	}
+	} else{log.Println("Successfully pinged database")}
 
+	log.Printf("Database connection: %+v", connDB)
 	return connDB, nil
 }
 
@@ -392,17 +411,23 @@ func main() {
 	// Initialize database connection
 	if db == nil {
 		log.Fatal("Database connection is not initialized.")
+	} else{
+		log.Println("Successfully initialized database connection")
 	}
 
 	// Insert or Update status code
 	err := InsertOrUpdateStatusCode("POS", "noth")
 	if err != nil {
 		log.Println("Failed to insert or update status code:", err)
+	} else{
+		log.Println("Successfully inserted or updated status code")
 	}
 
 	_, err = FetchUserID("jxo19")
 	if err != nil {
 		log.Fatalf("Failed to fetch user ID: %v", err)
+	} else{
+		log.Println("Successfully fetched user ID")
 	}
 
 	// Update User
@@ -429,7 +454,7 @@ func main() {
 	err = WriteLog(uniqueLogID, "Pos", "Message logged successfully", "Engine1", currentTime)
 	if err != nil {
 		log.Println("Failed to write log:", err)
-	}
+	} else{log.Println("Successfully wrote log")}
 
 	// Get and print all logs
 	logs, err := GetLog()
@@ -445,19 +470,19 @@ func main() {
 	err = StoreLog("Success", "Stored using procedure", "Engine1")
 	if err != nil {
 		log.Println("Failed to store log using stored procedure:", err)
-	}
+	} else{log.Println("Successfully stored log using stored procedure")}
 
 	//Insert a new status code
 	err = InsertStatusCode("200", "OK")
 	if err != nil {
 		log.Println("Failed to insert new status code:", err)
-	}
+	} else{log.Println("Successfully inserted new status code")}
 
 	//Create a new user
 	err = CreateUser("John", "john123", "ADM", "password", true)
 	if err != nil {
 		log.Println("Failed to create a new user:", err)
-	}
+	} else{log.Printf("Successfully created a new user")}
 
 	//Delete a user
 	//err = DeleteUser("john123")

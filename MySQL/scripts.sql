@@ -23,7 +23,7 @@ USE goengine;
 
 -- Create the lookup table for user roles
 CREATE TABLE IF NOT EXISTS users_roles_lookup (
-                                                  user_role NVARCHAR(5) PRIMARY KEY, -- Primary key representing user role
+                                                  user_role NVARCHAR(5) PRIMARY KEY , -- Primary key representing user role
                                                   role_name NVARCHAR(25) -- Name of the role
 );
 
@@ -134,6 +134,32 @@ CREATE TABLE IF NOT EXISTS predictions (
     prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (engine_id) REFERENCES scraper_engine (engine_id)
 );
+
+CREATE TABLE user_sessions (
+                               session_id INT PRIMARY KEY AUTO_INCREMENT,
+                               user_id CHAR(36),
+                               token VARCHAR(255) NOT NULL,
+                               time_to_live DATETIME NOT NULL,
+                               last_activity DATETIME NOT NULL,
+                               scope VARCHAR(255) NOT NULL,
+                               FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- Create the user_permissions table
+CREATE TABLE IF NOT EXISTS user_permissions (
+                                                permission_id INT AUTO_INCREMENT PRIMARY KEY, -- Auto-generated unique ID for the permission
+                                                user_role NVARCHAR(5), -- User's role
+                                                action_name NVARCHAR(50), -- Name of the action or permission
+                                                resource_name NVARCHAR(50) -- Name of the resource the permission applies to
+);
+
+-- Create the user_token_blacklist table
+CREATE TABLE IF NOT EXISTS user_token_blacklist (
+                                                    token_id INT AUTO_INCREMENT PRIMARY KEY, -- Auto-generated unique ID for the token
+                                                    token VARCHAR(255) NOT NULL, -- The token to be invalidated
+                                                    expiry_date DATETIME NOT NULL -- The date and time when the token expires or is invalidated
+);
+
 
 
 -- ================================================

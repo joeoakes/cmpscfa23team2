@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
 )
@@ -47,7 +48,12 @@ func GetUsersByRole(role string) ([]*User, error) {
 	} else {
 		log.Printf("Open query for getting Users by Role: %+v", rows)
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+
+		}
+	}(rows)
 	log.Printf("Closing Rows: %+v", rows)
 	var users []*User
 	for rows.Next() {
@@ -67,7 +73,12 @@ func GetAllUsers() ([]*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+
+		}
+	}(rows)
 	log.Printf("Closing Rows: %+v", rows)
 	var users []*User
 	for rows.Next() {
@@ -88,7 +99,7 @@ func FetchUserIDByName(userName string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	log.Printf("User ID: %s", userID, " was fetched successfully.")
+	log.Printf("User ID: %s", userID)
 	return userID, nil
 }
 
@@ -96,21 +107,21 @@ func FetchUserIDByName(userName string) (string, error) {
 func ValidateUserCredentials(userLogin, userPassword string) (bool, error) {
 	var isValid bool
 	err := db.QueryRow("CALL validate_user(?, ?)", userLogin, userPassword).Scan(&isValid)
-	log.Printf("User Login: %s", userLogin, " was validated successfully.")
+	log.Printf("User Login: %s", userLogin)
 	return isValid, err
 }
 
 // UpdateUser updates the details of a user.
 func UpdateUser(userID, userName, userLogin, userRole, userPassword string) error {
 	_, err := db.Exec("CALL update_user(?, ?, ?, ?, AES_ENCRYPT(?, 'IST888IST888'))", userID, userName, userLogin, userRole, userPassword)
-	log.Printf("User: %s", userID, " was updated successfully.")
+	log.Printf("User: %s", userID)
 	return err
 }
 
 // DeleteUser removes a user from the database.
 func DeleteUser(userID string) error {
 	_, err := db.Exec("CALL delete_user(?)", userID)
-	log.Printf("User: %s", userID, " was deleted successfully.")
+	log.Printf("User: %s", userID)
 	return err
 
 }

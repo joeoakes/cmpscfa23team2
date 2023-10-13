@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql" // Import MySQL driver
 	"log"
 	"os"
@@ -43,11 +44,17 @@ func TestMain(m *testing.M) {
 
 	_, err = tx.Exec("CALL goengine.user_registration(?, ?, ?, ?, ?)", "test_user", "test_login", "ADM", "test_password", true)
 	if err != nil {
-		tx.Rollback()
+		err := tx.Rollback()
+		if err != nil {
+			return
+		}
 		log.Fatalf("Failed to populate sample user: %v", err)
 	}
 
-	tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		return
+	}
 
 	code := m.Run()
 	os.Exit(code)
@@ -105,4 +112,18 @@ func TestAuthorizeUser(t *testing.T) {
 		// User is unauthorized, possibly add debug code here
 		t.Fatalf("User is not authorized")
 	}
+}
+
+func Connection(config JSON_Data_Connect) (*sql.DB, error) {
+	connDB, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", config.Username, config.Password, config.Hostname, config.Database))
+	if err != nil {
+		return nil, err
+	}
+
+	err = connDB.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	return connDB, nil
 }

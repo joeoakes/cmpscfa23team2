@@ -57,7 +57,9 @@ func CloseDb() {
 	if db != nil {
 		err := db.Close()
 		if err != nil {
-			log.Printf("Error closing the database: %v", err)
+			log.Printf("Error closing database connection: %s", err)
+		} else {
+			log.Println("Database connection closed successfully!")
 		}
 	}
 }

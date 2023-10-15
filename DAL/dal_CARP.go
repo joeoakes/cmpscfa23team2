@@ -15,6 +15,41 @@ type User struct {
 	UserDateAdded string
 }
 
+// CreateSession creates a new session in the database for a given user with the provided token.
+// It takes a userID and a token as parameters and returns an error if the operation fails.
+func CreateSession(userID string, token string) error {
+	// Execute the 'create_session' stored procedure with the provided userID and token.
+	_, err := db.Exec("CALL create_session(?, ?)", userID, token)
+	return err
+}
+
+// ValidateToken checks the validity of a token in the database and retrieves the associated userID and validation status.
+// It takes a token as a parameter and returns the userID, a boolean indicating validity, and an error if any.
+func ValidateToken(token string) (userID string, isValid bool, err error) {
+	// Query the database using the 'validate_token' stored procedure with the provided token.
+	err = db.QueryRow("CALL validate_token(?)", token).Scan(&userID, &isValid)
+	return userID, isValid, err
+}
+
+// AddPermission adds a permission for a user role to perform a specific action on a given resource.
+// It takes userRole, actionName, and resourceName as parameters and returns an error if the operation fails.
+func AddPermission(userRole, actionName, resourceName string) error {
+	// Execute the 'add_permission' stored procedure with the provided userRole, actionName, and resourceName.
+	_, err := db.Exec("CALL add_permission(?, ?, ?)", userRole, actionName, resourceName)
+	return err
+}
+
+// CheckPermission checks if a user role has permission to perform a specific action on a given resource.
+// It takes userRole, actionName, and resourceName as parameters and returns a boolean indicating permission status and an error if any.
+func CheckPermission(userRole, actionName, resourceName string) (bool, error) {
+	// Query the database using the 'check_permission' stored procedure with the provided userRole, actionName, and resourceName.
+	var hasPermission bool
+	err := db.QueryRow("CALL check_permission(?, ?, ?)", userRole, actionName, resourceName).Scan(&hasPermission)
+	return hasPermission, err
+}
+
+//
+
 // CreateUser inserts a new user into the database.
 func CreateUser(userName, userLogin, userRole string, userPassword string, activeOrNot bool) (string, error) {
 	var userID string

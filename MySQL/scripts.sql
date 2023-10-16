@@ -176,6 +176,14 @@ CREATE TABLE IF NOT EXISTS user_token_blacklist (
                                                     expiry_date DATETIME NOT NULL -- The date and time when the token expires or is invalidated
 );
 
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+                                              token_id CHAR(36) PRIMARY KEY,
+                                              user_id CHAR(36),
+                                              token VARBINARY(255),
+                                              expiry DATETIME,
+                                              FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
 -- A SPROC for user login
 DELIMITER //
 CREATE PROCEDURE user_login(
@@ -882,4 +890,3 @@ CALL user_registration('test_user', 'test_login', 'STD', 'test_password', true);
 
 
 call populate_log_status_codes();
-

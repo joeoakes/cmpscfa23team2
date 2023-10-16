@@ -88,23 +88,23 @@ func GetURLsFromDomain(domain string) ([]string, error) {
 	rows, err := db.Query("CALL get_urls_from_domain(?)", domain)
 	if err != nil {
 		return nil, err
+	} else {
+		log.Printf("URLs from domain: %v", rows)
 	}
+	log.Println("Closing Rows: %+v", rows)
 	defer rows.Close()
 
 	var urls []string
 	for rows.Next() {
 		var id, url, tags, domain string
 		var createdTime []byte // <-- Change this line
-
 		if err := rows.Scan(&id, &url, &tags, &domain, &createdTime); err != nil {
 			return nil, err
 		} else {
 			log.Printf("URLs from domain: %v", urls)
 		}
-
 		urls = append(urls, url)
 	}
-
 	return urls, rows.Err()
 }
 

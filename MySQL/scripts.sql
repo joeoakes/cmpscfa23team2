@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS urls (
 
 -- Table for TaskManager
 CREATE TABLE IF NOT EXISTS tasks (
-    task_id CHAR(36) PRIMARY KEY, 
+    task_id CHAR(36) PRIMARY KEY,
     task_name NVARCHAR(50),
     priority INT,
     status NVARCHAR(20),

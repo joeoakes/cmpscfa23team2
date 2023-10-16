@@ -175,7 +175,7 @@ CREATE TABLE IF NOT EXISTS user_token_blacklist (
                                                     token VARCHAR(255) NOT NULL, -- The token to be invalidated
                                                     expiry_date DATETIME NOT NULL -- The date and time when the token expires or is invalidated
 );
-
+-- Create the refresh_tokens
 CREATE TABLE IF NOT EXISTS refresh_tokens (
                                               token_id CHAR(36) PRIMARY KEY,
                                               user_id CHAR(36),
@@ -183,6 +183,27 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
                                               expiry DATETIME,
                                               FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+
+-- Sproc for invalidate Token and refresh_token
+DELIMITER //
+CREATE PROCEDURE invalidate_token(
+    IN p_user_id CHAR(36)
+)
+BEGIN
+    DELETE FROM user_sessions WHERE user_id = p_user_id;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE issue_refresh_token(
+    IN p_user_id CHAR(36),
+    IN p_token VARBINARY(255)
+)
+BEGIN
+    INSERT INTO refresh_tokens (token_id, user_id, token, expiry)
+    VALUES (UUID(), p_user_id, p_token, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 7 DAY));
+END //
+DELIMITER ;
 
 -- A SPROC for user login
 DELIMITER //

@@ -2,6 +2,8 @@ package main
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql" // Import MySQL driver
 	"log"
 	"os"
@@ -43,11 +45,17 @@ func TestMain(m *testing.M) {
 
 	_, err = tx.Exec("CALL goengine.user_registration(?, ?, ?, ?, ?)", "test_user", "test_login", "ADM", "test_password", true)
 	if err != nil {
-		tx.Rollback()
+		err := tx.Rollback()
+		if err != nil {
+			return
+		}
 		log.Fatalf("Failed to populate sample user: %v", err)
 	}
 
-	tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		return
+	}
 
 	code := m.Run()
 	os.Exit(code)
@@ -60,7 +68,7 @@ func TestAuthenticatingUser(t *testing.T) {
 
 	err := db.QueryRow("CALL goengine.user_login(?, ?)", "test_login", "test_password").Scan(&userId, &userName, &userRole)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			// User not found, possibly add debug code here
 		}
 		t.Fatalf("Failed to authenticate user: %v", err)
@@ -105,4 +113,52 @@ func TestAuthorizeUser(t *testing.T) {
 		// User is unauthorized, possibly add debug code here
 		t.Fatalf("User is not authorized")
 	}
+}
+
+// Initializes a connection to database
+func Connection(config JSON_Data_Connect) (*sql.DB, error) {
+	connDB, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", config.Username, config.Password, config.Hostname, config.Database))
+	if err != nil {
+		return nil, err
+	}
+
+	err = connDB.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	return connDB, nil
+}
+
+// function to test insert prediction
+func TestInsertPrediction(t *testing.T) {
+	engineID := "goengine"
+	predictionInfo := "Sample prediction information"
+
+	err := InsertSampleEngine(engineID, "Go Engine", "Description")
+	if err != nil {
+		t.Fatalf("Error inserting sample engine: %v", err)
+	}
+	err = InsertPrediction(engineID, predictionInfo)
+	if err != nil {
+		t.Fatalf("Error inserting prediction: %v", err)
+	}
+
+}
+
+func TestCreateUser(t *testing.T) {
+	userName := "TestUser"
+	userLogin := "testuser"
+	userRole := "User"
+	userPassword := "testpassword"
+
+	// call the createuser function and handle errors
+	userID, err := CreateUser(userName, userLogin, userRole, userPassword, true)
+	if err != nil {
+		t.Fatalf("Error creating user %v", err)
+	}
+	if userID == "" {
+		t.Fatalf("User ID should not be empty. :)")
+	}
+
 }

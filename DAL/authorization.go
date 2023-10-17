@@ -2,8 +2,14 @@ package main
 
 import (
 	"database/sql"
+
 	_ "github.com/go-sql-driver/mysql"
 )
+
+
+func Initialize(database *sql.DB) {
+	db = database
+}
 
 // GetUserRole fetches the role associated with a given user ID.
 func GetUserRole(db *sql.DB, userID string) (string, error) {
@@ -109,3 +115,8 @@ type Permission struct {
 func NewPermission(action, resource string) Permission {
 	return Permission{Action: action, Resource: resource}
 }
+
+)
+
+// ... [Additional functions for other sprocs as required]
+

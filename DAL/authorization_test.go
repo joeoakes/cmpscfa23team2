@@ -2,12 +2,49 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
+	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+	"os"
 	"testing"
 )
 
 // Mock DB and test data
 var testDB *sql.DB
 
+type Config struct {
+	Username string `json:"Username"`
+	Password string `json:"Password"`
+	Hostname string `json:"Hostname"`
+	Database string `json:"Database"`
+}
+
+func readConfig(filename string) (Config, error) {
+	var config Config
+	file, err := os.Open(filename)
+	if err != nil {
+		return config, err
+	}
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&config)
+	return config, err
+}
+
+func init() {
+	config, err := readConfig("config.json")
+	if err != nil {
+		panic(err)
+	}
+
+	dbConnStr := fmt.Sprintf("%s:%s@tcp(%s)/%s", config.Username, config.Password, config.Hostname, config.Database)
+	testDb, err = sql.Open("mysql", dbConnStr)
+	if err != nil {
+		panic(err)
+
+	}
+}
 func setupTestDB() *sql.DB {
 	// Set up and return a mock database for testing
 	return nil
@@ -65,5 +102,8 @@ func TestIsUserActive(t *testing.T) {
 	// Check if the user is active
 	if !isActive {
 		t.Errorf("IsUserActive returned false for an active user")
-	}
-}
+
+
+
+
+

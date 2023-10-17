@@ -1,7 +1,12 @@
 package main
 
 import (
+
+	"crypto/rand"
+	"encoding/base64"
+
 	"database/sql"
+
 	_ "github.com/go-sql-driver/mysql"
 	"log"
 )
@@ -14,6 +19,13 @@ type User struct {
 	UserPassword  []byte
 	ActiveOrNot   bool
 	UserDateAdded string
+}
+
+// HandleErrors is a utility function to handle and log errors consistently.
+func HandleErrors(err error, context string) {
+	if err != nil {
+		log.Printf("Error in %s: %v", context, err)
+	}
 }
 
 // CreateSession creates a new session in the database for a given user with the provided token.
@@ -30,23 +42,6 @@ func ValidateToken(token string) (userID string, isValid bool, err error) {
 	// Query the database using the 'validate_token' stored procedure with the provided token.
 	err = db.QueryRow("CALL validate_token(?)", token).Scan(&userID, &isValid)
 	return userID, isValid, err
-}
-
-// AddPermission adds a permission for a user role to perform a specific action on a given resource.
-// It takes userRole, actionName, and resourceName as parameters and returns an error if the operation fails.
-func AddPermission(userRole, actionName, resourceName string) error {
-	// Execute the 'add_permission' stored procedure with the provided userRole, actionName, and resourceName.
-	_, err := db.Exec("CALL add_permission(?, ?, ?)", userRole, actionName, resourceName)
-	return err
-}
-
-// CheckPermission checks if a user role has permission to perform a specific action on a given resource.
-// It takes userRole, actionName, and resourceName as parameters and returns a boolean indicating permission status and an error if any.
-func CheckPermission(userRole, actionName, resourceName string) (bool, error) {
-	// Query the database using the 'check_permission' stored procedure with the provided userRole, actionName, and resourceName.
-	var hasPermission bool
-	err := db.QueryRow("CALL check_permission(?, ?, ?)", userRole, actionName, resourceName).Scan(&hasPermission)
-	return hasPermission, err
 }
 
 //
@@ -161,4 +156,29 @@ func DeleteUser(userID string) error {
 	log.Printf("User: %s", userID)
 	return err
 
+}
+
+// This was created for the logout function (won't function properly without the creation of a new token)
+func generateNewToken() (string, error) {
+	tokenBytes := make([]byte, 32) // Generate a 32-byte random token
+	_, err := rand.Read(tokenBytes)
+	if err != nil {
+		return "", err
+	}
+
+	// Encode the random bytes as a base64 string
+	token := base64.StdEncoding.EncodeToString(tokenBytes)
+	return token, nil
+}
+
+// Logout invalidates the session token for a user, effectively logging them out.
+// ValidateUserCredentials already acts as a form of logging in.
+func Logout(userID string) error {
+	// Generate a new session token for the user and update it in the database to invalidate the old token.
+	newToken, _ := generateNewToken() // Implement a function to generate a new token.
+	_, err := db.Exec("UPDATE sessions SET token = ? WHERE user_id = ?", newToken, userID)
+	if err != nil {
+		return err
+	}
+	return nil
 }

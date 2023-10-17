@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS log (
 # SELECT* FROM log
 # WHERE date_time >= SUBDATE(CURDATE(), DAYOFWEEK(CURDATE()) - 1);
 
+
 -- Creates the webservice table
 CREATE TABLE IF NOT EXISTS web_service(
                                           web_service_ID CHAR(36)PRIMARY KEY, -- GUID for creating a unique ID
@@ -107,6 +108,7 @@ CREATE TABLE IF NOT EXISTS urls (
 
 -- Table for TaskManager
 CREATE TABLE IF NOT EXISTS tasks (
+
                                      task_id CHAR(36) PRIMARY KEY,
                                      task_name NVARCHAR(50),
                                      priority INT,
@@ -183,6 +185,75 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
                                               expiry DATETIME,
                                               FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+
+
+CREATE TABLE user_sessions (
+                               session_id INT PRIMARY KEY AUTO_INCREMENT,
+                               user_id CHAR(36),
+                               token VARCHAR(255) NOT NULL,
+                               time_to_live DATETIME NOT NULL,
+                               last_activity DATETIME NOT NULL,
+                               scope VARCHAR(255) NOT NULL,
+                               FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- Create the user_permissions table
+CREATE TABLE IF NOT EXISTS user_permissions (
+                                                permission_id INT AUTO_INCREMENT PRIMARY KEY, -- Auto-generated unique ID for the permission
+                                                user_role NVARCHAR(5), -- User's role
+                                                action_name NVARCHAR(50), -- Name of the action or permission
+                                                resource_name NVARCHAR(50) -- Name of the resource the permission applies to
+);
+
+-- Create the user_token_blacklist table
+CREATE TABLE IF NOT EXISTS user_token_blacklist (
+                                                    token_id INT AUTO_INCREMENT PRIMARY KEY, -- Auto-generated unique ID for the token
+                                                    token VARCHAR(255) NOT NULL, -- The token to be invalidated
+                                                    expiry_date DATETIME NOT NULL -- The date and time when the token expires or is invalidated
+);
+-- Create the refresh_tokens
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+                                              token_id CHAR(36) PRIMARY KEY,
+                                              user_id CHAR(36),
+                                              token VARBINARY(255),
+                                              expiry DATETIME,
+                                              FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- Sproc for invalidate Token and refresh_token
+DELIMITER //
+CREATE PROCEDURE invalidate_token(
+    IN p_user_id CHAR(36)
+)
+BEGIN
+    DELETE FROM user_sessions WHERE user_id = p_user_id;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE issue_refresh_token(
+    IN p_user_id CHAR(36),
+    IN p_token VARBINARY(255)
+)
+BEGIN
+    INSERT INTO refresh_tokens (token_id, user_id, token, expiry)
+    VALUES (UUID(), p_user_id, p_token, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 7 DAY));
+END //
+DELIMITER ;
+
+-- A SPROC for user login
+DELIMITER //
+CREATE PROCEDURE user_login(
+    IN p_user_login NVARCHAR(10),
+    IN p_user_password VARBINARY(16)
+)
+BEGIN
+    SELECT user_id, user_name, user_role
+    FROM users
+    WHERE user_login = p_user_login AND user_password = p_user_password AND active_or_not = TRUE;
+END //
+DELIMITER ;
+
 
 
 -- ================================================
@@ -490,7 +561,9 @@ BEGIN
     RETURN encrypted;
 END//
 
+
 DELIMITER //
+
 -- A SPROC to validate user credentials
 CREATE PROCEDURE `validate_user`(IN userLogin VARCHAR(255), IN userPassword NVARCHAR(255))
 BEGIN
@@ -534,6 +607,141 @@ BEGIN
 END //
 
 DELIMITER ;
+
+-- ================================================
+-- SECTION: Authentication and Authorization SPROCS
+-- ================================================
+
+-- SPROC for authenticating a user
+DELIMITER //
+CREATE PROCEDURE authenticate_user(
+    IN p_user_login NVARCHAR(10),
+    IN p_user_password VARBINARY(255)
+)
+BEGIN
+    DECLARE v_user_id CHAR(36);
+    DECLARE v_authenticated BOOLEAN;
+
+    -- Check if the login and hashed password match any user
+    SELECT user_id INTO v_user_id FROM users
+    WHERE user_login = p_user_login AND user_password = p_user_password;
+
+    -- Determine if the user is authenticated
+    SET v_authenticated = (v_user_id IS NOT NULL);
+
+    SELECT v_authenticated, v_user_id;
+END //
+DELIMITER ;
+
+-- SPROC for getting the role of a user
+DELIMITER //
+CREATE PROCEDURE get_user_role(
+    IN p_user_id CHAR(36)
+)
+BEGIN
+    DECLARE v_user_role NVARCHAR(5);
+
+    -- Fetch the role of the user
+    SELECT user_role INTO v_user_role FROM users WHERE user_id = p_user_id;
+
+    SELECT v_user_role;
+END //
+DELIMITER ;
+
+-- SPROC for checking if a user is active
+DELIMITER //
+CREATE PROCEDURE is_user_active(
+    IN p_user_id CHAR(36)
+)
+BEGIN
+    DECLARE v_active BOOLEAN;
+
+    -- Fetch the active status of the user
+    SELECT active_or_not INTO v_active FROM users WHERE user_id = p_user_id;
+
+    SELECT v_active;
+END //
+DELIMITER ;
+
+-- SPROC for authorizing a user based on role
+DELIMITER //
+CREATE PROCEDURE authorize_user(
+    IN p_user_id CHAR(36),
+    IN required_role NVARCHAR(5)
+)
+BEGIN
+    DECLARE v_user_role NVARCHAR(5);
+
+    -- Fetch the role of the user
+    SELECT user_role INTO v_user_role FROM users WHERE user_id = p_user_id;
+
+    -- Check if the user is authorized to perform the operation
+    IF v_user_role = required_role THEN
+        SELECT TRUE AS is_authorized;
+    ELSE
+        SELECT FALSE AS is_authorized;
+    END IF;
+END //
+DELIMITER ;
+
+-- Reset the delimiter back to default
+DELIMITER ;
+
+-- UPDATE
+-- A SPROC to update a user's role
+DELIMITER //
+CREATE PROCEDURE update_user_role(
+    IN p_user_id CHAR(36),
+    IN p_new_role NVARCHAR(5)
+)
+BEGIN
+    UPDATE users
+    SET user_role = p_new_role
+    WHERE user_id = p_user_id;
+END //
+DELIMITER ;
+
+-- A SPROC to update a user's password
+DELIMITER //
+CREATE PROCEDURE update_user_password(
+    IN p_user_id CHAR(36),
+    IN p_new_password VARBINARY(16)
+)
+BEGIN
+    UPDATE users
+    SET user_password = p_new_password
+    WHERE user_id = p_user_id;
+END //
+DELIMITER ;
+
+-- A SPROC to deactivate a user
+DELIMITER //
+CREATE PROCEDURE deactivate_user(
+    IN p_user_id CHAR(36)
+)
+BEGIN
+    UPDATE users
+    SET active_or_not = FALSE
+    WHERE user_id = p_user_id;
+END //
+DELIMITER ;
+
+-- A SPROC for user registration
+DELIMITER //
+CREATE PROCEDURE user_registration(
+    IN p_user_name NVARCHAR(25),
+    IN p_user_login NVARCHAR(10),
+    IN p_user_role NVARCHAR(5),
+    IN p_user_password VARBINARY(16),
+    IN p_active_or_not BOOLEAN
+)
+BEGIN
+    CALL create_user(p_user_name, p_user_login, p_user_role, p_user_password, p_active_or_not);
+END //
+DELIMITER ;
+
+
+
 
 -- ================================================
 -- SECTION: CRAB SPROCS
@@ -697,6 +905,7 @@ BEGIN
     END IF;
 END //
 
+
 -- Procedure to add a new permission for a user role
 DELIMITER //
 CREATE PROCEDURE add_permission(
@@ -724,6 +933,7 @@ BEGIN
     FROM user_permissions
     WHERE user_role = p_user_role AND action_name = p_action_name AND resource_name = p_resource_name;
 END //
+
 
 DELIMITER ;
 
@@ -784,8 +994,6 @@ DELIMITER ;
 -- SECTION: Authentication SPROCS:
 -- ================================================
 
-#Tables are not created yet
-#Tables left to create user_sessions, user_permissions
 
 -- SPROC for authenticating a user
 DELIMITER //
@@ -905,7 +1113,6 @@ VALUES
     ('ADM', 'Administrator'),
     ('USR', 'User'),
     ('DEV', 'Developer');
-
 
 -- Inserting sample users into the users table
 INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)

@@ -23,7 +23,7 @@ USE goengine;
 
 -- Create the lookup table for user roles
 CREATE TABLE IF NOT EXISTS users_roles_lookup (
-                                                  user_role NVARCHAR(5) PRIMARY KEY, -- Primary key representing user role
+                                                  user_role NVARCHAR(5) PRIMARY KEY , -- Primary key representing user role
                                                   role_name NVARCHAR(25) -- Name of the role
 );
 
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS users (
                                      user_name NVARCHAR(25), -- Name of the user
                                      user_login NVARCHAR(10), -- login credentials for user
                                      user_role NVARCHAR(5), -- User's role
-                                     user_password VARBINARY(16), -- Encrypted password
+                                     user_password VARBINARY(255), -- Encrypted password
                                      active_or_not BOOLEAN DEFAULT TRUE, -- Flag indicating if the user is active or not
                                      user_date_added DATETIME DEFAULT CURRENT_TIMESTAMP(), -- Date and time the user was added
                                      FOREIGN KEY (user_role) REFERENCES users_roles_lookup (user_role) -- Foreign key referencing user roles
@@ -41,8 +41,8 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Creates the logStatusCode lookup table for a reference to the log table
 CREATE TABLE IF NOT EXISTS log_status_codes(
-                                             status_code VARCHAR(3) PRIMARY KEY,
-                                             status_message VARCHAR(255)
+                                               status_code VARCHAR(3) PRIMARY KEY,
+                                               status_message VARCHAR(255)
 );
 
 -- Fix for Duplicate Key Issue:
@@ -55,14 +55,30 @@ CREATE TABLE IF NOT EXISTS log (
                                    go_engine_area VARCHAR(255), -- Where the log status is occurring
                                    date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- When inserting a value, the dateTime automatically updates to the time it occurred
 );
+
+-- Periodically clean the log (anything older than 30 days)
+-- Temporarily disable safe update mode
+# SET SQL_SAFE_UPDATES = 0;
+# DELETE FROM log
+# WHERE date_time < DATE_SUB(NOW(), INTERVAL 30 DAY);
+#
+# -- Retrieve logs from the start of the day
+# SELECT* FROM log
+# WHERE date_time >= CURDATE();
+#
+# -- get logs from the start of the week
+# SELECT* FROM log
+# WHERE date_time >= SUBDATE(CURDATE(), DAYOFWEEK(CURDATE()) - 1);
+
+
 -- Creates the webservice table
 CREATE TABLE IF NOT EXISTS web_service(
-                                         web_service_ID CHAR(36)PRIMARY KEY, -- GUID for creating a unique ID
-                                         web_service_description VARCHAR(255), -- A description of the service being offered
-                                         customer_ID CHAR(36), -- We are using CHAR(36) for our GUID's, but other options exist
-                                         access_token LONGTEXT, -- This lets the customer access the website. LONGTEXT is used to store JWT's of varying lengths
-                                         date_active DATE, -- When the token is activated
-                                         is_active BOOLEAN -- If the webservice is currently active or not
+                                          web_service_ID CHAR(36)PRIMARY KEY, -- GUID for creating a unique ID
+                                          web_service_description VARCHAR(255), -- A description of the service being offered
+                                          customer_ID CHAR(36), -- We are using CHAR(36) for our GUID's, but other options exist
+                                          access_token LONGTEXT, -- This lets the customer access the website. LONGTEXT is used to store JWT's of varying lengths
+                                          date_active DATE, -- When the token is activated
+                                          is_active BOOLEAN -- If the webservice is currently active or not
 );
 
 -- Creating url table for CRAB
@@ -70,6 +86,7 @@ CREATE TABLE IF NOT EXISTS urls (
                                     id CHAR(36) PRIMARY KEY, -- Unique identifier for the URLs using GUID
                                     url LONGTEXT NOT NULL, -- The URL string for storing the urls
                                     tags JSON, -- Optional JSON field for storing tags related to the URL
+                                    domain LONGTEXT, --
                                     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP() -- The timestamp of when the URL was created/added
 );
 
@@ -91,64 +108,91 @@ CREATE TABLE IF NOT EXISTS urls (
 
 -- Table for TaskManager
 CREATE TABLE IF NOT EXISTS tasks (
-    task_id CHAR(36) PRIMARY KEY, 
-    task_name NVARCHAR(50),
-    priority INT,
-    status NVARCHAR(20),
-    created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+
+                                     task_id CHAR(36) PRIMARY KEY,
+                                     task_name NVARCHAR(50),
+                                     priority INT,
+                                     status NVARCHAR(20),
+                                     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
 -- Table for MachineLearningModels
 CREATE TABLE IF NOT EXISTS machine_learning_models (
-    model_id CHAR(36) PRIMARY KEY,
-    model_name NVARCHAR(50),
-    weights LONGTEXT,
-    biases LONGTEXT,
-    created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+                                                       model_id CHAR(36) PRIMARY KEY,
+                                                       model_name NVARCHAR(50),
+                                                       weights LONGTEXT,
+                                                       biases LONGTEXT,
+                                                       created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
 -- Table for WebCrawlers
 USE goengine;
 CREATE TABLE IF NOT EXISTS webcrawlers (
-    crawler_id CHAR(36) PRIMARY KEY,
-    source_url LONGTEXT,
-    created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+                                           crawler_id CHAR(36) PRIMARY KEY,
+                                           source_url LONGTEXT,
+                                           created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
 -- Table for the scraper engine
 CREATE TABLE IF NOT EXISTS scraper_engine (
-	engine_id CHAR(36) PRIMARY KEY,
-    engine_name NVARCHAR(50),
-    engine_description VARCHAR(250),
-    time_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+                                              engine_id CHAR(36) PRIMARY KEY,
+                                              engine_name NVARCHAR(50),
+                                              engine_description VARCHAR(250),
+                                              time_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
-
+-- Table for predictions
 CREATE TABLE IF NOT EXISTS predictions (
-    prediction_id INT PRIMARY KEY AUTO_INCREMENT,
-    engine_id CHAR(36),
-    prediction_tag CHAR(64),  -- New field for clustering similar predictions
-    input_data TEXT,
-    prediction_info JSON,
-    prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (engine_id) REFERENCES scraper_engine (engine_id)
+                                           prediction_id INT PRIMARY KEY AUTO_INCREMENT,
+                                           engine_id CHAR(36),
+                                           prediction_tag CHAR(64),  -- New field for clustering similar predictions
+                                           input_data TEXT,
+                                           prediction_info JSON,
+                                           prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                           FOREIGN KEY (engine_id) REFERENCES scraper_engine (engine_id)
 );
 
--- Stored Procedure to add a new prediction
-DELIMITER //
-CREATE PROCEDURE create_prediction(
-    IN p_engine_id CHAR(36),
-    IN p_prediction_tag CHAR(64),  -- New parameter
-    IN p_prediction_info JSON
-)
-BEGIN
-    INSERT INTO predictions (engine_id, prediction_tag, prediction_info)
-    VALUES (p_engine_id, p_prediction_tag, p_prediction_info);
-END //
-DELIMITER ;
+
+CREATE TABLE IF NOT EXISTS user_sessions (
+                               session_id INT PRIMARY KEY AUTO_INCREMENT,
+                               user_id CHAR(36),
+                               token VARCHAR(255) NOT NULL,
+                               time_to_live DATETIME NOT NULL,
+                               last_activity DATETIME NOT NULL,
+                               scope VARCHAR(255) NOT NULL,
+                               FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- Create the user_permissions table
+CREATE TABLE IF NOT EXISTS user_permissions (
+                                                permission_id INT AUTO_INCREMENT PRIMARY KEY, -- Auto-generated unique ID for the permission
+                                                user_role NVARCHAR(5), -- User's role
+                                                action_name NVARCHAR(50), -- Name of the action or permission
+                                                resource_name NVARCHAR(50) -- Name of the resource the permission applies to
+);
+
+-- Create the user_token_blacklist table
+CREATE TABLE IF NOT EXISTS user_token_blacklist (
+                                                    token_id INT AUTO_INCREMENT PRIMARY KEY, -- Auto-generated unique ID for the token
+                                                    token VARCHAR(255) NOT NULL, -- The token to be invalidated
+                                                    expiry_date DATETIME NOT NULL -- The date and time when the token expires or is invalidated
+);
+-- Create the refresh_tokens
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+                                              token_id CHAR(36) PRIMARY KEY,
+                                              user_id CHAR(36),
+                                              token VARBINARY(255),
+                                              expiry DATETIME,
+                                              FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
 
 
 
+
+
+-- ================================================
+-- SECTION: TASK MANAGER SPROCS
+-- ================================================
 -- Stored Procedure to add a new task
 DELIMITER //
 CREATE PROCEDURE create_task(
@@ -161,6 +205,38 @@ BEGIN
     SET v_task_id = UUID();
     INSERT INTO tasks (task_id, task_name, priority, status)
     VALUES (v_task_id, p_task_name, p_priority, p_status);
+END //
+DELIMITER ;
+
+-- Stored Procedure to update a task
+DELIMITER //
+CREATE PROCEDURE update_task(
+    IN p_task_id CHAR(36),
+    IN p_priority INT,
+    IN p_status NVARCHAR(20)
+)
+BEGIN
+    UPDATE tasks
+    SET priority = p_priority,
+        status = p_status
+    WHERE task_id = p_task_id;
+END //
+DELIMITER ;
+
+-- ================================================
+-- SECTION: CUDA SPROCS
+-- ================================================
+
+-- Stored Procedure to add a new prediction
+DELIMITER //
+CREATE PROCEDURE create_prediction(
+    IN p_engine_id CHAR(36),
+    IN p_prediction_tag CHAR(64),  -- New parameter
+    IN p_prediction_info JSON
+)
+BEGIN
+    INSERT INTO predictions (engine_id, prediction_tag, prediction_info)
+    VALUES (p_engine_id, p_prediction_tag, p_prediction_info);
 END //
 DELIMITER ;
 
@@ -194,9 +270,10 @@ BEGIN
     WHERE model_id = p_model_id;
 END //
 DELIMITER ;
+-- Setting the delimiter for the entire script
+DELIMITER //
 
 -- Stored Procedure to delete a machine learning model
-DELIMITER //
 CREATE PROCEDURE delete_model(
     IN p_model_id CHAR(36)
 )
@@ -204,93 +281,25 @@ BEGIN
     DELETE FROM machine_learning_models
     WHERE model_id = p_model_id;
 END //
-DELIMITER ;
-
--- Stored Procedure to update a task
-DELIMITER //
-CREATE PROCEDURE update_task(
-    IN p_task_id CHAR(36),
-    IN p_priority INT,
-    IN p_status NVARCHAR(20)
-)
-BEGIN
-    UPDATE tasks
-    SET priority = p_priority,
-        status = p_status
-    WHERE task_id = p_task_id;
-END //
-DELIMITER ;
-
--- Stored Procedure to add a new web crawler
-DELIMITER //
-CREATE PROCEDURE create_webcrawler(
-    IN p_source_url LONGTEXT
-)
-BEGIN
-    DECLARE v_crawler_id CHAR(36);
-    SET v_crawler_id = UUID();
-    INSERT INTO webcrawlers (crawler_id, source_url)
-    VALUES (v_crawler_id, p_source_url);
-END //
-DELIMITER ;
-
--- Stored Procedure to add a new scraper engine
-DELIMITER //
-CREATE PROCEDURE create_scraper_engine(
-	IN p_engine_name NVARCHAR(50),
-    IN p_engine_description VARCHAR(250)
-)
-BEGIN
-	DECLARE v_engine_id CHAR(36);
-    -- Generating a unique identifier and assigning it to v_engine_id
-    SET v_engine_id = UUID();
-    INSERT INTO scraper_engine(engine_id, engine_name, engine_description)
-    VALUES (v_engine_id, p_engine_name, p_engine_description);
-END //
-DELIMITER ;
-
--- PROCEDURE CHECK
-
--- Set the delimiter for the following function creation
-DELIMITER //
-
--- Create a function to encrypt passwords
-CREATE FUNCTION EncryptsPassword(password NVARCHAR(10)) RETURNS VARBINARY(16)
-    DETERMINISTIC
-    NO SQL
-BEGIN
-    DECLARE encrypted VARBINARY(16);
-    SET encrypted = AES_ENCRYPT(password, 'IST888IST888');
-    RETURN encrypted;
-END //
-DELIMITER //
 
 
-CREATE PROCEDURE GetStatusCode(IN statusCode VARCHAR(3)) -- Gets the Status code of the Log
+-- ================================================
+-- SECTION: LOG SPROCS
+-- ================================================
+-- Procedure to get status code
+CREATE PROCEDURE get_status_code(IN statusCode VARCHAR(3))
 BEGIN
     SELECT * FROM log AS l WHERE l.status_code = statusCode;
 END //
-DELIMITER // -- Needed to not throw an error because of complex coding
 
-DELIMITER //
+-- Resetting the delimiter back to ;
+DELIMITER ;
 
-CREATE PROCEDURE InsertLog(
-    IN pStatusCode VARCHAR(3),
-    IN pMessage VARCHAR(250),
-    IN pGoEngineArea VARCHAR(250)
-)
-BEGIN
-    DECLARE pLogID CHAR(36);
-    SET pLogID = UUID();
-
-    INSERT INTO log (log_ID, status_code, message, go_engine_area)
-    VALUES (pLogID, pStatusCode, pMessage, pGoEngineArea);
-END//
 
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE InsertOrUpdateStatusCode(
+CREATE PROCEDURE insert_or_update_status_code(
     IN p_status_code VARCHAR(3),
     IN p_status_message VARCHAR(255)
 )
@@ -313,7 +322,6 @@ BEGIN
 END //
 DELIMITER ;
 
-
 -- USE goengine;
 
 -- DELIMITER //
@@ -335,12 +343,24 @@ DELIMITER ;
 --     INSERT INTO log (logID, statusCode, message, goEngineArea)
 --     VALUES (pLogID, pStatusCode, pMessage, pGoEngineArea);
 -- END//
-
 -- DELIMITER ;
 
 DELIMITER //
 
-CREATE PROCEDURE SelectAllLogs()
+CREATE PROCEDURE insert_log(
+    IN pStatusCode VARCHAR(3),
+    IN pMessage VARCHAR(250),
+    IN pGoEngineArea VARCHAR(250)
+)
+BEGIN
+    DECLARE pLogID CHAR(36);
+    SET pLogID = UUID();
+
+    INSERT INTO log (log_ID, status_code, message, go_engine_area)
+    VALUES (pLogID, pStatusCode, pMessage, pGoEngineArea);
+END//
+
+CREATE PROCEDURE select_all_logs()
 BEGIN
     SELECT log_ID, status_code, message, go_engine_area, date_time
     FROM log;
@@ -349,7 +369,7 @@ END //
 DELIMITER //
 
 DELIMITER //
-CREATE PROCEDURE SelectAllLogsByStatusCode(IN pStatusCode VARCHAR(3))
+CREATE PROCEDURE select_all_logs_by_status_code(IN pStatusCode VARCHAR(3))
 BEGIN
     SELECT log_ID, status_code, message, go_engine_area, date_time
     FROM log
@@ -358,7 +378,7 @@ END //
 
 DELIMITER //
 DELIMITER //
-CREATE PROCEDURE PopulateLogStatusCodes() -- Populates the Log's if they aren't already
+CREATE PROCEDURE populate_log_status_codes() -- Populates the Log's if they aren't already
 
 BEGIN
     IF (SELECT COUNT(*) FROM log_status_codes) = 0 THEN
@@ -400,7 +420,11 @@ DELIMITER //
 
 select * from log
 -- Reset the delimiter back to default
-DELIMITER ;
+                  DELIMITER ;
+
+-- ================================================
+-- SECTION: CARP SPROCS
+-- ================================================
 
 DELIMITER //
 -- CREATE
@@ -418,19 +442,71 @@ BEGIN
 
     INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
     VALUES (v_user_id, p_user_name, p_user_login, p_user_role, p_user_password, p_active_or_not, CURRENT_TIMESTAMP());
-    END //
+    SELECT v_user_id;
+END //
 
 DELIMITER ;
 -- READ
+-- A SPROC to get a specific user
 DELIMITER //
+CREATE PROCEDURE get_user_by_ID(IN p_user_id CHAR(36))
+BEGIN
+    SELECT * FROM users WHERE user_id = p_user_id;
+END //
+DELIMITER ;
 
+-- A SPROC to get all users in a specific role
+DELIMITER //
+CREATE PROCEDURE get_users_by_role(IN p_role NVARCHAR(5))
+BEGIN
+    SELECT * FROM users WHERE user_role = p_role;
+END //
+DELIMITER ;
+
+-- A SPROC to get all users
+DELIMITER //
 CREATE PROCEDURE get_users()
 BEGIN
     SELECT user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added
     FROM users;
 END //
-
 DELIMITER ;
+
+-- A SPROC to fetch user using username
+DELIMITER //
+CREATE PROCEDURE fetch_user_id(
+    IN p_user_name NVARCHAR(25)
+)
+BEGIN
+    SELECT user_id FROM users WHERE user_name = p_user_name;
+END //
+DELIMITER ;
+
+USE goengine;
+DELIMITER //
+
+-- Create a function to encrypt passwords
+CREATE FUNCTION encrypts_password(password NVARCHAR(255)) RETURNS VARBINARY(255)
+    DETERMINISTIC
+    NO SQL
+BEGIN
+    DECLARE encrypted VARBINARY(255);
+    SET encrypted = AES_ENCRYPT(password, 'IST888IST888');
+    RETURN encrypted;
+END//
+
+
+DELIMITER //
+
+-- A SPROC to validate user credentials
+CREATE PROCEDURE `validate_user`(IN userLogin VARCHAR(255), IN userPassword NVARCHAR(255))
+BEGIN
+    DECLARE encryptedPwd VARBINARY(255);
+    SET encryptedPwd = encrypts_password(userPassword);
+    SELECT COUNT(*) FROM users WHERE user_login = userLogin AND user_password = encryptedPwd INTO @exists;
+    SELECT IF(@exists > 0, TRUE, FALSE) AS valid;
+END;
+
 
 -- UPDATE
 DELIMITER //
@@ -466,8 +542,113 @@ END //
 
 DELIMITER ;
 
+-- ================================================
+-- SECTION: Authentication and Authorization SPROCS
+-- ================================================
+
+-- SPROC for authenticating a user
 DELIMITER //
-CREATE PROCEDURE GetRandomURL()
+CREATE PROCEDURE authenticate_user(
+    IN p_user_login NVARCHAR(10),
+    IN p_user_password VARBINARY(255)
+)
+BEGIN
+    DECLARE v_user_id CHAR(36);
+    DECLARE v_authenticated BOOLEAN;
+
+    -- Check if the login and hashed password match any user
+    SELECT user_id INTO v_user_id FROM users
+    WHERE user_login = p_user_login AND user_password = p_user_password;
+
+    -- Determine if the user is authenticated
+    SET v_authenticated = (v_user_id IS NOT NULL);
+
+    SELECT v_authenticated, v_user_id;
+END //
+DELIMITER ;
+
+-- ================================================
+-- SECTION: CRAB SPROCS
+-- ================================================
+
+-- Stored Procedure to add a new web crawler
+DELIMITER //
+DELIMITER //
+CREATE PROCEDURE create_webcrawler(
+    IN p_source_url LONGTEXT
+)
+BEGIN
+    DECLARE v_crawler_id CHAR(36);
+    SET v_crawler_id = UUID();
+    INSERT INTO webcrawlers (crawler_id, source_url)
+    VALUES (v_crawler_id, p_source_url);
+    SELECT v_crawler_id;
+END //
+DELIMITER ;
+
+-- Stored Procedure to add a new scraper engine
+DELIMITER //
+CREATE PROCEDURE create_scraper_engine(
+    IN p_engine_name NVARCHAR(50),
+    IN p_engine_description VARCHAR(250)
+)
+BEGIN
+    DECLARE v_engine_id CHAR(36);
+    -- Generating a unique identifier and assigning it to v_engine_id
+    SET v_engine_id = UUID();
+    INSERT INTO scraper_engine(engine_id, engine_name, engine_description)
+    VALUES (v_engine_id, p_engine_name, p_engine_description);
+    SELECT v_engine_id;
+END //
+DELIMITER ;
+
+-- SPROC to insert URL records into the URLs table
+DELIMITER //
+CREATE PROCEDURE insert_url(IN p_url LONGTEXT, IN p_tags JSON, IN p_domain LONGTEXT)
+BEGIN
+    DECLARE v_id CHAR(36);
+    SET v_id = UUID();
+    INSERT INTO urls (id, url, tags, domain, created_time)
+    VALUES (v_id, p_url, p_tags, p_domain, CURRENT_TIMESTAMP);
+    SELECT v_id; -- This line returns the generated ID.
+END //
+DELIMITER ;
+
+
+-- SPROC to update URL
+DELIMITER //
+CREATE PROCEDURE update_url(IN p_id CHAR(36), IN p_url LONGTEXT, IN p_tags JSON, IN p_domain LONGTEXT)
+BEGIN
+    UPDATE urls SET url = p_url, tags = p_tags, domain = p_domain WHERE id = p_id;
+END //
+DELIMITER ;
+
+-- SPROC for domain-specific queries: get URL tags and domain
+DELIMITER //
+CREATE PROCEDURE get_url_tags_and_domain(IN p_id CHAR(36))
+BEGIN
+    SELECT tags, domain FROM urls WHERE id = p_id;
+END //
+DELIMITER ;
+
+-- SPROC to get URLs from a specific domain
+DELIMITER //
+CREATE PROCEDURE get_urls_from_domain(IN p_domain LONGTEXT)
+BEGIN
+    SELECT * FROM urls WHERE domain = p_domain;
+END //
+DELIMITER ;
+
+-- SPROC to get UUID from URL and domain
+DELIMITER //
+CREATE PROCEDURE get_Uuid_from_URL_and_domain(IN p_url LONGTEXT, IN p_domain LONGTEXT)
+BEGIN
+    SELECT id FROM urls WHERE url = p_url AND domain = p_domain;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE get_random_url()
 BEGIN
     SELECT * FROM urls ORDER BY RAND() LIMIT 1;
 END //
@@ -476,7 +657,7 @@ DELIMITER ;
 -- Procedure to retrieve only the 'url' column from the 'urls' table
 DELIMITER //
 
-CREATE PROCEDURE GetURLsOnly()
+CREATE PROCEDURE get_urls_only()
 BEGIN
     -- Select only the 'url' column from the 'urls' table
     SELECT url FROM urls;
@@ -486,56 +667,278 @@ DELIMITER ;
 
 DELIMITER //
 
-CREATE PROCEDURE fetch_user_id(
-    IN p_user_name NVARCHAR(25)
-)
-BEGIN
-    SELECT user_id FROM users WHERE user_name = p_user_name;
-END //
-
-DELIMITER ;
-
-
 DELIMITER //
-CREATE PROCEDURE GetUrlsAndTags()
+CREATE PROCEDURE get_urls_and_tags()
 BEGIN
     SELECT url, tags FROM urls;
 END //
 DELIMITER ;
 
--- Insert values into users_roles_lookup table
+
+
+-- ================================================
+-- SECTION: Authorization SPROCS
+-- ================================================
+
+-- SPROC for getting the role of a user
+DELIMITER //
+CREATE PROCEDURE get_user_role(
+    IN p_user_id CHAR(36)
+)
+BEGIN
+    DECLARE v_user_role NVARCHAR(5);
+
+    -- Fetch the role of the user
+    SELECT user_role INTO v_user_role FROM users WHERE user_id = p_user_id;
+
+    SELECT v_user_role;
+END //
+DELIMITER ;
+
+-- SPROC for checking if a user is active
+DELIMITER //
+CREATE PROCEDURE is_user_active(
+    IN p_user_id CHAR(36)
+)
+BEGIN
+    DECLARE v_active BOOLEAN;
+
+    -- Fetch the active status of the user
+    SELECT active_or_not INTO v_active FROM users WHERE user_id = p_user_id;
+
+    SELECT v_active;
+END //
+
+-- SPROC for authorizing a user based on role
+DELIMITER //
+CREATE PROCEDURE authorize_user(
+    IN p_user_id CHAR(36),
+    IN required_role NVARCHAR(5)
+)
+BEGIN
+    DECLARE v_user_role NVARCHAR(5);
+
+    -- Fetch the role of the user
+    SELECT user_role INTO v_user_role FROM users WHERE user_id = p_user_id;
+
+    -- Check if the user is authorized to perform the operation
+    IF v_user_role = required_role THEN
+        SELECT TRUE AS is_authorized;
+    ELSE
+        SELECT FALSE AS is_authorized;
+    END IF;
+END //
+
+
+-- Procedure to add a new permission for a user role
+DELIMITER //
+CREATE PROCEDURE add_permission(
+    IN p_user_role NVARCHAR(5),
+    IN p_action_name NVARCHAR(100),
+    IN p_resource_name NVARCHAR(100)
+)
+BEGIN
+    -- Inserting a new permission record for the given user role, action, and resource
+    INSERT INTO user_permissions (permission_id, user_role, action_name, resource_name)
+    VALUES (UUID(), p_user_role, p_action_name, p_resource_name);
+END //
+DELIMITER ;
+
+-- Procedure to check if a user role has a specific permission
+DELIMITER //
+CREATE PROCEDURE check_permission(
+    IN p_user_role NVARCHAR(5),
+    IN p_action_name NVARCHAR(100),
+    IN p_resource_name NVARCHAR(100)
+)
+BEGIN
+    -- Checking if a permission exists for the given user role, action, and resource
+    SELECT COUNT(*) > 0 AS has_permission
+    FROM user_permissions
+    WHERE user_role = p_user_role AND action_name = p_action_name AND resource_name = p_resource_name;
+END //
+
+
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE get_permissions_for_role(
+    IN p_user_role NVARCHAR(5)
+)
+BEGIN
+    -- Fetch all permissions associated with the given user role
+    SELECT action_name, resource_name
+    FROM user_permissions
+    WHERE user_role = p_user_role;
+END//
+DELIMITER ;
+
+-- UPDATE
+-- A SPROC to update a user's role
+DELIMITER //
+CREATE PROCEDURE update_user_role(
+    IN p_user_id CHAR(36),
+    IN p_new_role NVARCHAR(5)
+)
+BEGIN
+    UPDATE users
+    SET user_role = p_new_role
+    WHERE user_id = p_user_id;
+END //
+DELIMITER ;
+
+-- A SPROC to update a user's password
+DELIMITER //
+CREATE PROCEDURE update_user_password(
+    IN p_user_id CHAR(36),
+    IN p_new_password VARBINARY(16)
+)
+BEGIN
+    UPDATE users
+    SET user_password = p_new_password
+    WHERE user_id = p_user_id;
+END //
+DELIMITER ;
+
+-- A SPROC to deactivate a user
+DELIMITER //
+CREATE PROCEDURE deactivate_user(
+    IN p_user_id CHAR(36)
+)
+BEGIN
+    UPDATE users
+    SET active_or_not = FALSE
+    WHERE user_id = p_user_id;
+END //
+DELIMITER ;
+
+
+
+-- ================================================
+-- SECTION: Authentication SPROCS:
+-- ================================================
+
+
+
+DELIMITER //
+-- Procedure to create a new session for a user
+CREATE PROCEDURE create_session(
+    IN p_user_id CHAR(36),
+    IN p_token TEXT
+)
+BEGIN
+    -- Inserting a new session with details and setting an expiration time of 1 hour
+    INSERT INTO user_sessions (session_id, user_id, token, time_to_live, last_activity, scope)
+    VALUES (UUID(), p_user_id, p_token, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 HOUR), CURRENT_TIMESTAMP, 'default');
+END ;
+DELIMITER ;
+-- Procedure to validate a user's token
+DELIMITER //
+CREATE PROCEDURE validate_token(
+    IN p_token TEXT
+)
+BEGIN
+    -- Checking if the token is valid and still within its active time frame
+    SELECT user_id, time_to_live > CURRENT_TIMESTAMP AS is_valid
+    FROM user_sessions
+    WHERE token = p_token;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE issue_refresh_token(
+    IN p_user_id CHAR(36),
+    IN p_token VARBINARY(255)
+)
+BEGIN
+    INSERT INTO refresh_tokens (token_id, user_id, token, expiry)
+    VALUES (UUID(), p_user_id, p_token, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 7 DAY));
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE logout_user(
+    IN p_user_id CHAR(36)
+)
+BEGIN
+    DELETE FROM user_sessions WHERE user_id = p_user_id;
+END //
+DELIMITER ;
+
+-- A SPROC for user registration
+DELIMITER //
+CREATE PROCEDURE user_registration(
+    IN p_user_name NVARCHAR(25),
+    IN p_user_login NVARCHAR(10),
+    IN p_user_role NVARCHAR(5),
+    IN p_user_password VARBINARY(16),
+    IN p_active_or_not BOOLEAN
+)
+BEGIN
+    CALL create_user(p_user_name, p_user_login, p_user_role, p_user_password, p_active_or_not);
+END //
+DELIMITER ;
+
+-- Setting the delimiter for stored procedures
+DELIMITER //
+
+
+-- Sproc for invalidate Token and refresh_token
+DELIMITER //
+CREATE PROCEDURE invalidate_token(
+    IN p_user_id CHAR(36)
+)
+BEGIN
+    DELETE FROM user_sessions WHERE user_id = p_user_id;
+END //
+DELIMITER ;
+
+
+-- A SPROC for user login
+DELIMITER //
+CREATE PROCEDURE user_login(
+    IN p_user_login NVARCHAR(10),
+    IN p_user_password VARBINARY(16)
+)
+BEGIN
+    SELECT user_id, user_name, user_role
+    FROM users
+    WHERE user_login = p_user_login AND user_password = p_user_password AND active_or_not = TRUE;
+END //
+DELIMITER ;
+
+
+-- ================================================
+-- SECTION: INSERTS & CALLS
+-- ================================================
+-- Inserting predefined roles into the user roles lookup table
 INSERT INTO users_roles_lookup (user_role, role_name)
 VALUES
     ('ADM', 'Administrator'),
-    ('FAC', 'Faculty'),
-    ('STD', 'Student'),
+    ('USR', 'User'),
     ('DEV', 'Developer');
 
--- Insert values into users table
+-- Inserting sample users into the users table
 INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
 VALUES
-    (UUID(), 'Joesph Oakes', 'jxo19', 'ADM', EncryptsPassword('admin123'), TRUE, CURRENT_TIMESTAMP()),
-    (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', EncryptsPassword('dev789'), TRUE, CURRENT_TIMESTAMP()),
-    (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', EncryptsPassword('std447'), TRUE, CURRENT_TIMESTAMP());
+    (UUID(), 'Joesph Oakes', 'jxo19', 'ADM', encrypts_password('admin123'), TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', encrypts_password('dev789'), TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', encrypts_password('std447'), TRUE, CURRENT_TIMESTAMP());
 
--- Inserting the first record
+-- Inserting sample URLs into the URLs table
 INSERT INTO urls (id, url, tags)
-VALUES (UUID(), 'https://sites.google.com/view/mahirbootstrap/home', '{"tag1": "<a>"}');
+VALUES
+    (UUID(), 'https://sites.google.com/view/mahirbootstrap/home', '{"tag1": "<a>"}'),
+    (UUID(), 'https://www.abington.psu.edu/WPL/mahir-khan', '{"tag2": "<img>"}'),
+    (UUID(), 'https://sites.google.com/view/mahirbootstrap/signup?authuser=0', '{"tag3": "<label>"}'),
+    (UUID(), 'https://sites.google.com/view/golangserver/home', '{"tag4": "<section>"}');
 
--- Inserting the second record
-INSERT INTO urls (id, url, tags)
-VALUES (UUID(), 'https://www.abington.psu.edu/WPL/mahir-khan', '{"tag2": "<img>"}');
+-- Call to the procedure to populate log status codes
+CALL populate_log_status_codes();
 
--- Inserting the third record
-INSERT INTO urls (id, url, tags)
-VALUES (UUID(), 'https://sites.google.com/view/mahirbootstrap/signup?authuser=0', '{"tag3": "<label>"}');
+use goengine;
 
--- Inserting the fourth record
-INSERT INTO urls (id, url, tags)
-VALUES (UUID(), 'https://sites.google.com/view/golangserver/home', '{"tag4": "<section>"}');
+CALL user_registration('test_user', 'test_login', 'ADM', 'test_password', true);
 
-call PopulateLogStatusCodes();
-INSERT INTO users_roles_lookup (user_role, role_name)
-VALUES ('1', 'User');
 
--- call PopulateLog();
+call populate_log_status_codes();

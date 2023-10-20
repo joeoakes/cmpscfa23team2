@@ -86,6 +86,7 @@ func CloseDb() {
 func WriteJSONConfig(configFile string, config *JSON_Data_Connect, key []byte) error {
 	encryptedUsername, err := encryptAES([]byte(config.Username), key)
 	if err != nil {
+		log.Println("Error encrypting username:", err)
 		InsertLog("400", "Error encrypting username", "WriteJSONConfig()")
 		return err
 	} else {
@@ -94,6 +95,7 @@ func WriteJSONConfig(configFile string, config *JSON_Data_Connect, key []byte) e
 
 	encryptedPassword, err := encryptAES([]byte(config.Password), key)
 	if err != nil {
+		log.Println("Failed to encrypt password:", err)
 		InsertLog("400", "Failed to encrypt password", "WriteJSONConfig()")
 		return err
 	} else {
@@ -110,6 +112,7 @@ func WriteJSONConfig(configFile string, config *JSON_Data_Connect, key []byte) e
 	// Marshal the encrypted configuration struct to JSON
 	data, err := json.Marshal(encryptedConfig)
 	if err != nil {
+		log.Println("Failed to marshal encrypted config:", err)
 		InsertLog("400", "Failed to marshal encrypted config", "WriteJSONConfig()")
 		return err
 	} else {
@@ -119,6 +122,7 @@ func WriteJSONConfig(configFile string, config *JSON_Data_Connect, key []byte) e
 	// Write the encrypted JSON configuration to file
 	err = ioutil.WriteFile(configFile, data, 0644)
 	if err != nil {
+		log.Println("Failed to write encrypted config to file:", err)
 		InsertLog("400", "Failed to write encrypted config to file", "WriteJSONConfig()")
 		return err
 	} else {
@@ -133,6 +137,7 @@ func WriteJSONConfig(configFile string, config *JSON_Data_Connect, key []byte) e
 func encryptAES(data []byte, key []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
+		log.Println("Failed to create a new cipher:", err)
 		InsertLog("400", "Failed to create new cipher", "encryptAES()")
 		return nil, err
 	} else {
@@ -161,6 +166,7 @@ func padPKCS7(data []byte, blockSize int) []byte {
 func decryptAES(data []byte, key []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
+		log.Println("Failed to create new cipher:", err)
 		InsertLog("400", "Failed to create new cipher", "decryptAES()")
 		WriteLog("encryptAES_fail_1", "200", "Failed to create new cipher", "decryptAES()", time.Now())
 		return nil, err
@@ -171,6 +177,7 @@ func decryptAES(data []byte, key []byte) ([]byte, error) {
 
 	blockSize := block.BlockSize()
 	if len(data)%blockSize != 0 {
+		log.Println("Ciphertext length is not a multiple of the block size:", err)
 		InsertLog("400", "Ciphertext length is not a multiple of the block size", "decryptAES()")
 		return nil, errors.New("ciphertext length is not a multiple of the block size")
 	} else {
@@ -212,6 +219,7 @@ func init() {
 
 	file, err := os.OpenFile("Logging_to.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
+		log.Println("Failed to open file", err)
 		InsertLog("400", "Failed to open file", "init()")
 		log.Fatal(err)
 	} else {
@@ -227,8 +235,10 @@ func WriteLog(logID string, status_code string, message string, goEngineArea str
 	var existingStatusCode string
 	err := db.QueryRow("SELECT status_code FROM log_status_codes WHERE status_code = ?", status_code).Scan(&existingStatusCode)
 	if err != nil {
+		log.Println("Failed to query row:", err)
 		InsertLog("400", "Failed to query row", "WriteLog()")
 		if err == sql.ErrNoRows {
+			log.Println("Invalid statusCode:", err)
 			InsertLog("400", "Invalid statusCode", "WriteLog()")
 			return fmt.Errorf("Invalid statusCode: %s", status_code)
 		} else {
@@ -241,6 +251,7 @@ func WriteLog(logID string, status_code string, message string, goEngineArea str
 	// Prepare the SQL statement for inserting into the log table
 	stmt, err := db.Prepare("INSERT INTO log(log_ID, status_code, message, go_engine_area, date_time) VALUES (? ,? ,? ,? ,?)")
 	if err != nil {
+		log.Println("Failed to prepare SQL statement:", err)
 		InsertLog("400", "Failed to prepare SQL statement", "WriteLog()")
 		return err
 	} else {
@@ -252,6 +263,7 @@ func WriteLog(logID string, status_code string, message string, goEngineArea str
 	// Execute the SQL statement
 	_, errExec := stmt.Exec(logID, existingStatusCode, message, goEngineArea, dateTime)
 	if errExec != nil {
+		log.Println("Failed to execute SQL statement:", err)
 		InsertLog("400", "Failed to execute SQL statement", "WriteLog()")
 		return errExec
 	} else {
@@ -265,6 +277,7 @@ func WriteLog(logID string, status_code string, message string, goEngineArea str
 func GetLog() ([]Log, error) {
 	stmt, err := db.Prepare("CALL select_all_logs()")
 	if err != nil {
+		log.Println("Failed to prepare SQL statement:", err)
 		InsertLog("400", "Failed to prepare SQL statement", "GetLog()")
 		return nil, err
 	} else {
@@ -274,6 +287,7 @@ func GetLog() ([]Log, error) {
 
 	rows, err := stmt.Query()
 	if err != nil {
+		log.Println("Failed to query SQL statement:", err)
 		InsertLog("400", "Failed to query SQL statement", "GetLog()")
 		return nil, err
 	} else {
@@ -287,6 +301,8 @@ func GetLog() ([]Log, error) {
 		var dateTimeStr []uint8
 		err := rows.Scan(&logItem.LogID, &logItem.status_code, &logItem.Message, &logItem.GoEngineArea, &dateTimeStr)
 		if err != nil {
+			log.Println("Failed to scan rows:", err)
+			InsertLog("400", "Failed to scan rows", "GetLog()")
 			return nil, err
 		} else {
 			InsertLog("200", "Successfully scanned rows", "GetLog()")
@@ -298,6 +314,7 @@ func GetLog() ([]Log, error) {
 	}
 
 	if err = rows.Err(); err != nil {
+		log.Println("Failed to iterate over rows:", err)
 		InsertLog("400", "Failed to iterate over rows", "GetLog()")
 		return nil, err
 	} else {
@@ -316,6 +333,7 @@ func InsertOrUpdateStatusCode(statusCode, statusMessage string) error {
 func GetSuccess() ([]Log, error) {
 	stmt, err := db.Prepare("CALL select_all_logs_by_status_code(?)")
 	if err != nil {
+		log.Println("Failed to prepare SQL statement:", err)
 		InsertLog("400", "Failed to prepare SQL statement", "GetSuccess()")
 		return nil, err
 	} else {
@@ -325,6 +343,7 @@ func GetSuccess() ([]Log, error) {
 
 	rows, err := stmt.Query("Success")
 	if err != nil {
+		log.Println("Failed to query SQL statement:", err)
 		InsertLog("400", "Failed to query SQL statement", "GetSuccess()")
 		return nil, err
 	} else {
@@ -338,6 +357,7 @@ func GetSuccess() ([]Log, error) {
 		var dateTimeStr []uint8
 		err := rows.Scan(&logItem.LogID, &logItem.status_code, &logItem.Message, &logItem.GoEngineArea, &dateTimeStr)
 		if err != nil {
+			log.Println("Failed to scan rows successfully:", err)
 			InsertLog("400", "Failed to scan rows successfully", "GetSuccess()")
 			return nil, err
 		} else {
@@ -349,6 +369,7 @@ func GetSuccess() ([]Log, error) {
 	}
 
 	if err = rows.Err(); err != nil {
+		log.Println("Failed to iterate over rows:", err)
 		InsertLog("400", "Failed to iterate over rows", "GetSuccess()")
 		return nil, err
 	} else {
@@ -361,6 +382,7 @@ func GetSuccess() ([]Log, error) {
 func StoreLog(status_code string, message string, goEngineArea string) error {
 	stmt, err := db.Prepare("CALL insert_log(?,?,?)")
 	if err != nil {
+		log.Println("Failed to prepare SQL statement:", err)
 		InsertLog("400", "Failed to prepare SQL statement", "StoreLog()")
 		return err
 	} else {
@@ -370,6 +392,7 @@ func StoreLog(status_code string, message string, goEngineArea string) error {
 
 	_, errExec := stmt.Exec(status_code, message, goEngineArea)
 	if errExec != nil {
+		log.Println("Failed to execute SQL statement:", err)
 		InsertLog("400", "Failed to execute SQL statement", "StoreLog()")
 		return errExec
 	} else {

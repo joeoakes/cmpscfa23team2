@@ -48,12 +48,12 @@ CREATE TABLE IF NOT EXISTS log_status_codes(
 -- Fix for Duplicate Key Issue:
 -- Adds AUTO_INCREMENT to generate unique logID
 CREATE TABLE IF NOT EXISTS log (
-                                   log_ID INT AUTO_INCREMENT PRIMARY KEY, -- Auto-generated unique ID
-                                   status_code VARCHAR(3), -- 3 letters to store the status code to the DB
-                                   FOREIGN KEY (status_code) REFERENCES log_status_codes (status_code), -- references to another table
-                                   message VARCHAR(255), -- A message about the status of the log
-                                   go_engine_area VARCHAR(255), -- Where the log status is occurring
-                                   date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- When inserting a value, the dateTime automatically updates to the time it occurred
+                                   log_ID BINARY(36) PRIMARY KEY, -- Use BINARY(16) to store UUIDs
+                                   status_code VARCHAR(3),
+                                   FOREIGN KEY (status_code) REFERENCES log_status_codes (status_code),
+                                   message VARCHAR(255),
+                                   go_engine_area VARCHAR(255),
+                                   date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Periodically clean the log (anything older than 30 days)
@@ -154,13 +154,13 @@ CREATE TABLE IF NOT EXISTS predictions (
 
 
 CREATE TABLE IF NOT EXISTS user_sessions (
-                               session_id INT PRIMARY KEY AUTO_INCREMENT,
-                               user_id CHAR(36),
-                               token VARCHAR(255) NOT NULL,
-                               time_to_live DATETIME NOT NULL,
-                               last_activity DATETIME NOT NULL,
-                               scope VARCHAR(255) NOT NULL,
-                               FOREIGN KEY (user_id) REFERENCES users(user_id)
+                                             session_id INT PRIMARY KEY AUTO_INCREMENT,
+                                             user_id CHAR(36),
+                                             token VARCHAR(255) NOT NULL,
+                                             time_to_live DATETIME NOT NULL,
+                                             last_activity DATETIME NOT NULL,
+                                             scope VARCHAR(255) NOT NULL,
+                                             FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 -- Create the user_permissions table
@@ -353,12 +353,13 @@ CREATE PROCEDURE insert_log(
     IN pGoEngineArea VARCHAR(250)
 )
 BEGIN
-    DECLARE pLogID CHAR(36);
-    SET pLogID = UUID();
+    DECLARE pLogID BINARY(16);
+    SET pLogID = UNHEX(REPLACE(UUID(), '-', '')); -- Generate a UUID and convert it to binary
 
     INSERT INTO log (log_ID, status_code, message, go_engine_area)
     VALUES (pLogID, pStatusCode, pMessage, pGoEngineArea);
 END//
+
 
 CREATE PROCEDURE select_all_logs()
 BEGIN
@@ -382,9 +383,9 @@ CREATE PROCEDURE populate_log_status_codes() -- Populates the Log's if they aren
 
 BEGIN
     IF (SELECT COUNT(*) FROM log_status_codes) = 0 THEN
-        INSERT INTO log_status_codes (status_code, status_message) VALUES ('OPR', 'Normal operational mode');
+        INSERT INTO log_status_codes (status_code, status_message) VALUES ('200', 'Normal operational mode');
         INSERT INTO log_status_codes (status_code, status_message) VALUES ('WAR', 'Warring issue application still functional');
-        INSERT INTO log_status_codes (status_code, status_message) VALUES ('ERR', 'Severe error application not functional');
+        INSERT INTO log_status_codes (status_code, status_message) VALUES ('400', 'Severe error application not functional');
     END IF;
 END //
 

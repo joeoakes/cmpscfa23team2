@@ -1,7 +1,6 @@
-package main
+package DAL
 
 import (
-
 	"crypto/rand"
 	"encoding/base64"
 
@@ -32,7 +31,7 @@ func HandleErrors(err error, context string) {
 // It takes a userID and a token as parameters and returns an error if the operation fails.
 func CreateSession(userID string, token string) error {
 	// Execute the 'create_session' stored procedure with the provided userID and token.
-	_, err := db.Exec("CALL create_session(?, ?)", userID, token)
+	_, err := DB.Exec("CALL create_session(?, ?)", userID, token)
 	return err
 }
 
@@ -40,7 +39,7 @@ func CreateSession(userID string, token string) error {
 // It takes a token as a parameter and returns the userID, a boolean indicating validity, and an error if any.
 func ValidateToken(token string) (userID string, isValid bool, err error) {
 	// Query the database using the 'validate_token' stored procedure with the provided token.
-	err = db.QueryRow("CALL validate_token(?)", token).Scan(&userID, &isValid)
+	err = DB.QueryRow("CALL validate_token(?)", token).Scan(&userID, &isValid)
 	return userID, isValid, err
 }
 
@@ -49,7 +48,7 @@ func ValidateToken(token string) (userID string, isValid bool, err error) {
 // CreateUser inserts a new user into the database.
 func CreateUser(userName, userLogin, userRole string, userPassword string, activeOrNot bool) (string, error) {
 	var userID string
-	err := db.QueryRow("CALL create_user(?, ?, ?, AES_ENCRYPT(?, 'IST888IST888'), ?)", userName, userLogin, userRole, userPassword, activeOrNot).Scan(&userID)
+	err := DB.QueryRow("CALL create_user(?, ?, ?, AES_ENCRYPT(?, 'IST888IST888'), ?)", userName, userLogin, userRole, userPassword, activeOrNot).Scan(&userID)
 	if err != nil {
 		return "", err
 	} else { // If no error, log the user ID
@@ -58,10 +57,25 @@ func CreateUser(userName, userLogin, userRole string, userPassword string, activ
 	return userID, nil
 }
 
+// UpdateUser updates the details of a user.
+func UpdateUser(userID, userName, userLogin, userRole, userPassword string) error {
+	_, err := DB.Exec("CALL update_user(?, ?, ?, ?, AES_ENCRYPT(?, 'IST888IST888'))", userID, userName, userLogin, userRole, userPassword)
+	log.Printf("User: %s", userID)
+	return err
+}
+
+// DeleteUser removes a user from the database.
+func DeleteUser(userID string) error {
+	_, err := DB.Exec("CALL delete_user(?)", userID)
+	log.Printf("User: %s", userID)
+	return err
+
+}
+
 // GetUserByID retrieves a specific user by their ID.
 func GetUserByID(userID string) (*User, error) {
 	var u User
-	row := db.QueryRow("CALL get_user_by_ID(?)", userID)
+	row := DB.QueryRow("CALL get_user_by_ID(?)", userID)
 	if err := row.Scan(&u.UserID, &u.UserName, &u.UserLogin, &u.UserRole, &u.UserPassword, &u.ActiveOrNot, &u.UserDateAdded); err != nil {
 		return nil, err
 	} else {
@@ -72,7 +86,7 @@ func GetUserByID(userID string) (*User, error) {
 
 // GetUsersByRole fetches all users with a specific role.
 func GetUsersByRole(role string) ([]*User, error) {
-	rows, err := db.Query("CALL get_users_by_role(?)", role)
+	rows, err := DB.Query("CALL get_users_by_role(?)", role)
 	if err != nil {
 		return nil, err
 	} else {
@@ -101,7 +115,7 @@ func GetUsersByRole(role string) ([]*User, error) {
 
 // GetAllUsers retrieves all registered users.
 func GetAllUsers() ([]*User, error) {
-	rows, err := db.Query("CALL get_users()")
+	rows, err := DB.Query("CALL get_users()")
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +141,7 @@ func GetAllUsers() ([]*User, error) {
 // FetchUserIDByName retrieves a user's ID using their username.
 func FetchUserIDByName(userName string) (string, error) {
 	var userID string
-	err := db.QueryRow("CALL fetch_user_id(?)", userName).Scan(&userID)
+	err := DB.QueryRow("CALL fetch_user_id(?)", userName).Scan(&userID)
 	if err != nil {
 		return "", err
 	}
@@ -138,24 +152,9 @@ func FetchUserIDByName(userName string) (string, error) {
 // ValidateUserCredentials verifies user login details.
 func ValidateUserCredentials(userLogin, userPassword string) (bool, error) {
 	var isValid bool
-	err := db.QueryRow("CALL validate_user(?, ?)", userLogin, userPassword).Scan(&isValid)
+	err := DB.QueryRow("CALL validate_user(?, ?)", userLogin, userPassword).Scan(&isValid)
 	log.Printf("User Login: %s", userLogin)
 	return isValid, err
-}
-
-// UpdateUser updates the details of a user.
-func UpdateUser(userID, userName, userLogin, userRole, userPassword string) error {
-	_, err := db.Exec("CALL update_user(?, ?, ?, ?, AES_ENCRYPT(?, 'IST888IST888'))", userID, userName, userLogin, userRole, userPassword)
-	log.Printf("User: %s", userID)
-	return err
-}
-
-// DeleteUser removes a user from the database.
-func DeleteUser(userID string) error {
-	_, err := db.Exec("CALL delete_user(?)", userID)
-	log.Printf("User: %s", userID)
-	return err
-
 }
 
 // This was created for the logout function (won't function properly without the creation of a new token)
@@ -176,7 +175,7 @@ func generateNewToken() (string, error) {
 func Logout(userID string) error {
 	// Generate a new session token for the user and update it in the database to invalidate the old token.
 	newToken, _ := generateNewToken() // Implement a function to generate a new token.
-	_, err := db.Exec("UPDATE sessions SET token = ? WHERE user_id = ?", newToken, userID)
+	_, err := DB.Exec("UPDATE user_sessions SET token = ? WHERE user_id = ?", newToken, userID)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package DAL
+package main
 
 import (
 	"database/sql"
@@ -153,9 +153,10 @@ func GetSuccess() ([]Log, error) {
 
 	rows, err := stmt.Query("Success")
 	if err != nil {
+		InsertLog("400", "Failed to query SQL statement", "GetSuccess()")
 		return nil, err
 	} else {
-		InsertLog("400", "Failed to query SQL statement", "GetSuccess()")
+		InsertLog("200", "Successfully queried SQL statement", "GetSuccess()")
 	}
 	defer rows.Close()
 	InsertLog("200", "Successfully closed rows", "GetSuccess()")
@@ -188,7 +189,7 @@ func GetSuccess() ([]Log, error) {
 func StoreLog(status_code string, message string, goEngineArea string) error {
 	stmt, err := DB.Prepare("CALL insert_log(?,?,?)")
 	if err != nil {
-		InsertLog("400", "Failed to iterate over rows", "GetSuccess()")
+		InsertLog("400", "Failed to prepare SQL statement", "StoreLog()")
 		return err
 	} else {
 		InsertLog("200", "Successfully prepared SQL statement", "StoreLog()")

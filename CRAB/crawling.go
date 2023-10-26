@@ -1,94 +1,122 @@
-package CRAB
-
 /*
 
+First:
+go get github.com/PuerkitoBio/goquery
+go get github.com/temoto/robotstxt-go
+
 Explanation:
-	The scrape function fetches and processes a single URL.
-	The main function spawns multiple goroutines, one for each URL to be scraped.
-	Results (or errors) from each scrape are sent back to the main thread via a channel.
-	A WaitGroup ensures the main thread waits for all scraping goroutines to complete.
-	This is a basic setup, and many more features can be added like rate limiting, respecting robots.txt, handling redirects, etc. 
-	Also, data extraction in the scrape function is very rudimentary. 
-	You'd need to customize it based on the structure of the sites you're scraping and the data you want to extract.
+	We first fetch and parse the robots.txt file to make sure we're allowed to scrape our target URLs.
+	Rate limiting is implemented with a simple sleep. Depending on your needs and the site's policies, you might want to refine this.
+	The scrape function is tailored to extract house prices. The specific HTML element and,
+ 	class (.house-price-class) would need to match the actual structure of the website you're targeting.
+	Always remember that web scraping may be subject to legal and ethical restrictions. 
+ 	Always ensure you have permission to scrape a website, and always respect its robots.txt and terms of use.
 */
 
+package CRAB
 
 import (
 	"fmt"
 	"log"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/temoto/robotstxt-go"
 )
 
-// ScrapeResult stores the result of a scrape
 type ScrapeResult struct {
-	URL   string
-	Data  string // You can replace this with a more detailed structure
-	Error error
+	URL    string
+	Price  string
+	Error  error
 }
 
-// scrape performs web scraping on a given url
-func scrape(url string, ch chan<- ScrapeResult) {
-	res, err := http.Get(url)
+func fetchRobotsTxt(url string) (*robotstxt.Group, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := robotstxt.FromResponse(resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return data.FindGroup("*"), nil
+}
+
+func scrape(url string, ch chan<- ScrapeResult, userAgent string, delay time.Duration) {
+	time.Sleep(delay) // Rate limiting
+
+	resp, err := http.Get(url)
 	if err != nil {
 		ch <- ScrapeResult{URL: url, Error: err}
 		return
 	}
-	defer res.Body.Close()
+	defer resp.Body.Close()
 
-	if res.StatusCode != 200 {
-		ch <- ScrapeResult{URL: url, Error: fmt.Errorf("status code: %d", res.StatusCode)}
+	if resp.StatusCode != 200 {
+		ch <- ScrapeResult{URL: url, Error: fmt.Errorf("status code: %d", resp.StatusCode)}
 		return
 	}
 
-	doc, err := goquery.NewDocumentFromReader(res.Body)
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
 		ch <- ScrapeResult{URL: url, Error: err}
 		return
 	}
 
-	// This is a basic example. You'd typically extract more detailed information here.
-	content, _ := doc.Find("body").Html()
-	ch <- ScrapeResult{URL: url, Data: content}
+	price := doc.Find(".house-price-class").Text() // Assuming a class that holds the price
+	ch <- ScrapeResult{URL: url, Price: price}
 }
 
 func main() {
-	// Sample list of URLs to scrape. You'd replace this with your actual list.
-	urls := []string{
-		"http://example.com",
-		"http://example.org",
-		"http://example.net",
+	baseURL := "http://example-estate-site.com"
+	robotsURL := baseURL + "/robots.txt"
+	userAgent := "YourBotName" // replace with your bot's name
+	urls := []string{ // Some sample house URLs
+		baseURL + "/house1",
+		baseURL + "/house2",
+		// ... add as many URLs as needed
 	}
 
-	// Channel to collect scrape results
-	ch := make(chan ScrapeResult)
+	// Fetch robots.txt
+	robotsGroup, err := fetchRobotsTxt(robotsURL)
+	if err != nil {
+		log.Fatalf("Failed fetching robots.txt: %v", err)
+	}
 
+	// Ensure our bot can access the desired URLs
+	for _, url := range urls {
+		if !robotsGroup.Test(url) {
+			log.Fatalf("Access denied by robots.txt for URL: %s", url)
+		}
+	}
+
+	ch := make(chan ScrapeResult)
 	var wg sync.WaitGroup
 
+	delay := 1 * time.Second // 1 request per second. Adjust as needed.
 	for _, url := range urls {
 		wg.Add(1)
 		go func(u string) {
 			defer wg.Done()
-			scrape(u, ch)
+			scrape(u, ch, userAgent, delay)
 		}(url)
 	}
 
-	// This goroutine collects results and prints them.
 	go func() {
 		for result := range ch {
 			if result.Error != nil {
 				log.Printf("Error scraping %s: %v", result.URL, result.Error)
 			} else {
-				// Just printing the beginning of the content for brevity.
-				// Replace this with your data processing logic.
-				fmt.Printf("Scraped %s: %s...\n", result.URL, result.Data[:100])
+				fmt.Printf("Scraped %s: %s\n", result.URL, result.Price)
 			}
 		}
 	}()
 
-	// Wait for all scraping goroutines to complete
 	wg.Wait()
 	close(ch)
 }

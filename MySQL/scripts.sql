@@ -446,6 +446,15 @@ BEGIN
     SELECT v_user_id;
 END //
 
+DELIMITER //
+CREATE PROCEDURE get_user_by_login(
+    IN p_user_login NVARCHAR(10)
+)
+BEGIN
+    SELECT * FROM users WHERE user_login = p_user_login;
+END //
+DELIMITER ;
+
 DELIMITER ;
 -- READ
 -- A SPROC to get a specific user
@@ -492,7 +501,7 @@ CREATE PROCEDURE update_user(
     IN p_user_name NVARCHAR(25),
     IN p_user_login NVARCHAR(10),
     IN p_user_role NVARCHAR(5),
-    IN p_user_password VARBINARY(16)
+    IN p_user_password VARBINARY(255)
 )
 BEGIN
     UPDATE users
@@ -739,18 +748,6 @@ BEGIN
 END //
 DELIMITER ;
 
--- A SPROC to update a user's password
-DELIMITER //
-CREATE PROCEDURE update_user_password(
-    IN p_user_id CHAR(36),
-    IN p_new_password VARBINARY(16)
-)
-BEGIN
-    UPDATE users
-    SET user_password = p_new_password
-    WHERE user_id = p_user_id;
-END //
-DELIMITER ;
 
 -- A SPROC to deactivate a user
 DELIMITER //
@@ -818,6 +815,18 @@ BEGIN
 END //
 DELIMITER ;
 
+DELIMITER  //
+CREATE PROCEDURE validate_refresh_token(
+    IN p_token VARBINARY(255)
+)
+BEGIN
+    SELECT user_id
+    FROM refresh_tokens
+    WHERE token = p_token AND expiry > CURRENT_TIMESTAMP;
+
+END //
+DELIMITER ;
+
 DELIMITER //
 CREATE PROCEDURE issue_refresh_token(
     IN p_user_id CHAR(36),
@@ -838,13 +847,25 @@ BEGIN
 END //
 DELIMITER ;
 
+-- A SPROC to update a user's password
+DELIMITER //
+CREATE PROCEDURE change_user_password(
+    IN p_user_id CHAR(36),
+    IN p_new_password VARBINARY(255)
+)
+BEGIN
+    UPDATE users
+    SET user_password = p_new_password
+    WHERE user_id = p_user_id;
+END //
+DELIMITER ;
 -- A SPROC for user registration
 DELIMITER //
 CREATE PROCEDURE user_registration(
     IN p_user_name NVARCHAR(25),
     IN p_user_login NVARCHAR(10),
     IN p_user_role NVARCHAR(5),
-    IN p_user_password VARBINARY(16),
+    IN p_user_password VARBINARY(255),
     IN p_active_or_not BOOLEAN
 )
 BEGIN
@@ -871,7 +892,7 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE user_login(
     IN p_user_login NVARCHAR(10),
-    IN p_user_password VARBINARY(16)
+    IN p_user_password VARBINARY(255)
 )
 BEGIN
     SELECT user_id, user_name, user_role

@@ -2,7 +2,7 @@
 
 First:
 go get github.com/PuerkitoBio/goquery
-go get github.com/temoto/robotstxt-go
+go get github.com/temoto/robotstxt
 
 Explanation:
 	We first fetch and parse the robots.txt file to make sure we're allowed to scrape our target URLs.

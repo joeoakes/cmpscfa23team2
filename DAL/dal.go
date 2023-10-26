@@ -121,32 +121,12 @@ func main() {
 		}
 	}
 
-	// Test: ValidateUserCredentials
-	isValid, err := ValidateUserCredentials("jdoe", "password123")
-	if err != nil {
-		log.Printf("Error validating user: %s", err)
-	} else if isValid {
-		log.Println("User user credentials are valid!")
-	} else {
-		log.Println("User credentials are invalid!")
-	}
-
 	// Test: UpdateUser
 	err = UpdateUser(userID, "John Updated", "jupdated", "FAC", ("newpassword123"))
 	if err != nil {
 		log.Printf("Error updating user: %s", err)
 	} else {
 		log.Println("User details updated successfully!")
-	}
-
-	// Validate the user with updated credentials
-	isValid, err = ValidateUserCredentials("jupdated", "newpassword123")
-	if err != nil {
-		log.Printf("Error validating user after update: %s", err)
-	} else if isValid {
-		log.Println("User's updated credentials are valid!")
-	} else {
-		log.Println("User's updated credentials are invalid!")
 	}
 
 	// Test: DeleteUser

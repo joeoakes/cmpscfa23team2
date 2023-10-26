@@ -1,9 +1,6 @@
 package DAL
 
 import (
-	"crypto/rand"
-	"encoding/base64"
-
 	"database/sql"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -20,35 +17,10 @@ type User struct {
 	UserDateAdded string
 }
 
-// HandleErrors is a utility function to handle and log errors consistently.
-func HandleErrors(err error, context string) {
-	if err != nil {
-		log.Printf("Error in %s: %v", context, err)
-	}
-}
-
-// CreateSession creates a new session in the database for a given user with the provided token.
-// It takes a userID and a token as parameters and returns an error if the operation fails.
-func CreateSession(userID string, token string) error {
-	// Execute the 'create_session' stored procedure with the provided userID and token.
-	_, err := DB.Exec("CALL create_session(?, ?)", userID, token)
-	return err
-}
-
-// ValidateToken checks the validity of a token in the database and retrieves the associated userID and validation status.
-// It takes a token as a parameter and returns the userID, a boolean indicating validity, and an error if any.
-func ValidateToken(token string) (userID string, isValid bool, err error) {
-	// Query the database using the 'validate_token' stored procedure with the provided token.
-	err = DB.QueryRow("CALL validate_token(?)", token).Scan(&userID, &isValid)
-	return userID, isValid, err
-}
-
-//
-
 // CreateUser inserts a new user into the database.
 func CreateUser(userName, userLogin, userRole string, userPassword string, activeOrNot bool) (string, error) {
 	var userID string
-	err := DB.QueryRow("CALL create_user(?, ?, ?, AES_ENCRYPT(?, 'IST888IST888'), ?)", userName, userLogin, userRole, userPassword, activeOrNot).Scan(&userID)
+	err := DB.QueryRow("CALL create_user(?, ?, ?, ?, ?)", userName, userLogin, userRole, userPassword, activeOrNot).Scan(&userID)
 	if err != nil {
 		return "", err
 	} else { // If no error, log the user ID
@@ -59,7 +31,7 @@ func CreateUser(userName, userLogin, userRole string, userPassword string, activ
 
 // UpdateUser updates the details of a user.
 func UpdateUser(userID, userName, userLogin, userRole, userPassword string) error {
-	_, err := DB.Exec("CALL update_user(?, ?, ?, ?, AES_ENCRYPT(?, 'IST888IST888'))", userID, userName, userLogin, userRole, userPassword)
+	_, err := DB.Exec("CALL update_user(?, ?, ?, ?, ?)", userID, userName, userLogin, userRole, userPassword)
 	log.Printf("User: %s", userID)
 	return err
 }
@@ -70,6 +42,17 @@ func DeleteUser(userID string) error {
 	log.Printf("User: %s", userID)
 	return err
 
+}
+
+func GetUserByLogin(userLogin string) (*User, error) {
+	var u User
+	row := DB.QueryRow("CALL get_user_by_login(?)", userLogin)
+	if err := row.Scan(&u.UserID, &u.UserName, &u.UserLogin, &u.UserRole, &u.UserPassword, &u.ActiveOrNot, &u.UserDateAdded); err != nil {
+		return nil, err
+	} else {
+		log.Printf("Get User: %+v", u)
+	}
+	return &u, nil
 }
 
 // GetUserByID retrieves a specific user by their ID.
@@ -147,37 +130,4 @@ func FetchUserIDByName(userName string) (string, error) {
 	}
 	log.Printf("User ID: %s", userID)
 	return userID, nil
-}
-
-// ValidateUserCredentials verifies user login details.
-func ValidateUserCredentials(userLogin, userPassword string) (bool, error) {
-	var isValid bool
-	err := DB.QueryRow("CALL validate_user(?, ?)", userLogin, userPassword).Scan(&isValid)
-	log.Printf("User Login: %s", userLogin)
-	return isValid, err
-}
-
-// This was created for the logout function (won't function properly without the creation of a new token)
-func generateNewToken() (string, error) {
-	tokenBytes := make([]byte, 32) // Generate a 32-byte random token
-	_, err := rand.Read(tokenBytes)
-	if err != nil {
-		return "", err
-	}
-
-	// Encode the random bytes as a base64 string
-	token := base64.StdEncoding.EncodeToString(tokenBytes)
-	return token, nil
-}
-
-// Logout invalidates the session token for a user, effectively logging them out.
-// ValidateUserCredentials already acts as a form of logging in.
-func Logout(userID string) error {
-	// Generate a new session token for the user and update it in the database to invalidate the old token.
-	newToken, _ := generateNewToken() // Implement a function to generate a new token.
-	_, err := DB.Exec("UPDATE user_sessions SET token = ? WHERE user_id = ?", newToken, userID)
-	if err != nil {
-		return err
-	}
-	return nil
 }

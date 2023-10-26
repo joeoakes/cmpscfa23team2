@@ -1,116 +1,117 @@
-//package main
+//package DAL
 //
-//import(
-//"database/sql"
-//"encoding/json"
-//"fmt"
-//"time"
-//
-//"github.com/dgrijalva/jwt-go"
-//_"github.com/go-sql-driver/mysql"
+//import (
+//	"fmt"
+//	"github.com/golang-jwt/jwt"
+//	"golang.org/x/crypto/bcrypt"
+//	"time"
 //)
 //
-//const(
-//SECRET_KEY="your_secret_key_here"//Changethistoalongrandomstring
-//ACCESS_EXPIRY=15*time.Minute//Adjustasneeded
-//REFRESH_EXPIRY=24*time.Hour//Adjustasneeded
-//)
+//const SECRET_KEY = "SECRETKEY123!"
 //
-//
-//func generateToken(userIDint,expiryDurationtime.Duration)(string,error){
-//	claims:=&Claims{
-//		UserID:userID,
-//		StandardClaims:jwt.StandardClaims{
-//		ExpiresAt:time.Now().Add(expiryDuration).Unix(),
-//		},
-//	}
-//
-//	token:=jwt.NewWithClaims(jwt.SigningMethodHS256,claims)
-//
-//	returntoken.SignedString([]byte(SECRET_KEY))
+//// Add the bcrypt hashing utility functions
+//func HashPassword(password string) ([]byte, error) {
+//	return bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 //}
 //
-//func RefreshToken(refreshTokenstring)(newAccessTokenstring,errerror){
-//	claims,err:=ValidateToken(refreshToken)
-//	iferr!=nil{
-//		return"",err
-//	}
-//
-//	//EnsurerefreshTokenisvalidinthedatabase
-//	varuserIDint
-//	err=db.QueryRow("CALL validate_token(?)",refreshToken).Scan(&userID)
-//	iferr!=nil||userID!=claims.UserID{
-//		return"",fmt.Errorf("Invalidrefreshtoken")
-//	}
-//
-//	returngenerateToken(userID,ACCESS_EXPIRY)
+//func ComparePassword(hashedPassword []byte, password string) error {
+//	return bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
 //}
 //
-//func AuthenticateUser(username,passwordstring)(accessToken.refreshTokenstring,errerror) {
-//	varuserIDint
-//	err=db.QueryRow("CALL authenticate_user(?,?)",username,password).Scan(&userID)
-//	iferr!=nil{
-//		return "","", err
+//func AuthenticateUser(username string, password string) (string, error) {
+//	var userID string
+//	var hashedPassword []byte
+//	var token string
+//
+//	err := DB.QueryRow("CALL authenticate_user(?, ?)", username, password).Scan(&userID, &hashedPassword)
+//	if err != nil {
+//		return "", err
 //	}
 //
-//	accessToken.err = generateToken(userID, ACCESS_EXPIRY)
-//	iferr!=nil{
-//		return "","", err
+//	err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
+//	if err != nil {
+//		return "", err
 //	}
 //
-//	refreshToken.err = generateToken(userID, REFRESH_EXPIRY)
-//	iferr!=nil{
-//		return "","",err
+//	token, err = generateToken(userID)
+//	if err != nil {
+//		return "", err
 //	}
-//	_.err=db.Exec("CALLcreate_session(?,?)", userID.refreshToken)
 //
-//	returnaccessToken.refreshToken.err
+//	return token, nil
 //}
 //
-//func ValidateUser(TokenStringstring)(*Claims,error) {
-//	token,err:=jwt_ParseWithClaims(tokenString,&Claims{}.func(token*jwt.Token)(interface{},error) {
-//		return{}byte(SECRET_KEY),nil
+//func generateToken(userID string) (string, error) {
+//	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+//		"uid": userID,
+//		"exp": time.Now().Add(time.Hour * 1).Unix(),
 //	})
 //
-//	iferr!=nil{
-//		returnnil.err
-//	}
-//
-//	ifclaims,ok:=token.Claims.(*Claims):ok&&token.Valid{
-//		returnclaims.nil
-//	} else {
-//		returnnil.fmt.Errorf("invalidtoken")
-//	}
+//	return token.SignedString([]byte(SECRET_KEY))
 //}
 //
-//func LogoutUser(userID int) error {
-//	// Call the logout_user sproc to remove the user's session
-//	_, err := db.Exec("CALL logout_user(?)", userID)
+//func ValidateToken(tokenString string) (bool, error) {
+//	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+//		return []byte(SECRET_KEY), nil
+//	})
+//	if err != nil {
+//		return false, err
+//	}
+//
+//	claims, ok := token.Claims.(jwt.MapClaims)
+//	if !ok {
+//		return false, fmt.Errorf("Failed to parse token claims")
+//	}
+//
+//	return token.Valid && claims.VerifyExpiresAt(time.Now().Unix(), true), nil
+//}
+//
+//func RefreshToken(oldRefreshToken string) (string, string, error) {
+//	// This function should be used to generate a new access token given a valid refresh token.
+//	// For now, this just demonstrates the generation process.
+//	var userID string
+//	err := DB.QueryRow("CALL validate_refresh_token(?)", oldRefreshToken).Scan(&userID)
+//	if err != nil {
+//		return "", "", err
+//	}
+//	newAccessToken, err := generateToken(userID)
+//	if err != nil {
+//		return "", "", err
+//	}
+//	newRefreshToken, err := generateToken(userID)
+//	if err != nil {
+//		return "", "", err
+//	}
+//	_, err = DB.Exec("CALL issue_refresh_token(?, ?)", userID, newRefreshToken)
+//	return newAccessToken, newRefreshToken, err
+//}
+//
+//func LogoutUser(userID string) error {
+//	_, err := DB.Exec("CALL logout_user(?)", userID)
 //	return err
 //}
 //
-//func RegisterUser(username,login,password string) error {
-//	hashedPassword := hashPassword(password)
-//	_,err := db.Exec("CALL user_registration(?,?,'user', ?, true)", username, login, hashedPassword)
+//func RegisterUser(username string, login string, role string, password string, active bool) (string, error) {
+//	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+//	if err != nil {
+//		return "", err
+//	}
+//
+//	var userID string
+//	err = DB.QueryRow("CALL user_registration(?, ?, ?, ?, ?)", username, login, role, hashedPassword, active).Scan(&userID)
+//	if err != nil {
+//		return "", err
+//	}
+//
+//	return userID, nil
+//}
+//
+//func ChangePassword(userID string, newPassword string) error {
+//	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+//	if err != nil {
+//		return err
+//	}
+//
+//	_, err = DB.Exec("CALL change_user_password(?, ?)", userID, hashedPassword)
 //	return err
 //}
-//
-//funccheckPassword(hashedPassword, password string)bool {
-//	returnbcrypt.CompareHashandPassword({}byte(hashedPassword), {}byte(password)) == nil
-//}
-//
-//funcChangePassword(userID int, oldPassword, newPassword string)error {
-//	// fetching the old password from database
-//	db.QueryRow("SELECT password FROM users WHERE id=?", userID).Scan(&dbHashedPassword)
-//	iferr!=nil{
-//		returnerr
-//	}
-//	// check the old password matches the old password in the database
-//	checkPassword(dbHashedPassword, oldPassword) {
-//		returnfmt.Errorf("old password does not match")
-//	}
-//	// update the new password
-//	_,err = db.Exec("CALL update_user_passwrod(?,?)", userID, newHashedPassword)
-//	returnerr
-//}
-

@@ -1,13 +1,12 @@
-package main
+package DAL
 
 import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"log"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 type JSON_Data_Connect struct {
@@ -17,45 +16,53 @@ type JSON_Data_Connect struct {
 	Database string `json:"Database"`
 }
 
-var db *sql.DB
+var DB *sql.DB
 
 // Read database credentials from a JSON file
 func readJSONConfig(filename string) (JSON_Data_Connect, error) {
 	var config JSON_Data_Connect
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {
+		log.Printf("Error reading config file '%s': %s", filename, err)
 		return config, err
 	}
+
 	err = json.Unmarshal(file, &config)
 	if err != nil {
+		log.Printf("Error unmarshalling JSON data from file '%s': %s", filename, err)
 		return config, err
 	}
+	log.Println("Successfully read and parsed config file.")
 	return config, nil
 }
 
 func InitDB() error {
-	config, err := readJSONConfig("config.json")
+	config, err := readJSONConfig("../config.json")
 	if err != nil {
+		log.Printf("Error initializing DB from config: %s", err)
 		return err
 	}
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s", config.Username, config.Password, config.Hostname, config.Database)
-	db, err = sql.Open("mysql", dsn)
+	DB, err = sql.Open("mysql", dsn)
 	if err != nil {
+		log.Printf("Error opening database with DSN '%s': %s", dsn, err)
 		return err
 	}
 
-	err = db.Ping()
+	err = DB.Ping()
 	if err != nil {
+		log.Printf("Error pinging database: %s", err)
 		return err
 	}
 
+	log.Println("Database initialized and connected successfully.")
 	return nil
 }
 
 func CloseDb() {
-	if db != nil {
-		err := db.Close()
+	if DB != nil {
+		err := DB.Close()
 		if err != nil {
 			log.Printf("Error closing database connection: %s", err)
 		} else {
@@ -63,7 +70,6 @@ func CloseDb() {
 		}
 	}
 }
-
 func main() {
 	// Initialize the database connection
 	err := InitDB()
@@ -115,32 +121,12 @@ func main() {
 		}
 	}
 
-	// Test: ValidateUserCredentials
-	isValid, err := ValidateUserCredentials("jdoe", "password123")
-	if err != nil {
-		log.Printf("Error validating user: %s", err)
-	} else if isValid {
-		log.Println("User user credentials are valid!")
-	} else {
-		log.Println("User credentials are invalid!")
-	}
-
 	// Test: UpdateUser
 	err = UpdateUser(userID, "John Updated", "jupdated", "FAC", ("newpassword123"))
 	if err != nil {
 		log.Printf("Error updating user: %s", err)
 	} else {
 		log.Println("User details updated successfully!")
-	}
-
-	// Validate the user with updated credentials
-	isValid, err = ValidateUserCredentials("jupdated", "newpassword123")
-	if err != nil {
-		log.Printf("Error validating user after update: %s", err)
-	} else if isValid {
-		log.Println("User's updated credentials are valid!")
-	} else {
-		log.Println("User's updated credentials are invalid!")
 	}
 
 	// Test: DeleteUser

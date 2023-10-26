@@ -48,12 +48,12 @@ CREATE TABLE IF NOT EXISTS log_status_codes(
 -- Fix for Duplicate Key Issue:
 -- Adds AUTO_INCREMENT to generate unique logID
 CREATE TABLE IF NOT EXISTS log (
-                                   log_ID INT AUTO_INCREMENT PRIMARY KEY, -- Auto-generated unique ID
-                                   status_code VARCHAR(3), -- 3 letters to store the status code to the DB
-                                   FOREIGN KEY (status_code) REFERENCES log_status_codes (status_code), -- references to another table
-                                   message VARCHAR(255), -- A message about the status of the log
-                                   go_engine_area VARCHAR(255), -- Where the log status is occurring
-                                   date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- When inserting a value, the dateTime automatically updates to the time it occurred
+                                   log_ID BINARY(36) PRIMARY KEY, -- Use BINARY(16) to store UUIDs
+                                   status_code VARCHAR(3),
+                                   FOREIGN KEY (status_code) REFERENCES log_status_codes (status_code),
+                                   message VARCHAR(255),
+                                   go_engine_area VARCHAR(255),
+                                   date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Periodically clean the log (anything older than 30 days)
@@ -154,18 +154,18 @@ CREATE TABLE IF NOT EXISTS predictions (
 
 
 CREATE TABLE IF NOT EXISTS user_sessions (
-                               session_id INT PRIMARY KEY AUTO_INCREMENT,
-                               user_id CHAR(36),
-                               token VARCHAR(255) NOT NULL,
-                               time_to_live DATETIME NOT NULL,
-                               last_activity DATETIME NOT NULL,
-                               scope VARCHAR(255) NOT NULL,
-                               FOREIGN KEY (user_id) REFERENCES users(user_id)
+                                             session_id CHAR(36) PRIMARY KEY,
+                                             user_id CHAR(36),
+                                             token VARCHAR(255) NOT NULL,
+                                             time_to_live DATETIME NOT NULL,
+                                             last_activity DATETIME NOT NULL,
+                                             scope VARCHAR(255) NOT NULL,
+                                             FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 -- Create the user_permissions table
 CREATE TABLE IF NOT EXISTS user_permissions (
-                                                permission_id INT AUTO_INCREMENT PRIMARY KEY, -- Auto-generated unique ID for the permission
+                                                permission_id CHAR(36) PRIMARY KEY, -- Auto-generated unique ID for the permission
                                                 user_role NVARCHAR(5), -- User's role
                                                 action_name NVARCHAR(50), -- Name of the action or permission
                                                 resource_name NVARCHAR(50) -- Name of the resource the permission applies to
@@ -353,12 +353,13 @@ CREATE PROCEDURE insert_log(
     IN pGoEngineArea VARCHAR(250)
 )
 BEGIN
-    DECLARE pLogID CHAR(36);
-    SET pLogID = UUID();
+    DECLARE pLogID BINARY(16);
+    SET pLogID = UNHEX(REPLACE(UUID(), '-', '')); -- Generate a UUID and convert it to binary
 
     INSERT INTO log (log_ID, status_code, message, go_engine_area)
     VALUES (pLogID, pStatusCode, pMessage, pGoEngineArea);
 END//
+
 
 CREATE PROCEDURE select_all_logs()
 BEGIN
@@ -382,9 +383,9 @@ CREATE PROCEDURE populate_log_status_codes() -- Populates the Log's if they aren
 
 BEGIN
     IF (SELECT COUNT(*) FROM log_status_codes) = 0 THEN
-        INSERT INTO log_status_codes (status_code, status_message) VALUES ('OPR', 'Normal operational mode');
+        INSERT INTO log_status_codes (status_code, status_message) VALUES ('200', 'Normal operational mode');
         INSERT INTO log_status_codes (status_code, status_message) VALUES ('WAR', 'Warring issue application still functional');
-        INSERT INTO log_status_codes (status_code, status_message) VALUES ('ERR', 'Severe error application not functional');
+        INSERT INTO log_status_codes (status_code, status_message) VALUES ('400', 'Severe error application not functional');
     END IF;
 END //
 
@@ -432,7 +433,7 @@ CREATE PROCEDURE create_user(
     IN p_user_name NVARCHAR(25),
     IN p_user_login NVARCHAR(10),
     IN p_user_role NVARCHAR(5),
-    IN p_user_password VARBINARY(16),
+    IN p_user_password VARBINARY(255),
     IN p_active_or_not BOOLEAN
 )
 BEGIN
@@ -444,6 +445,15 @@ BEGIN
     VALUES (v_user_id, p_user_name, p_user_login, p_user_role, p_user_password, p_active_or_not, CURRENT_TIMESTAMP());
     SELECT v_user_id;
 END //
+
+DELIMITER //
+CREATE PROCEDURE get_user_by_login(
+    IN p_user_login NVARCHAR(10)
+)
+BEGIN
+    SELECT * FROM users WHERE user_login = p_user_login;
+END //
+DELIMITER ;
 
 DELIMITER ;
 -- READ
@@ -482,31 +492,6 @@ BEGIN
 END //
 DELIMITER ;
 
-USE goengine;
-DELIMITER //
-
--- Create a function to encrypt passwords
-CREATE FUNCTION encrypts_password(password NVARCHAR(255)) RETURNS VARBINARY(255)
-    DETERMINISTIC
-    NO SQL
-BEGIN
-    DECLARE encrypted VARBINARY(255);
-    SET encrypted = AES_ENCRYPT(password, 'IST888IST888');
-    RETURN encrypted;
-END//
-
-
-DELIMITER //
-
--- A SPROC to validate user credentials
-CREATE PROCEDURE `validate_user`(IN userLogin VARCHAR(255), IN userPassword NVARCHAR(255))
-BEGIN
-    DECLARE encryptedPwd VARBINARY(255);
-    SET encryptedPwd = encrypts_password(userPassword);
-    SELECT COUNT(*) FROM users WHERE user_login = userLogin AND user_password = encryptedPwd INTO @exists;
-    SELECT IF(@exists > 0, TRUE, FALSE) AS valid;
-END;
-
 
 -- UPDATE
 DELIMITER //
@@ -516,7 +501,7 @@ CREATE PROCEDURE update_user(
     IN p_user_name NVARCHAR(25),
     IN p_user_login NVARCHAR(10),
     IN p_user_role NVARCHAR(5),
-    IN p_user_password VARBINARY(16)
+    IN p_user_password VARBINARY(255)
 )
 BEGIN
     UPDATE users
@@ -542,30 +527,6 @@ END //
 
 DELIMITER ;
 
--- ================================================
--- SECTION: Authentication and Authorization SPROCS
--- ================================================
-
--- SPROC for authenticating a user
-DELIMITER //
-CREATE PROCEDURE authenticate_user(
-    IN p_user_login NVARCHAR(10),
-    IN p_user_password VARBINARY(255)
-)
-BEGIN
-    DECLARE v_user_id CHAR(36);
-    DECLARE v_authenticated BOOLEAN;
-
-    -- Check if the login and hashed password match any user
-    SELECT user_id INTO v_user_id FROM users
-    WHERE user_login = p_user_login AND user_password = p_user_password;
-
-    -- Determine if the user is authenticated
-    SET v_authenticated = (v_user_id IS NOT NULL);
-
-    SELECT v_authenticated, v_user_id;
-END //
-DELIMITER ;
 
 -- ================================================
 -- SECTION: CRAB SPROCS
@@ -787,18 +748,6 @@ BEGIN
 END //
 DELIMITER ;
 
--- A SPROC to update a user's password
-DELIMITER //
-CREATE PROCEDURE update_user_password(
-    IN p_user_id CHAR(36),
-    IN p_new_password VARBINARY(16)
-)
-BEGIN
-    UPDATE users
-    SET user_password = p_new_password
-    WHERE user_id = p_user_id;
-END //
-DELIMITER ;
 
 -- A SPROC to deactivate a user
 DELIMITER //
@@ -819,6 +768,27 @@ DELIMITER ;
 -- ================================================
 
 
+
+-- SPROC for authenticating a user
+DELIMITER //
+CREATE PROCEDURE authenticate_user(
+    IN p_user_login NVARCHAR(10),
+    IN p_user_password VARBINARY(255)
+)
+BEGIN
+    DECLARE v_user_id CHAR(36);
+    DECLARE v_authenticated BOOLEAN;
+
+    -- Check if the login and hashed password match any user
+    SELECT user_id INTO v_user_id FROM users
+    WHERE user_login = p_user_login AND user_password = p_user_password;
+
+    -- Determine if the user is authenticated
+    SET v_authenticated = (v_user_id IS NOT NULL);
+
+    SELECT v_authenticated, v_user_id;
+END //
+DELIMITER ;
 
 DELIMITER //
 -- Procedure to create a new session for a user
@@ -845,6 +815,18 @@ BEGIN
 END //
 DELIMITER ;
 
+DELIMITER  //
+CREATE PROCEDURE validate_refresh_token(
+    IN p_token VARBINARY(255)
+)
+BEGIN
+    SELECT user_id
+    FROM refresh_tokens
+    WHERE token = p_token AND expiry > CURRENT_TIMESTAMP;
+
+END //
+DELIMITER ;
+
 DELIMITER //
 CREATE PROCEDURE issue_refresh_token(
     IN p_user_id CHAR(36),
@@ -865,13 +847,25 @@ BEGIN
 END //
 DELIMITER ;
 
+-- A SPROC to update a user's password
+DELIMITER //
+CREATE PROCEDURE change_user_password(
+    IN p_user_id CHAR(36),
+    IN p_new_password VARBINARY(255)
+)
+BEGIN
+    UPDATE users
+    SET user_password = p_new_password
+    WHERE user_id = p_user_id;
+END //
+DELIMITER ;
 -- A SPROC for user registration
 DELIMITER //
 CREATE PROCEDURE user_registration(
     IN p_user_name NVARCHAR(25),
     IN p_user_login NVARCHAR(10),
     IN p_user_role NVARCHAR(5),
-    IN p_user_password VARBINARY(16),
+    IN p_user_password VARBINARY(255),
     IN p_active_or_not BOOLEAN
 )
 BEGIN
@@ -898,7 +892,7 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE user_login(
     IN p_user_login NVARCHAR(10),
-    IN p_user_password VARBINARY(16)
+    IN p_user_password VARBINARY(255)
 )
 BEGIN
     SELECT user_id, user_name, user_role
@@ -921,9 +915,9 @@ VALUES
 -- Inserting sample users into the users table
 INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
 VALUES
-    (UUID(), 'Joesph Oakes', 'jxo19', 'ADM', encrypts_password('admin123'), TRUE, CURRENT_TIMESTAMP()),
-    (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', encrypts_password('dev789'), TRUE, CURRENT_TIMESTAMP()),
-    (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', encrypts_password('std447'), TRUE, CURRENT_TIMESTAMP());
+    (UUID(), 'Joesph Oakes', 'jxo19', 'ADM', 'admin123', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', 'dev789', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', 'std447', TRUE, CURRENT_TIMESTAMP());
 
 -- Inserting sample URLs into the URLs table
 INSERT INTO urls (id, url, tags)

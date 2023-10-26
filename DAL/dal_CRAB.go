@@ -1,4 +1,4 @@
-package main
+package DAL
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 // Function to create a new web crawler
 func CreateWebCrawler(sourceURL string) (string, error) {
 	var crawlerID string
-	err := db.QueryRow("CALL create_webcrawler(?)", sourceURL).Scan(&crawlerID)
+	err := DB.QueryRow("CALL create_webcrawler(?)", sourceURL).Scan(&crawlerID)
 	if err != nil {
 		return "", err
 	} else {
@@ -22,7 +22,7 @@ func CreateWebCrawler(sourceURL string) (string, error) {
 // Function to create a new scraper engine
 func CreateScraperEngine(engineName, engineDescription string) (string, error) {
 	var engineID string
-	err := db.QueryRow("CALL create_scraper_engine(?, ?)", engineName, engineDescription).Scan(&engineID)
+	err := DB.QueryRow("CALL create_scraper_engine(?, ?)", engineName, engineDescription).Scan(&engineID)
 	if err != nil {
 		return "", err
 	} else {
@@ -41,7 +41,7 @@ func InsertURL(url, domain string, tags map[string]interface{}) (string, error) 
 		log.Printf("URL inserted with tags: %v", tags)
 	}
 
-	err = db.QueryRow("CALL insert_url(?, ?, ?)", url, string(jsonTags), domain).Scan(&id)
+	err = DB.QueryRow("CALL insert_url(?, ?, ?)", url, string(jsonTags), domain).Scan(&id)
 	if err != nil {
 		return "", err
 	} else {
@@ -59,14 +59,14 @@ func UpdateURL(id, url, domain string, tags map[string]interface{}) error {
 		log.Printf("URL updated with tags: %v", tags)
 	}
 
-	_, err = db.Exec("CALL update_url(?, ?, ?, ?)", id, url, string(jsonTags), domain)
+	_, err = DB.Exec("CALL update_url(?, ?, ?, ?)", id, url, string(jsonTags), domain)
 	return err
 }
 
 // Function to fetch URL tags and domain by ID
 func GetURLTagsAndDomain(id string) (map[string]interface{}, string, error) {
 	var tagsStr, domain string
-	err := db.QueryRow("CALL get_url_tags_and_domain(?)", id).Scan(&tagsStr, &domain)
+	err := DB.QueryRow("CALL get_url_tags_and_domain(?)", id).Scan(&tagsStr, &domain)
 	if err != nil {
 		return nil, "", err
 	} else {
@@ -85,7 +85,7 @@ func GetURLTagsAndDomain(id string) (map[string]interface{}, string, error) {
 
 // Function to fetch URLs from a specific domain
 func GetURLsFromDomain(domain string) ([]string, error) {
-	rows, err := db.Query("CALL get_urls_from_domain(?)", domain)
+	rows, err := DB.Query("CALL get_urls_from_domain(?)", domain)
 	if err != nil {
 		return nil, err
 	} else {
@@ -111,7 +111,7 @@ func GetURLsFromDomain(domain string) ([]string, error) {
 // Function to fetch UUID from URL and domain
 func GetUUIDFromURLAndDomain(url, domain string) (string, error) {
 	var id string
-	err := db.QueryRow("CALL get_Uuid_from_URL_and_domain(?, ?)", url, domain).Scan(&id)
+	err := DB.QueryRow("CALL get_Uuid_from_URL_and_domain(?, ?)", url, domain).Scan(&id)
 	if err != nil {
 		return "", err
 	} else {
@@ -124,7 +124,7 @@ func GetUUIDFromURLAndDomain(url, domain string) (string, error) {
 func GetRandomURL() (string, error) {
 	var id, url, tags, domain string
 	var createdTime []byte // As per our earlier fix
-	err := db.QueryRow("CALL get_random_url()").Scan(&id, &url, &tags, &domain, &createdTime)
+	err := DB.QueryRow("CALL get_random_url()").Scan(&id, &url, &tags, &domain, &createdTime)
 	if err != nil {
 		return "", err
 	} else {
@@ -135,7 +135,7 @@ func GetRandomURL() (string, error) {
 
 // Function to fetch all URLs (just the 'url' column)
 func GetURLsOnly() ([]string, error) {
-	rows, err := db.Query("CALL get_urls_only()")
+	rows, err := DB.Query("CALL get_urls_only()")
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +157,7 @@ func GetURLsOnly() ([]string, error) {
 
 // Function to fetch all URLs with their tags
 func GetURLsAndTags() (map[string]map[string]interface{}, error) {
-	rows, err := db.Query("CALL get_urls_and_tags()")
+	rows, err := DB.Query("CALL get_urls_and_tags()")
 	if err != nil {
 		return nil, err
 	}

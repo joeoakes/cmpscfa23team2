@@ -1,5 +1,7 @@
 /*
 
+This is just a template, check out the 'threading.go' for an actual example.
+
 First:
 go get github.com/PuerkitoBio/goquery
 go get github.com/temoto/robotstxt

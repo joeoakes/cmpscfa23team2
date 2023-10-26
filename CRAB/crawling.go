@@ -1,5 +1,18 @@
 package CRAB
 
+/*
+
+Explanation:
+	The scrape function fetches and processes a single URL.
+	The main function spawns multiple goroutines, one for each URL to be scraped.
+	Results (or errors) from each scrape are sent back to the main thread via a channel.
+	A WaitGroup ensures the main thread waits for all scraping goroutines to complete.
+	This is a basic setup, and many more features can be added like rate limiting, respecting robots.txt, handling redirects, etc. 
+	Also, data extraction in the scrape function is very rudimentary. 
+	You'd need to customize it based on the structure of the sites you're scraping and the data you want to extract.
+*/
+
+
 import (
 	"fmt"
 	"log"

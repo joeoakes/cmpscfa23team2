@@ -46,8 +46,6 @@ func main() {
 		return
 	}
 
-	// put scraping elements here
-
 	// keeps the program running
 	select {}
 }

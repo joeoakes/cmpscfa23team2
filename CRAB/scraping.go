@@ -145,6 +145,7 @@ type EtfInfo struct {
 //type travelInfo struct {
 //	Title              string
 //	DescriptionOfPlace string
+// jjjjjj
 //}
 
 func setupCollector() *colly.Collector {

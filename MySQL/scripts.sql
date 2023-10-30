@@ -672,6 +672,35 @@ BEGIN
 END //
 DELIMITER ;
 
+
+-- SPROC for Retrieving ETF data by ISIN
+DELIMITER //
+CREATE PROCEDURE FetchETFByISIN(
+    IN p_isin VARCHAR(255)
+)
+BEGIN
+    SELECT * FROM ETFs WHERE isin = p_isin;
+END //
+DELIMITER ;
+
+-- SPROC for Deleting ETF data by ISIN
+DELIMITER //
+CREATE PROCEDURE DeleteETFByISIN(
+    IN p_isin VARCHAR(255)
+)
+BEGIN
+    DELETE FROM ETFs WHERE isin = p_isin;
+END //
+DELIMITER ;
+
+-- SPROC for Listing All ETFs
+DELIMITER //
+CREATE PROCEDURE ListAllETFs()
+BEGIN
+    SELECT * FROM ETFs;
+END //
+DELIMITER ;
+
 -- ================================================
 -- SECTION: Authorization SPROCS
 -- ================================================

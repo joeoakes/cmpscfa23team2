@@ -189,7 +189,7 @@ func main() {
 	var wg sync.WaitGroup
 	resultChan := make(chan EtfInfo, TotalURLs*URLsPerCategory)
 
-	// Launch worker goroutines
+	// Launch worker goroutineshh
 	for i := 0; i < Workers; i++ {
 		wg.Add(1)
 		go func() {

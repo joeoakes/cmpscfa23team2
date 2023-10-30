@@ -186,9 +186,17 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
                                               FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
-
-
-
+CREATE TABLE ETFs (
+                      etf_id INT AUTO_INCREMENT PRIMARY KEY,
+                      title VARCHAR(255) NOT NULL,
+                      replication VARCHAR(255),
+                      earnings VARCHAR(255),
+                      total_expense_ratio VARCHAR(255),
+                      tracking_difference VARCHAR(255),
+                      fund_size VARCHAR(255),
+                      isin VARCHAR(255) UNIQUE NOT NULL,
+                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 -- ================================================
 -- SECTION: TASK MANAGER SPROCS

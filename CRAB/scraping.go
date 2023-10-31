@@ -127,7 +127,7 @@ import (
 
 const (
 	BaseURL         = "https://www.trackingdifferences.com/ETF/ISIN/"
-	AdditionalURL   = "https://www.travelpulse.com/gallery/features/the-15-travel-trends-that-will-define-2023"
+	AdditionalURL   = "https://www.cntraveler.com/story/best-places-to-go-in-2023"
 	Workers         = 3
 	TotalURLs       = 2 // Total number of URLs to scrape
 	URLsPerCategory = 1 // Number of URLs per category (you can adjust this based on your needs)
@@ -142,55 +142,98 @@ type EtfInfo struct {
 	FundSize           string
 }
 
-//type travelInfo struct {
-//	Title              string
-//	DescriptionOfPlace string
-// jjjjjj
-//}
+type TravelInfo struct {
+	Title              string
+	DescriptionOfPlace string
+}
 
 func setupCollector() *colly.Collector {
 	return colly.NewCollector(
-		colly.AllowedDomains("www.trackingdifferences.com", "trackingdifferences.com", "www.travelpulse.com"),
+		colly.AllowedDomains("www.trackingdifferences.com", "trackingdifferences.com", "www.cntraveler.com"),
 	)
 }
 
-func scrapeEtfInfo(url string, wg *sync.WaitGroup, resultChan chan EtfInfo) {
+func scrapeEtfInfo(url string, wg *sync.WaitGroup, resultChan chan interface{}) {
 	defer wg.Done()
 
-	etfInfo := EtfInfo{}
-	c := setupCollector()
+	if url == BaseURL {
+		etfInfo := EtfInfo{} // Initialize with empty fields
+		c := setupCollector()
 
-	// Set headers before making a request
-	c.OnRequest(func(r *colly.Request) {
-		r.Headers.Set("Accept-Language", "en-US;q=0.9")
-		fmt.Printf("Visiting %s\n", r.URL)
-	})
+		// Set headers before making a request
+		c.OnRequest(func(r *colly.Request) {
+			r.Headers.Set("Accept-Language", "en-US;q=0.9")
+			fmt.Printf("Visiting %s\n", r.URL)
+		})
 
-	// Handle any errors during scraping
-	c.OnError(func(r *colly.Response, e error) {
-		fmt.Printf("Error while scraping: %s\n", e.Error())
-	})
+		// Handle any errors during scraping
+		c.OnError(func(r *colly.Response, e error) {
+			fmt.Printf("Error while scraping: %s\n", e.Error())
+		})
 
-	// Implement other scraping logic here
+		// Implement scraping logic for ETF info here
+		// For example:
+		// c.OnHTML("your ETF info CSS selector", func(e *colly.HTMLElement) {
+		//   etfInfo.Title = e.ChildText("title CSS selector")
+		//   etfInfo.Replication = e.ChildText("replication CSS selector")
+		//   // ... populate other fields similarly
+		// })
 
-	// After scraping is complete, send the result back through the channel
-	c.OnScraped(func(r *colly.Response) {
-		resultChan <- etfInfo
-	})
+		// After scraping is complete, send the result back through the channel
+		c.OnScraped(func(r *colly.Response) {
+			resultChan <- etfInfo
+		})
 
-	// Visit the URL
-	err := c.Visit(url)
-	if err != nil {
-		fmt.Printf("Error visiting site: %s", err)
+		// Visit the ETF URL
+		err := c.Visit(url)
+		if err != nil {
+			fmt.Printf("Error visiting ETF site: %s", err)
+		}
+	} else if url == AdditionalURL {
+		travelInfo := TravelInfo{} // Initialize with empty fields
+		c := setupCollector()
+
+		// Set headers before making a request
+		c.OnRequest(func(r *colly.Request) {
+			r.Headers.Set("Accept-Language", "en-US;q=0.9")
+			fmt.Printf("Visiting %s\n", r.URL)
+		})
+
+		// Handle any errors during scraping
+		c.OnError(func(r *colly.Response, e error) {
+			fmt.Printf("Error while scraping: %s\n", e.Error())
+		})
+
+		// Implement scraping logic for travel info here
+		c.OnHTML("h1.headline", func(e *colly.HTMLElement) {
+			fmt.Println("Title found:", e.Text)
+			travelInfo.Title = e.Text
+		})
+
+		c.OnHTML(".dekText", func(e *colly.HTMLElement) {
+			fmt.Println("Description found:", e.Text)
+			travelInfo.DescriptionOfPlace = e.Text
+		})
+
+		// After scraping is complete, send the result back through the channel
+		c.OnScraped(func(r *colly.Response) {
+			resultChan <- travelInfo
+		})
+
+		// Visit the travel URL
+		err := c.Visit(url)
+		if err != nil {
+			fmt.Printf("Error visiting travel site: %s", err)
+		}
 	}
 }
 
 func main() {
 	urls := []string{BaseURL, AdditionalURL}
 	var wg sync.WaitGroup
-	resultChan := make(chan EtfInfo, TotalURLs*URLsPerCategory)
+	resultChan := make(chan interface{}, TotalURLs*URLsPerCategory)
 
-	// Launch worker goroutineshh
+	// Launch worker goroutines
 	for i := 0; i < Workers; i++ {
 		wg.Add(1)
 		go func() {
@@ -210,12 +253,23 @@ func main() {
 
 	// Collect results from the channel
 	var etfInfos []EtfInfo
-	for etfInfo := range resultChan {
-		etfInfos = append(etfInfos, etfInfo)
+	var travelInfos []TravelInfo
+	for result := range resultChan {
+		switch data := result.(type) {
+		case EtfInfo:
+			etfInfos = append(etfInfos, data)
+		case TravelInfo:
+			travelInfos = append(travelInfos, data)
+		}
 	}
 
 	// Encode and print the scraped data
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", " ")
+
+	// Output ETF information
 	enc.Encode(etfInfos)
+
+	// Output travel information
+	enc.Encode(travelInfos)
 }

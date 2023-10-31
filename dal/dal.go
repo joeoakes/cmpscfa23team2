@@ -1,4 +1,4 @@
-package DAL
+package dal
 
 import (
 	"database/sql"
@@ -195,7 +195,7 @@ func main() {
 	//	log.Printf("Success inserting scraped data")
 	//}
 
-	// dal.CRAB function testing
+	// dal.crab function testing
 	// Test: CreateWebCrawler
 	crawlerID, err := CreateWebCrawler("http://example.com")
 	if err != nil {

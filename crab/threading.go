@@ -32,112 +32,112 @@ Always ensure you have the legal right to scrape a website, and respect its robo
 
 package main
 
-import (
-	"flag"
-	"fmt"
-	"log"
-	"net/http"
-	"sync"
-	"time"
-
-	"github.com/PuerkitoBio/goquery"
-	"github.com/temoto/robotstxt"
-)
-
-type ScrapeResult struct {
-	URL   string
-	Data  string
-	Error error
-}
-
-func fetchRobotsTxt(url string) (*robotstxt.Group, error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	data, err := robotstxt.FromResponse(resp)
-	if err != nil {
-		return nil, err
-	}
-
-	return data.FindGroup("*"), nil
-}
-
-func scrape(url string, targetElement string, ch chan<- ScrapeResult, delay time.Duration) {
-	time.Sleep(delay)
-
-	resp, err := http.Get(url)
-	if err != nil {
-		ch <- ScrapeResult{URL: url, Error: err}
-		return
-	}
-	defer resp.Body.Close()
-
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
-	if err != nil {
-		ch <- ScrapeResult{URL: url, Error: err}
-		return
-	}
-
-	doc.Find(targetElement).Each(func(index int, element *goquery.Selection) {
-		ch <- ScrapeResult{URL: url, Data: element.Text()}
-	})
-}
-
-// For testing reasons if this main does not compile, try the other one
-func main() {
-	var bypassRobotsCheck bool
-	flag.BoolVar(&bypassRobotsCheck, "bypass-robots", false, "Bypass the robots.txt check")
-	flag.Parse()
-
-	baseURL := "http://quotes.toscrape.com"
-	robotsURL := baseURL + "/robots.txt"
-	urls := []string{
-		baseURL + "/page/1/",
-	}
-
-	if !bypassRobotsCheck {
-		robotsGroup, err := fetchRobotsTxt(robotsURL)
-		if err != nil {
-			log.Fatalf("Failed fetching robots.txt: %v", err)
-		}
-
-		for _, url := range urls {
-			if !robotsGroup.Test(url) {
-				log.Fatalf("Access denied by robots.txt for URL: %s", url)
-			}
-		}
-	}
-
-	targetElement := ".quote .text"
-
-	ch := make(chan ScrapeResult)
-	var wg sync.WaitGroup
-
-	delay := 1 * time.Second
-	for _, url := range urls {
-		wg.Add(1)
-		go func(u string) {
-			defer wg.Done()
-			scrape(u, targetElement, ch, delay)
-		}(url)
-	}
-
-	go func() {
-		wg.Wait() // Wait for all scraping Goroutines to finish
-		close(ch) // Then close the channel
-	}()
-
-	for result := range ch {
-		if result.Error != nil {
-			log.Printf("Error scraping %s: %v", result.URL, result.Error)
-		} else {
-			fmt.Printf("Scraped %s: %s\n", result.URL, result.Data)
-		}
-	}
-}
+//import (
+//	"flag"
+//	"fmt"
+//	"log"
+//	"net/http"
+//	"sync"
+//	"time"
+//
+//	"github.com/PuerkitoBio/goquery"
+//	"github.com/temoto/robotstxt"
+//)
+//
+//type ScrapeResult struct {
+//	URL   string
+//	Data  string
+//	Error error
+//}
+//
+//func fetchRobotsTxt(url string) (*robotstxt.Group, error) {
+//	resp, err := http.Get(url)
+//	if err != nil {
+//		return nil, err
+//	}
+//	defer resp.Body.Close()
+//
+//	data, err := robotstxt.FromResponse(resp)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	return data.FindGroup("*"), nil
+//}
+//
+//func scrape(url string, targetElement string, ch chan<- ScrapeResult, delay time.Duration) {
+//	time.Sleep(delay)
+//
+//	resp, err := http.Get(url)
+//	if err != nil {
+//		ch <- ScrapeResult{URL: url, Error: err}
+//		return
+//	}
+//	defer resp.Body.Close()
+//
+//	doc, err := goquery.NewDocumentFromReader(resp.Body)
+//	if err != nil {
+//		ch <- ScrapeResult{URL: url, Error: err}
+//		return
+//	}
+//
+//	doc.Find(targetElement).Each(func(index int, element *goquery.Selection) {
+//		ch <- ScrapeResult{URL: url, Data: element.Text()}
+//	})
+//}
+//
+//// For testing reasons if this main does not compile, try the other one
+//func main() {
+//	var bypassRobotsCheck bool
+//	flag.BoolVar(&bypassRobotsCheck, "bypass-robots", false, "Bypass the robots.txt check")
+//	flag.Parse()
+//
+//	baseURL := "http://quotes.toscrape.com"
+//	robotsURL := baseURL + "/robots.txt"
+//	urls := []string{
+//		baseURL + "/page/1/",
+//	}
+//
+//	if !bypassRobotsCheck {
+//		robotsGroup, err := fetchRobotsTxt(robotsURL)
+//		if err != nil {
+//			log.Fatalf("Failed fetching robots.txt: %v", err)
+//		}
+//
+//		for _, url := range urls {
+//			if !robotsGroup.Test(url) {
+//				log.Fatalf("Access denied by robots.txt for URL: %s", url)
+//			}
+//		}
+//	}
+//
+//	targetElement := ".quote .text"
+//
+//	ch := make(chan ScrapeResult)
+//	var wg sync.WaitGroup
+//
+//	delay := 1 * time.Second
+//	for _, url := range urls {
+//		wg.Add(1)
+//		go func(u string) {
+//			defer wg.Done()
+//			scrape(u, targetElement, ch, delay)
+//		}(url)
+//	}
+//
+//	go func() {
+//		wg.Wait() // Wait for all scraping Goroutines to finish
+//		close(ch) // Then close the channel
+//	}()
+//
+//	for result := range ch {
+//		if result.Error != nil {
+//			log.Printf("Error scraping %s: %v", result.URL, result.Error)
+//		} else {
+//			fmt.Printf("Scraped %s: %s\n", result.URL, result.Data)
+//		}
+//	}
+//}
 
 //
 //func main() {

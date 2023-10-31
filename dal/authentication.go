@@ -1,4 +1,5 @@
-//package DAL
+package dal
+
 //
 //import (
 //	"fmt"

@@ -182,7 +182,10 @@ func TestDeactivateUser(t *testing.T) {
 	userID := "878ff80b-739a-11ee-b88a-30d042e80ac3" // Replace with a valid user ID
 	err := DAL.DeactivateUser(userID)
 	if err != nil {
-		DAL.InsertLog("400", "Failed to deactivate user", "TestDeactivateUser()")
+		err := DAL.InsertLog("400", "Failed to deactivate user", "TestDeactivateUser()")
+		if err != nil {
+			return
+		}
 		t.Fatalf("Failed to deactivate user: %v", err)
 	}
 

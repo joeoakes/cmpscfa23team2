@@ -141,9 +141,7 @@ func TestRegisterUser(t *testing.T) {
 	login := "hescalling"
 	role := "NA"
 	password := "jp123"
-	active := true
-
-	userID, err := DAL.RegisterUser(username, login, role, password, active)
+	userID, err := DAL.RegisterUser(username, login, role, password, true)
 	if err != nil {
 		t.Errorf("User registration failed: %v", err)
 	}

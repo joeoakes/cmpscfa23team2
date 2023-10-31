@@ -1,4 +1,4 @@
-package DAL_TEST
+package dal_test
 
 import (
 	"cmpscfa23team2/DAL"

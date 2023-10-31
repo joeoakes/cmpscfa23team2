@@ -3,7 +3,7 @@
 -- Produced By: 4Tekies LLC and Penn State Abington - CMPSC 488 Course
 -- Author: Mahir Khan, Joshua Ferrell & Joseph Oakes and Team 2 Members
 -- Date: 6/27/2023, 09/28/2023
--- Purpose: OurGo holds all necessary MySQL code needed to establish the database
+-- Purpose: OurGo holds all necessary mysql code needed to establish the database
 ---------------------------------------------------
 */
 -- Drop the database if it exists

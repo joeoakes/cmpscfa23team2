@@ -186,9 +186,17 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
                                               FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
-
-
-
+CREATE TABLE ETFs (
+                      etf_id INT AUTO_INCREMENT PRIMARY KEY,
+                      title VARCHAR(255) NOT NULL,
+                      replication VARCHAR(255),
+                      earnings VARCHAR(255),
+                      total_expense_ratio VARCHAR(255),
+                      tracking_difference VARCHAR(255),
+                      fund_size VARCHAR(255),
+                      isin VARCHAR(255) UNIQUE NOT NULL,
+                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 -- ================================================
 -- SECTION: TASK MANAGER SPROCS
@@ -635,7 +643,63 @@ BEGIN
 END //
 DELIMITER ;
 
+-- SPROC for Inserting or Updating ETF data
+DELIMITER //
+CREATE PROCEDURE InsertOrUpdateETFData(
+    IN p_title VARCHAR(255),
+    IN p_replication VARCHAR(255),
+    IN p_earnings VARCHAR(255),
+    IN p_total_expense_ratio VARCHAR(255),
+    IN p_tracking_difference VARCHAR(255),
+    IN p_fund_size VARCHAR(255),
+    IN p_isin VARCHAR(255)
+)
+BEGIN
+    IF NOT EXISTS (SELECT * FROM ETFs WHERE isin = p_isin) THEN
+        INSERT INTO ETFs (title, replication, earnings, total_expense_ratio, tracking_difference, fund_size, isin)
+        VALUES (p_title, p_replication, p_earnings, p_total_expense_ratio, p_tracking_difference, p_fund_size, p_isin);
+    ELSE
+        UPDATE ETFs
+        SET
+            title = p_title,
+            replication = p_replication,
+            earnings = p_earnings,
+            total_expense_ratio = p_total_expense_ratio,
+            tracking_difference = p_tracking_difference,
+            fund_size = p_fund_size
+        WHERE isin = p_isin;
+    END IF;
+END //
+DELIMITER ;
 
+
+-- SPROC for Retrieving ETF data by ISIN
+DELIMITER //
+CREATE PROCEDURE FetchETFByISIN(
+    IN p_isin VARCHAR(255)
+)
+BEGIN
+    SELECT * FROM ETFs WHERE isin = p_isin;
+END //
+DELIMITER ;
+
+-- SPROC for Deleting ETF data by ISIN
+DELIMITER //
+CREATE PROCEDURE DeleteETFByISIN(
+    IN p_isin VARCHAR(255)
+)
+BEGIN
+    DELETE FROM ETFs WHERE isin = p_isin;
+END //
+DELIMITER ;
+
+-- SPROC for Listing All ETFs
+DELIMITER //
+CREATE PROCEDURE ListAllETFs()
+BEGIN
+    SELECT * FROM ETFs;
+END //
+DELIMITER ;
 
 -- ================================================
 -- SECTION: Authorization SPROCS

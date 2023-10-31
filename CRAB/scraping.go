@@ -121,7 +121,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocolly/colly"
 	"os"
 	"sync"
@@ -147,7 +146,7 @@ type EtfInfo struct {
 //type travelInfo struct {
 //	Title              string
 //	DescriptionOfPlace string
-//
+// jjjjjj
 //}
 
 func setupCollector() *colly.Collector {

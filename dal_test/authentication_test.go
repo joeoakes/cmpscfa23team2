@@ -1,7 +1,7 @@
-package DAL_TEST
+package dal_test
 
 import (
-	"cmpscfa23team2/DAL"
+	"cmpscfa23team2/dal"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
 	"testing"
@@ -9,7 +9,7 @@ import (
 
 func TestHashPassword(t *testing.T) {
 	password := "secretpassword"
-	hashed, err := DAL.HashPassword(password)
+	hashed, err := dal.HashPassword(password)
 	if err != nil {
 		t.Errorf("Error occured: %v", err)
 	}
@@ -23,13 +23,13 @@ func TestComparePassword(t *testing.T) {
 	password := "password123" //use any password you like
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
-	err := DAL.ComparePassword(hashedPassword, password)
+	err := dal.ComparePassword(hashedPassword, password)
 	if err != nil {
 		t.Errorf("Passwords should match, but they don't: %v", err)
 
 	}
 	anotherPassword := "anotherPassword"
-	err = DAL.ComparePassword(hashedPassword, anotherPassword)
+	err = dal.ComparePassword(hashedPassword, anotherPassword)
 	if err == nil {
 		t.Errorf("Passwords should not match, but they do.")
 	}
@@ -39,11 +39,11 @@ func TestComparePassword(t *testing.T) {
 func TestGenerateToken(t *testing.T) {
 	// replace with test values
 	userID := "testUserID"
-	token, err := DAL.GenerateToken(userID)
+	token, err := dal.GenerateToken(userID)
 	if err != nil {
 		t.Errorf("Token generation failed: %v", err)
 	}
-	valid, err := DAL.ValidateToken(token)
+	valid, err := dal.ValidateToken(token)
 	if err != nil {
 		t.Errorf("Token validation failed: %v", err)
 
@@ -69,14 +69,14 @@ func TestGenerateToken(t *testing.T) {
 
 func TestValidateToken(t *testing.T) {
 	// if it is a valid token
-	validToken, _ := DAL.GenerateToken("testUserID")
-	isValid, err := DAL.ValidateToken(validToken)
+	validToken, _ := dal.GenerateToken("testUserID")
+	isValid, err := dal.ValidateToken(validToken)
 	assert.Nil(t, err)      //assert that there is no error
 	assert.True(t, isValid) //assert that the token is valid
 
 	// if it is not a valid token
 	invalidToken := "invalid_token"
-	isValid, err = DAL.ValidateToken(invalidToken)
+	isValid, err = dal.ValidateToken(invalidToken)
 	assert.NotNil(t, err)    //assert that there is an error
 	assert.False(t, isValid) // assert that the token is invalid
 }
@@ -87,7 +87,7 @@ func TestAuthenticateUser(t *testing.T) {
 	password := "he's'calling"
 
 	// authenticate the user
-	token, authErr := DAL.AuthenticateUser(username, password)
+	token, authErr := dal.AuthenticateUser(username, password)
 	if authErr != nil {
 		t.Errorf("Authentication failed: %v", authErr)
 
@@ -103,7 +103,7 @@ func TestRefreshToken(t *testing.T) {
 	oldRefreshToken := "valid_refresh_token"
 
 	// Generate a new access token and refresh token using the old refresh token
-	newAccessToken, newRefreshToken, err := DAL.RefreshToken(oldRefreshToken)
+	newAccessToken, newRefreshToken, err := dal.RefreshToken(oldRefreshToken)
 	if err != nil {
 		t.Errorf("Refresh token failed: %v", err)
 	}
@@ -117,7 +117,7 @@ func TestRefreshToken(t *testing.T) {
 	}
 
 	// Validate the new access token
-	isValid, err := DAL.ValidateToken(newAccessToken)
+	isValid, err := dal.ValidateToken(newAccessToken)
 	if err != nil {
 		t.Errorf("Token validation failed: %v", err)
 	}
@@ -126,7 +126,7 @@ func TestRefreshToken(t *testing.T) {
 	}
 
 	// Validate the new refresh token
-	isValid, err = DAL.ValidateToken(newRefreshToken)
+	isValid, err = dal.ValidateToken(newRefreshToken)
 	if err != nil {
 		t.Errorf("Token validation failed: %v", err)
 	}
@@ -141,7 +141,7 @@ func TestRegisterUser(t *testing.T) {
 	login := "hescalling"
 	role := "NA"
 	password := "jp123"
-	userID, err := DAL.RegisterUser(username, login, role, password, true)
+	userID, err := dal.RegisterUser(username, login, role, password, true)
 	if err != nil {
 		t.Errorf("User registration failed: %v", err)
 	}
@@ -152,7 +152,7 @@ func TestRegisterUser(t *testing.T) {
 
 func TestLogoutUser(t *testing.T) {
 	userID := "testUserID"
-	err := DAL.LogoutUser(userID)
+	err := dal.LogoutUser(userID)
 	if err != nil {
 		t.Errorf("User logout failed: %v", err)
 	}
@@ -162,7 +162,7 @@ func TestLogoutUser(t *testing.T) {
 func TestChangePassword(t *testing.T) {
 	userID := "testUserID"
 	newPassword := "newPassword"
-	err := DAL.ChangePassword(userID, newPassword)
+	err := dal.ChangePassword(userID, newPassword)
 	if err != nil {
 		t.Errorf("ChangePassword failed: %v", err)
 

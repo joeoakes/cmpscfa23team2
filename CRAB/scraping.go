@@ -118,8 +118,10 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocolly/colly"
 	"os"
 	"sync"
@@ -145,7 +147,7 @@ type EtfInfo struct {
 //type travelInfo struct {
 //	Title              string
 //	DescriptionOfPlace string
-// jjjjjj
+//
 //}
 
 func setupCollector() *colly.Collector {
@@ -184,6 +186,80 @@ func scrapeEtfInfo(url string, wg *sync.WaitGroup, resultChan chan EtfInfo) {
 		fmt.Printf("Error visiting site: %s", err)
 	}
 }
+
+// ////////////////////////////////////////////////////////////////////////////////////////////////
+// (ETF functions and table creations)
+// Function to Create the ETFs Table:
+func createETFsTable(db *sql.DB) error {
+	query := `
+        CREATE TABLE IF NOT EXISTS ETFs (
+            etf_id INT AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            replication VARCHAR(255),
+            earnings VARCHAR(255),
+            total_expense_ratio VARCHAR(255),
+            tracking_difference VARCHAR(255),
+            fund_size VARCHAR(255),
+            isin VARCHAR(255) UNIQUE NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    `
+	_, err := db.Exec(query)
+	return err
+}
+
+// Function to Insert or Update ETF Data:
+func UpdateETFData(db *sql.DB, title, replication, earnings, totalExpenseRatio, trackingDifference, fundSize, isin string) error {
+	query := `
+        INSERT INTO ETFs (title, replication, earnings, total_expense_ratio, tracking_difference, fund_size, isin)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+        title = VALUES(title),
+        replication = VALUES(replication),
+        earnings = VALUES(earnings),
+        total_expense_ratio = VALUES(total_expense_ratio),
+        tracking_difference = VALUES(tracking_difference),
+        fund_size = VALUES(fund_size);
+    `
+	_, err := db.Exec(query, title, replication, earnings, totalExpenseRatio, trackingDifference, fundSize, isin)
+	return err
+}
+
+// Function to Fetch ETF Data by ISIN:
+func fetchETFByISIN(db *sql.DB, isin string) (*sql.Rows, error) {
+	query := "CALL FetchETFByISIN(?)"
+	return db.Query(query, isin)
+}
+
+// Function to Update the Fund Size of an ETF by ISIN:
+func updateFundSizeByISIN(db *sql.DB, isin string, fundSize string) error {
+	query := "UPDATE ETFs SET fund_size = ? WHERE isin = ?"
+	_, err := db.Exec(query, fundSize, isin)
+	return err
+}
+
+// Function to Count the Number of ETFs:
+func countETFs(db *sql.DB) (int, error) {
+	query := "SELECT COUNT(*) FROM ETFs"
+	var count int
+	err := db.QueryRow(query).Scan(&count)
+	return count, err
+}
+
+// Function to Delete ETF Data by ISIN:
+func deleteETFByISIN(db *sql.DB, isin string) error {
+	query := "CALL DeleteETFByISIN(?)"
+	_, err := db.Exec(query, isin)
+	return err
+}
+
+// Function to List All ETFs:
+func listAllETFs(db *sql.DB) (*sql.Rows, error) {
+	query := "CALL ListAllETFs()"
+	return db.Query(query)
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
 func main() {
 	urls := []string{BaseURL, AdditionalURL}

@@ -2,7 +2,6 @@ package main
 
 import (
 	"cmpscfa23team2/DAL"
-	// "cmpscfa23team2/DAL"
 	_ "encoding/csv"
 	"fmt"
 	"github.com/gocolly/colly"
@@ -78,8 +77,6 @@ func main() {
 		// TO DO ...
 	})
 
-	// keeps the program running
-	// select {}
 }
 
 // reference: https://www.zenrows.com/blog/web-scraping-golang#set-up-go-project

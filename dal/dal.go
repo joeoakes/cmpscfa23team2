@@ -1,4 +1,4 @@
-package DAL
+package dal
 
 import (
 	"database/sql"
@@ -77,7 +77,7 @@ func main() {
 		log.Fatalf("Failed to initialize the database: %s", err)
 	}
 	defer CloseDb()
-	// dal_CARP.go Functions Testing
+	// dal_carp.go Functions Testing
 	// Test: CreateUser
 	userID, err := CreateUser("John Doe", "jdoe", "STD", "password123", true)
 	if err != nil {
@@ -195,7 +195,7 @@ func main() {
 	//	log.Printf("Success inserting scraped data")
 	//}
 
-	// dal.CRAB function testing
+	// dal.crab function testing
 	// Test: CreateWebCrawler
 	crawlerID, err := CreateWebCrawler("http://example.com")
 	if err != nil {

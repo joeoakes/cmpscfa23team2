@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmpscfa23team2/DAL"
 	"fmt"
 	"github.com/gocolly/colly"
 	"github.com/temoto/robotstxt"
@@ -64,7 +65,6 @@ func isURLAllowedByRobotsTXT(url string) bool {
 		// Handle the error as needed. If there's no robots.txt, it's assumed that all paths are allowed.
 		return true
 	}
-	defer resp.Body.Close()
 
 	data, err := robotstxt.FromResponse(resp)
 	if err != nil {
@@ -89,11 +89,6 @@ func threadedCrawl(urls []URLData, concurrentCrawlers int) {
 		wg.Wait()
 		close(ch)
 	}()
-
-	//for urlData := range ch {
-	// Process the URL data, i.e., scrape it, store it, etc.
-	// This could be another function like processURL(urlData), then insert URL
-	//}
 }
 
 func main() {
@@ -138,32 +133,3 @@ func GetURLTagsAndDomain(url string) (map[string]interface{}, string, error) {
 	tags := map[string]interface{}{"tag1": "value1", "tag2": "value2"}
 	return tags, "example.com", nil
 }
-
-//func GetURLsOnly() ([]string, error) {
-//	var urls []URL
-//	if err := db.Model(&URL{}).Pluck("url", &urls).Error; err != nil {
-//		return nil, err
-//	}
-//
-//	var urlStrings []string
-//	for _, u := range urls {
-//		urlStrings = append(urlStrings, u.URL)
-//	}
-//
-//	return urlStrings, nil
-//}
-
-//func GetURLTagsAndDomain(url string) (map[string]interface{}, string, error) {
-//	var u URL
-//	if err := db.Where("url = ?", url).First(&u).Error; err != nil {
-//		return nil, "", err
-//	}
-//
-//	// Parse the tags into a map
-//	var tags map[string]interface{}
-//	if err := json.Unmarshal([]byte(u.Tags), &tags); err != nil {
-//		return nil, "", err
-//	}
-//
-//	return tags, u.Domain, nil
-//}

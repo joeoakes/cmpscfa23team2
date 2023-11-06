@@ -58,3 +58,8 @@ CARP - Distribution Center Expansion
     - Methods:
        - MockService(serviceName string)
        - RunTests()
+
+10. Feature - Web Browser Extension
+    - Purpose: Another version of the API
+    - Methods:
+         - ?

@@ -23,6 +23,7 @@ Codename: CRAB - Web Crawler & Scraper Engine
 •	Methods:
 •	ExecuteInThread(task Task)
 
+Nov 7: Add encoding (64 bit) to the input.
 
 ==========================================================================================================================================
 

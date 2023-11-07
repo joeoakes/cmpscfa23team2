@@ -1,4 +1,4 @@
-package DAL
+package dal
 
 import (
 	_ "github.com/go-sql-driver/mysql"

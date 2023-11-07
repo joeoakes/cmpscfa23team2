@@ -1,10 +1,10 @@
-package DAL
+package dal
 
 // Import required packages
 import (
 	"encoding/json"                    // For JSON handling
 	"fmt"                              // For formatted I/O
-	_ "github.com/go-sql-driver/mysql" // Import MySQL driver
+	_ "github.com/go-sql-driver/mysql" // Import mysql driver
 	"log"                              // For logging
 	"time"                             // For simulating machine learning model processing time
 )

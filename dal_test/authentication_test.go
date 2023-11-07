@@ -2,6 +2,7 @@ package dal_test
 
 import (
 	"cmpscfa23team2/dal"
+	_ "github.com/golang-jwt/jwt"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
 	"testing"
@@ -83,8 +84,8 @@ func TestValidateToken(t *testing.T) {
 
 // Function does not pass the test because crypto/bcrypt: hashedSecret too short to be a bcrypted password
 func TestAuthenticateUser(t *testing.T) {
-	username := "johnpork"
-	password := "he's'calling"
+	username := "Mahir Khan"
+	password := "dev789"
 
 	// authenticate the user
 	token, authErr := dal.AuthenticateUser(username, password)
@@ -135,12 +136,12 @@ func TestRefreshToken(t *testing.T) {
 	}
 }
 
-// RegisterUser function currently does not pass the test for foreign key violation. Trying to solve this problem
+// solved. Function passes the test
 func TestRegisterUser(t *testing.T) {
-	username := "JohnPork" //replace all of these with actual variables
-	login := "hescalling"
-	role := "NA"
-	password := "jp123"
+	username := "Joshua Ferrell" //replace all of these with actual variables
+	login := "jmf6913"
+	role := "DEV"
+	password := "std447"
 	userID, err := dal.RegisterUser(username, login, role, password, true)
 	if err != nil {
 		t.Errorf("User registration failed: %v", err)

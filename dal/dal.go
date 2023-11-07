@@ -9,6 +9,8 @@ import (
 	"log"
 )
 
+// This code defines a Go struct named "JSON_Data_Connect" with fields for username, password, hostname,
+// and database, each tagged for JSON serialization.
 type JSON_Data_Connect struct {
 	Username string `json:"Username"`
 	Password string `json:"Password"`
@@ -36,6 +38,7 @@ func readJSONConfig(filename string) (JSON_Data_Connect, error) {
 	return config, nil
 }
 
+// It initializes a database connection using configuration data from a JSON file and logs any errors encountered during the process.
 func InitDB() error {
 	config, err := readJSONConfig("../config.json")
 	if err != nil {
@@ -60,6 +63,8 @@ func InitDB() error {
 	return nil
 }
 
+// defines a function to close a database connection
+// and logs any errors or a success message if the connection is closed successfully.
 func CloseDb() {
 	if DB != nil {
 		err := DB.Close()

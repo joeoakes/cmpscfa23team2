@@ -1,52 +1,69 @@
-
 package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
+	"os"
 )
 
-// Request and Response structures
-type APIRequest struct {
-	// Details for weather forecast
+// Structs for incoming and outgoing JSON
+type WeatherRequest struct {
+	Location string `json:"location"`
 }
 
-type APIResponse struct {
-	// Results for weather forecast
+type WeatherResponse struct {
+	Forecast string `json:"forecast"`
 }
 
-// Function to simulate interaction with external services (ChatGPT, CUDA, CRAB, DAL/SQL)
-func interactWithService(serviceName string, data string) string {
-	// Simulate interaction with the service
-	// In reality, you would make an API call here
-	return fmt.Sprintf("Data processed by %s", serviceName)
+// Placeholder functions for external service calls
+func callChatGPT(input string) string {
+	// Replace with actual API call
+	return "This is a placeholder response from ChatGPT"
 }
 
-// HTTP handler function for the case
-func handler(w http.ResponseWriter, r *http.Request) {
-	// Parse the incoming request
-	var req APIRequest
-	_ = json.NewDecoder(r.Body).Decode(&req)
-	
-	// Simulate interactions with services
-	chatGPTResponse := interactWithService("ChatGPT", "User query")
-	cudaResponse := interactWithService("CUDA", chatGPTResponse)
-	crabResponse := interactWithService("CRAB", "Data needed for CUDA")
-	dalSQLResponse := interactWithService("DAL/SQL", crabResponse)
-	
-	// Create and send the response back to the user
-	response := APIResponse{
-		// Populate with actual response data
+func processDataWithCUDA(data string) string {
+	// Replace with actual CUDA processing call
+	return "Processed data with CUDA"
+}
+
+func retrieveDataWithCRAB(location string) string {
+	// Replace with actual CRAB retrieval call
+	return "Retrieved data with CRAB"
+}
+
+func interactWithDAL(location string) string {
+	// Replace with actual DAL/SQL interaction
+	return "Interacted with DAL/SQL"
+}
+
+// HTTP handler function
+func weatherPredictionHandler(w http.ResponseWriter, r *http.Request) {
+	var req WeatherRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "Error reading request", http.StatusBadRequest)
+		return
 	}
-	json.NewEncoder(w).Encode(response)
+
+	chatGPTResponse := callChatGPT(req.Location)
+	cudaResponse := processDataWithCUDA(chatGPTResponse)
+	crabResponse := retrieveDataWithCRAB(req.Location)
+	dalResponse := interactWithDAL(crabResponse)
+
+	// Assume dalResponse contains the weather data to be sent to the user
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(WeatherResponse{Forecast: dalResponse})
 }
 
 func main() {
-	// Define the route and handler
-	http.HandleFunc("/weather_forecast", handler)
+	http.HandleFunc("/weather-prediction", weatherPredictionHandler)
 
-	// Start the server
-	fmt.Println("Server listening on port 8080")
-	http.ListenAndServe(":8080", nil)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // Default port if not specified
+	}
+
+	log.Printf("Server starting on port %s\n", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

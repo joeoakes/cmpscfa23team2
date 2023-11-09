@@ -701,6 +701,53 @@ BEGIN
 END //
 DELIMITER ;
 
+-- (Storing data sprocs):
+DELIMITER $$
+CREATE PROCEDURE InsertOrUpdateETFData(
+    IN p_title VARCHAR(255),
+    IN p_replication VARCHAR(255),
+    IN p_earnings VARCHAR(255),
+    IN p_totalExpenseRatio VARCHAR(255),
+    IN p_trackingDifference VARCHAR(255),
+    IN p_fundSize VARCHAR(255),
+    IN p_isin VARCHAR(255)
+)
+BEGIN
+    INSERT INTO ETFs (title, replication, earnings, total_expense_ratio, tracking_difference, fund_size, isin)
+    VALUES (p_title, p_replication, p_earnings, p_totalExpenseRatio, p_trackingDifference, p_fundSize, p_isin)
+    ON DUPLICATE KEY UPDATE
+                         title = VALUES(title),
+                         replication = VALUES(replication),
+                         earnings = VALUES(earnings),
+                         total_expense_ratio = VALUES(total_expense_ratio),
+                         tracking_difference = VALUES(tracking_difference),
+                         fund_size = VALUES(fund_size);
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE FetchETFByISIN(IN p_isin VARCHAR(255))
+BEGIN
+    SELECT * FROM ETFs WHERE isin = p_isin;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE UpdateFundSizeByISIN(IN p_isin VARCHAR(255), IN p_fundSize VARCHAR(255))
+BEGIN
+    UPDATE ETFs SET fund_size = p_fundSize WHERE isin = p_isin;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE DeleteETFByISIN(IN p_isin VARCHAR(255))
+BEGIN
+    DELETE FROM ETFs WHERE isin = p_isin;
+END$$
+DELIMITER ;
+
+--
+
 -- ================================================
 -- SECTION: Authorization SPROCS
 -- ================================================

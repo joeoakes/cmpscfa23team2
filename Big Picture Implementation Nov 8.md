@@ -1,7 +1,8 @@
 # Prediction Engine API Interaction Flow
+Updated on Nov 09.
 
 ## E-commerce (Price Prediction) 
-## Sarah, Emily
+## Ben, Sarah, Emily
 - **User Interaction**: Request for a price prediction of a product.
 - **ML Algorithms**: Linear Regression
 - **Flow**:
@@ -11,28 +12,6 @@
   - DAL/SQL → CRAB: Returns the requested data.
   - CUDA: Processes the data to predict the price.
   - User: Receives the predicted price.
-
-## Social Media (Sentiment Analysis and Collaborative Filtering)
-- **User Interaction**: Sentiment analysis request for a trending topic.
-- **ML Algorithms**: NLP for Sentiment Analysis, Collaborative Filtering for personalized content recommendation.
-- **Flow**:
-  - Web UI → CUDA: Transmits the user's request.
-  - CUDA → CRAB: Gathers relevant social media posts.
-  - CRAB → DAL/SQL: Retrieves data from the database.
-  - DAL/SQL → CRAB: Sends back the data.
-  - CUDA: Performs sentiment analysis and applies collaborative filtering.
-  - User: Gets sentiment results and content recommendations.
-
-## News and Articles (Trend Detection)
-- **User Interaction**: Query for latest trends in news.
-- **ML Algorithms**: NLP for Topic Modeling, SVM for Classification.
-- **Flow**:
-  - Web UI → CUDA: Processes the query.
-  - CUDA → CRAB: Requests recent news articles.
-  - CRAB → DAL/SQL: Pulls the latest articles.
-  - DAL/SQL → CRAB: Delivers the articles.
-  - CUDA: Applies trend detection algorithms.
-  - User: Receives the trending topics.
 
 ## Real Estate (Market Value Prediction) 
 ## Ben, Sarah, Emily
@@ -57,16 +36,5 @@
   - DAL/SQL → CRAB: Sends back the data.
   - CUDA: Analyzes for demand trends.
   - User: Gets the trend analysis.
-
-## Weather (Weather Pattern Forecast)
-- **User Interaction**: Weather forecast request.
-- **ML Algorithms**: ARIMA for Time Series Forecasting, Neural Networks.
-- **Flow**:
-  - Web UI → CUDA: Routes the forecast request.
-  - CUDA → CRAB: Requests historical weather data.
-  - CRAB → DAL/SQL: Pulls weather data.
-  - DAL/SQL → CRAB: Delivers the data.
-  - CUDA: Uses forecasting models to predict weather.
-  - User: Receives the weather forecast.
 
 Each flow is designed to be a seamless interaction from the user's request to the final output, leveraging machine learning algorithms for accurate and efficient predictions.

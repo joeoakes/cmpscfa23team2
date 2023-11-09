@@ -1,8 +1,9 @@
 # Prediction Engine API Interaction Flow
 
-## E-commerce (Price Prediction)
+## E-commerce (Price Prediction) 
+## Sarah, Emily
 - **User Interaction**: Request for a price prediction of a product.
-- **ML Algorithms**: Linear Regression, Random Forest.
+- **ML Algorithms**: Linear Regression
 - **Flow**:
   - Web UI → CUDA: Formats and sends the request.
   - CUDA → CRAB: Instructs data retrieval.
@@ -33,9 +34,10 @@
   - CUDA: Applies trend detection algorithms.
   - User: Receives the trending topics.
 
-## Real Estate (Market Value Prediction)
+## Real Estate (Market Value Prediction) 
+## Ben, Sarah, Emily
 - **User Interaction**: Market value estimation request for a property.
-- **ML Algorithms**: Regression Trees, K-Nearest Neighbors.
+- **ML Algorithms**: K-Nearest Neighbors.
 - **Flow**:
   - Web UI → CUDA: Forwards the request.
   - CUDA → CRAB: Asks for real estate listings.
@@ -45,8 +47,9 @@
   - User: Obtains estimated market value.
 
 ## Job Market (Industry Trend Analysis)
+## Hansi, Eni, Mat, Shiv, Matthew
 - **User Interaction**: Inquiry about the demand for specific job skills.
-- **ML Algorithms**: Time Series Analysis, Naive Bayes Classifier.
+- **ML Algorithms**: Naive Bayes Classifier.
 - **Flow**:
   - Web UI → CUDA: Sends the inquiry.
   - CUDA → CRAB: Requests job listing data.

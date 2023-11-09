@@ -1,49 +1,110 @@
 package main
 
 import (
-	"github.com/gocarina/gocsv"
+	"encoding/csv"
+	"fmt"
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/vg"
+	"image"
+	"image/color"
+	"log"
 	"os"
+	"strconv"
 )
 
-type KCHouseData struct {
-	ID           string  `csv:"id"`
-	Date         string  `csv:"date"`
-	Price        int     `csv:"price"`
-	Bedrooms     int     `csv:"bedrooms"`
-	Bathrooms    float32 `csv:"bathrooms"`
-	SqftLiving   int     `csv:"sqft_living"`
-	SqftLot      int     `csv:"sqft_lot"`
-	Floors       string  `csv:"floors"`
-	Waterfront   int     `csv:"waterfront"`
-	View         int     `csv:"view"`
-	Condition    int     `csv:"condition"`
-	Grade        int     `csv:"grade"`
-	SqftAbove    int     `csv:"sqft_above"`
-	SqftBasement int     `csv:"sqft_basement"`
-	YrBuilt      int     `csv:"yr_built"`
-	YrRenovated  int     `csv:"yr_renovated"`
-	Zipcode      string  `csv:"zipcode"`
-	Lat          float32 `csv:"lat"`
-	Long         float32 `csv:"long"`
-	SqftLiving15 int     `csv:"sqft_living15"`
-	SqftLot15    int     `csv:"sqft_lot15"`
-}
-
 func main() {
-	file, err := os.Create("data2.csv")
+	// we open the csv file from the disk
+	f, err := os.Open("/Users/Sara/GolandProjects/cmpscfa23team2/cuda/data2.csv")
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	defer file.Close()
+	defer f.Close()
 
-	kc_house_data := []*KCHouseData{
-		{"7129300520", "20141013T000000", 221900, 3, 1, 1180, 5650, "1", 0, 0, 3, 7, 1180, 0, 1955, 0, "98178", 47.5112, -122.257, 1340, 5650},
-		{"6414100192", "20141209T000000", 538000, 3, 2.25, 2570, 7242, "2", 0, 0, 3, 7, 2170, 400, 1951, 1991, "98125", 47.721, -122.319, 1690, 7639},
-		{"5631500400", "20150225T000000", 180000, 2, 1, 770, 10000, "1", 0, 0, 3, 6, 770, 0, 1933, 0, "98028", 47.7379, -122.233, 2720, 8062},
+	// we create a new csv reader specifying
+	// the number of columns it has
+	salesData := csv.NewReader(f)
+	salesData.FieldsPerRecord = 21
+
+	// we read all the records
+	records, err := salesData.ReadAll()
+	if err != nil {
+		log.Fatal(err)
+	}
+	header := records[0]
+	// by slicing the records we skip the header
+	records = records[1:]
+
+	// we iterate over all the records
+	// and keep track of all the gathered values
+	// for each column
+	columnsValues := map[int]plotter.Values{}
+	for i, record := range records {
+		// we want one histogram per column,
+		// so we will iterate over all the columns we have
+		// and gather the date for each in a separate value set
+		// in columnsValues
+		// we are skipping the ID column and the Date,
+		// so we start on index 2
+		for c := 2; c < salesData.FieldsPerRecord; c++ {
+			if _, found := columnsValues[c]; !found {
+				columnsValues[c] = make(plotter.Values, len(records))
+			}
+			// we parse each close value and add it to our set
+			floatVal, err := strconv.ParseFloat(record[c], 64)
+			if err != nil {
+				log.Fatal(err)
+			}
+			columnsValues[c][i] = floatVal
+		}
 	}
 
-	if err := gocsv.MarshalFile(&kc_house_data, file); err != nil {
-		panic(err)
-	}
+	// once we have all the data, we draw each graph
+	for c, values := range columnsValues {
+		// create a new plot
+		p := plot.New()
+		if err != nil {
+			log.Fatal(err)
+		}
+		p.Title.Text = fmt.Sprintf("Histogram of %s", header[c])
 
+		// create a new normalized histogram
+		// and add it to the plot
+		h, err := plotter.NewHist(values, 16)
+		if err != nil {
+			log.Fatal(err)
+		}
+		h.Normalize(1)
+		p.Add(h)
+
+		// create a PNG file:
+		// Create a new blank image with width 200 and height 100
+		width := 400
+		height := 400
+		img := image.NewRGBA(image.Rect(0, 0, width, height))
+
+		// Fill the image with a blue color
+		blue := color.RGBA{0, 0, 255, 255}
+		for y := 0; y < height; y++ {
+			for x := 0; x < width; x++ {
+				img.Set(x, y, blue)
+			}
+		}
+
+		// Create a new PNG file
+		file, err := os.Create("test_hist.png")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+
+		// save the plot to a PNG file.
+		if err := p.Save(
+			10*vg.Centimeter,
+			10*vg.Centimeter,
+			"test_hist.png",
+		); err != nil {
+			log.Fatal(err)
+		}
+	}
 }

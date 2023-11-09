@@ -6,6 +6,8 @@ import (
 )
 
 // GetUserRole fetches the role associated with a given user ID.
+//
+// This function retrieves a user's role from a database using the provided userID and logs the result, handling any potential errors.
 func GetUserRole(userID string) (string, error) {
 	var userRole string
 	err := DB.QueryRow("Call get_user_role(?)", userID).Scan(&userRole)
@@ -18,6 +20,8 @@ func GetUserRole(userID string) (string, error) {
 }
 
 // IsUserActive checks if a user is currently marked as active based on their user ID.
+//
+// It defines a function "IsUserActive" that checks the activity status of a user in a database and returns a boolean indicating whether the user is active or not, along with an error if any.
 func IsUserActive(userID string) (bool, error) {
 	var isActive bool
 	err := DB.QueryRow("CALL is_user_active(?)", userID).Scan(&isActive)
@@ -42,6 +46,9 @@ func AuthorizeUser(userID string, requiredRole string) (bool, error) {
 }
 
 // GetPermissionsForRole fetches all permissions associated with a given user role.
+//
+// This code defines a function that retrieves permissions for a given user role from a database using a stored procedure
+// and returns them as a slice of Permission objects while handling potential errors.
 func GetPermissionsForRole(userRole string) ([]Permission, error) {
 	// Execute a stored procedure to fetch permissions for the user role.
 	rows, err := DB.Query("CALL get_permissions_for_role(?)", userRole)
@@ -85,6 +92,8 @@ func CheckPermission(userRole, action, resource string) (bool, error) {
 }
 
 // UpdateUserRole allows for changing the role associated with a user.
+//
+// It defines a function UpdateUserRole that updates a user's role in a database using a stored procedure and logs the outcome, handling potential errors.
 func UpdateUserRole(userID, newRole string) error {
 	_, err := DB.Exec("CALL update_user_role(?, ?)", userID, newRole)
 	if err != nil {
@@ -96,6 +105,8 @@ func UpdateUserRole(userID, newRole string) error {
 }
 
 // DeactivateUser marks a user as inactive.
+//
+// It deactivates a user in a database by calling a stored procedure with the provided userID and logs the outcome, handling any errors that may occur.
 func DeactivateUser(userID string) error {
 	_, err := DB.Exec("CALL deactivate_user(?)", userID)
 	if err != nil {
@@ -118,6 +129,8 @@ func AddPermission(userRole, action, resource string) error {
 }
 
 // HasPermission is a higher-level function to check if a user has a specific permission.
+//
+// It defines a function, HasPermission, which checks if a user has a specific permission by first retrieving the user's role, then verifying the permission for a given action and resource, and logging the result along with potential errors.
 func HasPermission(userID, action, resource string) (bool, error) {
 	userRole, err := GetUserRole(userID)
 	if err != nil {
@@ -138,12 +151,17 @@ func HasPermission(userID, action, resource string) (bool, error) {
 // ... [Additional functions for other sprocs as required]
 
 // Permission represents a user's permission to perform an action on a resource.
+//
+// The code defines a struct named "Permission" with two fields, "Action" and "Resource," to represent permissions for actions on specific resources.
 type Permission struct {
 	Action   string
 	Resource string
 }
 
 // NewPermission creates a new Permission object.
+//
+// This code defines a Go function named "NewPermission" that creates
+// and returns a new "Permission" struct with provided "action" and "resource" strings.
 func NewPermission(action, resource string) Permission {
 	return Permission{Action: action, Resource: resource}
 }

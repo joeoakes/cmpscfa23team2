@@ -9,6 +9,9 @@ import (
 )
 
 // Log struct models the data structure of a log entry in the database
+//
+// This code defines a Go struct named "Log" with fields for
+// log ID, status code, message, GoEngineArea, and date-time information.
 type Log struct {
 	LogID        string
 	status_code  string
@@ -17,12 +20,16 @@ type Log struct {
 	DateTime     []uint8
 }
 
+// This code defines a Go struct named LogStatusCodes with two fields, "StatusCode" and
+// "StatusMessage," to represent status code and associated status messages.
 type LogStatusCodes struct {
 	StatusCode    string
 	StatusMessage string
 }
 
 // Function to insert a log entry into the database
+//
+// It  inserts a log entry into a database using a SQL stored procedure, handling any errors that may occur during the execution.
 func InsertLog(statusCode, message, goEngineArea string) error {
 	_, err := DB.Exec("CALL insert_log(?, ?, ?)", statusCode, message, goEngineArea)
 	if err != nil {
@@ -50,6 +57,9 @@ func init() {
 }
 
 // WriteLog writes a log entry to the database
+//
+// This code defines a function WriteLog that validates a status code, inserts a log entry into a database,
+// and logs the execution process, handling potential errors along the way.
 func WriteLog(logID string, status_code string, message string, goEngineArea string, dateTime time.Time) error {
 	// Validate the statusCode by checking if it exists in the `log_status_codes` table
 	var existingStatusCode string
@@ -90,6 +100,9 @@ func WriteLog(logID string, status_code string, message string, goEngineArea str
 }
 
 // GetLog - Reads the log
+//
+// This Go code defines a function, "GetLog," that prepares and queries a database for logs, logging both successful and failed operations,
+// and returns a log objects along with potential errors.
 func GetLog() ([]Log, error) {
 	stmt, err := DB.Prepare("CALL select_all_logs()")
 	if err != nil {
@@ -135,12 +148,16 @@ func GetLog() ([]Log, error) {
 	return logs, nil
 }
 
+// It defines  defines a function that executes a SQL stored procedure "insert_or_update_status_code" with provided parameters "statusCode"
+// and "statusMessage" using the "DB" database connection and returns any potential errors.
 func InsertOrUpdateStatusCode(statusCode, statusMessage string) error {
 	_, err := DB.Exec("CALL insert_or_update_status_code(?, ?)", statusCode, statusMessage)
 	return err
 }
 
 // GetSuccess - Uses a Procedure to gather all the 'Success' rows in the DB
+//
+// The code defines a function GetSuccess that retrieves log entries with a "Success" status code from a database, logs various status messages.
 func GetSuccess() ([]Log, error) {
 	stmt, err := DB.Prepare("CALL select_all_logs_by_status_code(?)")
 	if err != nil {
@@ -186,6 +203,7 @@ func GetSuccess() ([]Log, error) {
 	return logs, nil
 }
 
+// This code prepares and executes a SQL statement to store log information in a database, logging the status of the SQL operations during the process
 func StoreLog(status_code string, message string, goEngineArea string) error {
 	stmt, err := DB.Prepare("CALL insert_log(?,?,?)")
 	if err != nil {

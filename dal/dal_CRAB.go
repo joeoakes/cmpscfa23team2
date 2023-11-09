@@ -8,6 +8,8 @@ import (
 )
 
 // Function to create a new web crawler
+//
+// It creates a web crawler with a specified source URL and logs the crawler's ID if successful.
 func CreateWebCrawler(sourceURL string) (string, error) {
 	var crawlerID string
 	err := DB.QueryRow("CALL create_webcrawler(?)", sourceURL).Scan(&crawlerID)
@@ -20,6 +22,8 @@ func CreateWebCrawler(sourceURL string) (string, error) {
 }
 
 // Function to create a new scraper engine
+//
+// defines a function called "CreateScraperEngine" that creates a scraper engine in a database, and it returns the engine's ID or an error.
 func CreateScraperEngine(engineName, engineDescription string) (string, error) {
 	var engineID string
 	err := DB.QueryRow("CALL create_scraper_engine(?, ?)", engineName, engineDescription).Scan(&engineID)
@@ -32,6 +36,8 @@ func CreateScraperEngine(engineName, engineDescription string) (string, error) {
 }
 
 // Function to insert a new URL
+//
+// Function "InsertURL," inserts a URL into a database along with associated tags and logs the operation, returning the generated ID or an error.
 func InsertURL(url, domain string, tags map[string]interface{}) (string, error) {
 	var id string
 	jsonTags, err := json.Marshal(tags)
@@ -51,6 +57,8 @@ func InsertURL(url, domain string, tags map[string]interface{}) (string, error) 
 }
 
 // Function to update an existing URL
+//
+// It defines a function UpdateURL that updates a URL record in a database, converting tags into JSON format and logging the update action.
 func UpdateURL(id, url, domain string, tags map[string]interface{}) error {
 	jsonTags, err := json.Marshal(tags)
 	if err != nil {
@@ -64,6 +72,8 @@ func UpdateURL(id, url, domain string, tags map[string]interface{}) error {
 }
 
 // Function to fetch URL tags and domain by ID
+//
+// It defines a function that retrieves tags and a domain from a database using a specified ID, logs the results, and returns them in a map and a string along with potential errors.
 func GetURLTagsAndDomain(id string) (map[string]interface{}, string, error) {
 	var tagsStr, domain string
 	err := DB.QueryRow("CALL get_url_tags_and_domain(?)", id).Scan(&tagsStr, &domain)
@@ -84,6 +94,8 @@ func GetURLTagsAndDomain(id string) (map[string]interface{}, string, error) {
 }
 
 // Function to fetch URLs from a specific domain
+//
+// Defines a function that queries a database to retrieve URLs associated with a given domain, processes the results, and returns the URLs in a slice while handling potential errors and logging.
 func GetURLsFromDomain(domain string) ([]string, error) {
 	rows, err := DB.Query("CALL get_urls_from_domain(?)", domain)
 	if err != nil {
@@ -109,6 +121,8 @@ func GetURLsFromDomain(domain string) ([]string, error) {
 }
 
 // Function to fetch UUID from URL and domain
+//
+// This function retrieves a UUID from a database by calling a stored procedure with a given URL and domain, and it logs the result if successful.
 func GetUUIDFromURLAndDomain(url, domain string) (string, error) {
 	var id string
 	err := DB.QueryRow("CALL get_Uuid_from_URL_and_domain(?, ?)", url, domain).Scan(&id)
@@ -121,6 +135,8 @@ func GetUUIDFromURLAndDomain(url, domain string) (string, error) {
 }
 
 // Function to fetch a random URL
+//
+// It defines a function that retrieves a random URL from a database, logs the URL, and returns it as a string, handling any potential errors during the database query.
 func GetRandomURL() (string, error) {
 	var id, url, tags, domain string
 	var createdTime []byte // As per our earlier fix
@@ -134,6 +150,8 @@ func GetRandomURL() (string, error) {
 }
 
 // Function to fetch all URLs (just the 'url' column)
+//
+// Defines a Go function called "GetURLsOnly" that queries a database for URLs and returns them in a slice, handling potential errors along the way.
 func GetURLsOnly() ([]string, error) {
 	rows, err := DB.Query("CALL get_urls_only()")
 	if err != nil {
@@ -156,6 +174,8 @@ func GetURLsOnly() ([]string, error) {
 }
 
 // Function to fetch all URLs with their tags
+//
+// It retrieves URL and tag data from a database, processes it into a map of URLs mapped to corresponding tags, and handles potential errors, logging intermediate results
 func GetURLsAndTags() (map[string]map[string]interface{}, error) {
 	rows, err := DB.Query("CALL get_urls_and_tags()")
 	if err != nil {

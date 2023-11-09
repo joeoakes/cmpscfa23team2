@@ -1,0 +1,65 @@
+CARP - Distribution Center Expansion
+
+1. Database Management (database_manager.go):
+   - Purpose: Manages interactions with the database to store, retrieve, and manage data.
+   - Methods:
+      - SaveData(data Data)
+      - RetrieveData(query string)
+      - UpdateData(data Data)
+      - DeleteData(dataID uuid.UUID)
+
+2. Error Handling (error_handler.go):
+   - Purpose: Provides centralized error handling and logging.
+   - Methods:
+      - LogError(err error)
+      - HandleError(err error, w http.ResponseWriter)
+
+3. Rate Limiting (rate_limiter.go):
+   - Purpose: Implements rate limiting to prevent abuse of the API.
+   - Methods:
+      - CheckRateLimit(clientIP string)
+      - ResetRateLimit(clientIP string)
+
+4. Data Validation (data_validator.go):
+   - Purpose: Validates data to ensure it meets required formats and constraints.
+   - Methods:
+      - ValidateData(data Data)
+
+5. Monitoring and Analytics (monitoring.go):
+   - Purpose: Collects and analyzes system metrics for monitoring and optimization.
+   - Methods:
+      - CollectMetrics()
+      - AnalyzeMetrics(metrics Metrics)
+
+6. Notification Service (notification_service.go):
+   - Purpose: Sends notifications to system administrators or users.
+   - Methods:
+      - SendNotification(notification Notification)
+
+7. Cache Management (cache_manager.go):
+   - Purpose: Manages caching to improve performance.
+   - Methods:
+      - CacheData(dataID uuid.UUID, data Data)
+      - RetrieveCachedData(dataID uuid.UUID)
+
+8. Configuration Management (config_manager.go):
+   - Purpose: Manages system configurations.
+   - Methods:
+      - LoadConfig()
+      - GetConfig(key string)
+
+9. Dependency Injection (dependency_injection.go):
+   - Purpose: Handles dependency injection to promote modularity and testability.
+   - Methods:
+      - ProvideDependency(dependencyName string)
+
+10. Testing and Mocking (testing_manager.go):
+    - Purpose: Provides utilities for testing and mocking.
+    - Methods:
+       - MockService(serviceName string)
+       - RunTests()
+
+10. Feature - Web Browser Extension
+    - Purpose: Another version of the API
+    - Methods:
+         - ?

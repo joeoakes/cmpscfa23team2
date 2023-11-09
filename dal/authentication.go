@@ -10,14 +10,18 @@ import (
 const SECRET_KEY = "SECRETKEY123!"
 
 // Add the bcrypt hashing utility functions
+//
+// It defines function that hashes a provided password using the bcrypt hashing algorithm with a default cost and returns the hashed password as a byte slice or an error if encountered.
 func HashPassword(password string) ([]byte, error) {
 	return bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 }
 
+// defines a function that compares a hashed password stored as a byte slice with a provided password string using the bcrypt library for secure password authentication.
 func ComparePassword(hashedPassword []byte, password string) error {
 	return bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
 }
 
+// The code defines a function that authenticates a user by querying a database with a username and password, comparing the hashed password with the provided one, and generating a token for the user, returning the token or an error.
 func AuthenticateUser(username string, password string) (string, error) {
 	var userID string
 	var hashedPassword []byte
@@ -41,6 +45,7 @@ func AuthenticateUser(username string, password string) (string, error) {
 	return token, nil
 }
 
+// This code generates a JWT token with a user ID and expiration time, using HMAC-SHA256 for signing.
 func GenerateToken(userID string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"uid": userID,
@@ -50,6 +55,9 @@ func GenerateToken(userID string) (string, error) {
 	return token.SignedString([]byte(SECRET_KEY))
 }
 
+// This code defines a function that validates a JSON Web Token (JWT) by parsing it
+// verifying its signature using a secret key,
+// and checking its expiration time
 func ValidateToken(tokenString string) (bool, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte(SECRET_KEY), nil
@@ -66,6 +74,8 @@ func ValidateToken(tokenString string) (bool, error) {
 	return token.Valid && claims.VerifyExpiresAt(time.Now().Unix(), true), nil
 }
 
+// It defines a function called RefreshToken that takes an old refresh token as input, validates it against a database, generates a new access token and refresh token,
+// and updates the database with the new refresh token
 func RefreshToken(oldRefreshToken string) (string, string, error) {
 	// This function should be used to generate a new access token given a valid refresh token.
 	// For now, this just demonstrates the generation process.
@@ -86,11 +96,16 @@ func RefreshToken(oldRefreshToken string) (string, string, error) {
 	return newAccessToken, newRefreshToken, err
 }
 
+// This code defines a function called LogoutUser that takes a userID as a parameter and it uses the database connection.
+// (DB) to execute a SQL stored procedure to log out a user with the specified userID,
+// returning any potential errors encountered during the database operation.
 func LogoutUser(userID string) error {
 	_, err := DB.Exec("CALL logout_user(?)", userID)
 	return err
 }
 
+// It defines a function "RegisterUser" that securely registers a user by hashing their password
+// and storing their information in a database, returning a user ID or an error.
 func RegisterUser(username string, login string, role string, password string, active bool) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -106,6 +121,7 @@ func RegisterUser(username string, login string, role string, password string, a
 	return userID, nil
 }
 
+// Takes a user ID and a new password as input and returns an error if there is any issue with the passowrd change process
 func ChangePassword(userID string, newPassword string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 	if err != nil {

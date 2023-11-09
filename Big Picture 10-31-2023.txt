@@ -83,3 +83,39 @@ DAL - Data Access Layer API
 •	QueryData(query SqlQuery)
 •	UpdateData(data Data)
 
+______________________________________________________________________
+Other Domains with application (ignore for now):
+
+## Weather (Weather Pattern Forecast)
+- **User Interaction**: Weather forecast request.
+- **ML Algorithms**: ARIMA for Time Series Forecasting, Neural Networks.
+- **Flow**:
+  - Web UI → CUDA: Routes the forecast request.
+  - CUDA → CRAB: Requests historical weather data.
+  - CRAB → DAL/SQL: Pulls weather data.
+  - DAL/SQL → CRAB: Delivers the data.
+  - CUDA: Uses forecasting models to predict weather.
+  - User: Receives the weather forecast.
+
+## Social Media (Sentiment Analysis and Collaborative Filtering)
+- **User Interaction**: Sentiment analysis request for a trending topic.
+- **ML Algorithms**: NLP for Sentiment Analysis, Collaborative Filtering for personalized content recommendation.
+- **Flow**:
+  - Web UI → CUDA: Transmits the user's request.
+  - CUDA → CRAB: Gathers relevant social media posts.
+  - CRAB → DAL/SQL: Retrieves data from the database.
+  - DAL/SQL → CRAB: Sends back the data.
+  - CUDA: Performs sentiment analysis and applies collaborative filtering.
+  - User: Gets sentiment results and content recommendations.
+
+
+## News and Articles (Trend Detection)
+- **User Interaction**: Query for latest trends in news.
+- **ML Algorithms**: NLP for Topic Modeling, SVM for Classification.
+- **Flow**:
+  - Web UI → CUDA: Processes the query.
+  - CUDA → CRAB: Requests recent news articles.
+  - CRAB → DAL/SQL: Pulls the latest articles.
+  - DAL/SQL → CRAB: Delivers the articles.
+  - CUDA: Applies trend detection algorithms.
+  - User: Receives the trending topics.

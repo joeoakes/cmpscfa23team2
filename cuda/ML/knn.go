@@ -6,6 +6,13 @@ import (
 	"sort"
 )
 
+// WeatherData Hard coded weather data
+type WeatherData struct {
+	Location    string
+	Date        string
+	Temperature float64
+}
+
 // Point represents a data point in 2D space
 type Point struct {
 	Features []float64
@@ -61,20 +68,19 @@ func KNN(k int, data []Point, target Point) string {
 	return predictedLabel
 }
 
-func main2() {
-	// Example dataset
+func main() {
+	// KNN with hard coded weather data
 	data := []Point{
-		{Features: []float64{1, 2}, Label: "A"},
-		{Features: []float64{3, 1}, Label: "B"},
-		{Features: []float64{2, 4}, Label: "C"},
-		{Features: []float64{5, 3}, Label: "D"},
-		// Add more data points if needed
+		{Features: []float64{1, 2}, Label: "Sunny"},
+		{Features: []float64{3, 1}, Label: "Rainy"},
+		{Features: []float64{2, 4}, Label: "Cloudy"},
+		{Features: []float64{5, 3}, Label: "Sunny"},
 	}
 
-	// Target point to classify
+	// Target point to classify (representing new weather data)
 	target := Point{Features: []float64{5, 1}}
 
-	// Perform kNN classification
+	// Perform KNN classification
 	k := 1 // Number of neighbors
 	label := KNN(k, data, target)
 	fmt.Printf("The label predicted for the target is '%s'\n", label)

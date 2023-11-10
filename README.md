@@ -1,12 +1,28 @@
-# PredictAI - The Future of Predictive Analytics
-
 <!--
 1. This is a template, that will be updated periodically.
-2. We can add the PredictAi logo below.
+ 
+
 <div align="center">
-   <img src="logo.png" alt="PredictAI Logo"/>
+   <img src="PredictAi/frontend/Assets/PredictAi logo.png" alt=" Design of a modern and sleek logo for a project named 'PredictAI'. The logo features a stylized, abstract brain composed of interconnected nodes."/>
 </div>
- -->
+
+Hansi notes: (don't delete)
+![PredictAi logo](https://github.com/hseitaj/PredictAi/assets/67917151/1ec4cb58-230f-493d-a248-d23931cbf204)
+# PredictAI - The Future of Predictive Analytics
+
+<img src="https://github.com/hseitaj/PredictAi/assets/67917151/1ec4cb58-230f-493d-a248-d23931cbf204" alt="PredictAi logo" width="300" height="300" align="left"/>
+
+# PredictAI - The Future of Predictive Analytics
+
+<div style="clear: both;"></div>
+<br clear="left"/>
+
+-->
+<div align="center">
+  <img src="https://github.com/hseitaj/PredictAi/assets/67917151/1ec4cb58-230f-493d-a248-d23931cbf204" alt="PredictAi logo" width="300" height="300"/>
+  <h1>PredictAI - The Future of Predictive Analytics</h1>
+</div>
+
 ---
 
 ## 📚 Table of Contents
@@ -33,9 +49,11 @@ PredictAI is a pioneering project aimed at revolutionizing predictive analytics.
 ## 🔧 Technologies
 
 - **🔍 Language:** Golang
-- **🌐 Web UI Framework:** Golang for dynamic web page generation
+- **🌐 Web UI Framework:** Golang for dynamic web page generation and the Unix server
+- **Machine Learning:** CUDA
 - **🗄 Database:** MySQL
 - **🔐 Authentication:** Token-based for both users and web services
+- **Version Control:** Git
 
 ---
 
@@ -93,19 +111,21 @@ PredictAI is a pioneering project aimed at revolutionizing predictive analytics.
 ---
 
 ## 👥 Contributors
-<!--
-- [Team Member 1](mailto:team1@email.com)
-- [Team Member 2](mailto:team2@email.com)
-- [Team Member 3](mailto:team3@email.com)
-- [Team Member 4](mailto:team4@email.com)
-- [Team Member 5](mailto:team5@email.com)
-- [Team Member 6](mailto:team6@email.com)
-- [Team Member 7](mailto:team7@email.com)
+- [Assali, Matthew - Team Lead](mailto:mfa5498@psu.edu)
+- [Seitaj, Hansi](mailto:hjs5684@psu.edu)
+- [Vejseli, Eni](mailto:emv5319@psu.edu)
+- [Becker, Sara](mailto:sqb6198@psu.edu)
+- [Carpenter, Emily](mailto:esc5316@psu.edu)
+- [Finn, Matthew](mailto:mkf5480@psu.edu)
+- [Green, Evan M](mailto:emg5555@psu.edu)
+- [Hoang, Binh Thanh](mailto:bth5241@psu.edu)
+- [Patel, Shiv](mailto:sbp5769@psu.edu)
 
 ---
+
+**Thank you for exploring PredictAI!**
+<!--
 
 📧 For any further questions or inquiries, please reach out to our [Support Team](mailto:support@email.com).
 
----
 -->
-**Thank you for exploring PredictAI!**

@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"math"
+	"os"
 	"sort"
+	"strconv"
 )
 
 // WeatherData Hard coded weather data
@@ -68,7 +71,53 @@ func KNN(k int, data []Point, target Point) string {
 	return predictedLabel
 }
 
+// reads data from a csv file. Change to however you want it to be or have it do
+func ReadDataFromFile(filename string) ([]Point, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+
+		}
+	}(file)
+	reader := csv.NewReader(file)
+	lines, err := reader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+	var data []Point
+	for _, line := range lines {
+		var features []float64
+		for _, value := range line[:len(line)-1] {
+			feature, err := strconv.ParseFloat(value, 64)
+			if err != nil {
+				return nil, err
+			}
+			features = append(features, feature)
+		}
+		label := line[len(line)-1]
+
+		data = append(data, Point{Features: features, Label: label})
+	}
+	return data, nil
+}
+
+// added this here just in case we need it to read a csv file
+
 func main() {
+	//filename := "your_data.csv"
+	//data, err := ReadDataFromFile(filename)
+	//if err != nil {
+	//	fmt.Printf("Error reading data from file: %v\n", err)
+	//	return
+	//}
+	// calling function to read the csv file
+	// but unsure of whether it will be used in the future
+	// so leave it there - Binh
+
 	// KNN with hard coded weather data
 	data := []Point{
 		{Features: []float64{1, 2}, Label: "Sunny"},

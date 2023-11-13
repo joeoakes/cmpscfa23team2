@@ -105,6 +105,36 @@ func ReadDataFromFile(filename string) ([]Point, error) {
 	return data, nil
 }
 
+// write the data to csv file
+func WriteDatatoFile(filename string, data []Point) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+
+		}
+	}(file)
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	for _, point := range data {
+		var record []string
+		for _, feature := range point.Features {
+			record = append(record, strconv.FormatFloat(feature, 'f', -1, 64))
+
+		}
+		record = append(record, point.Label)
+		err := writer.Write(record)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // added this here just in case we need it to read a csv file
 
 func main() {
@@ -125,12 +155,28 @@ func main() {
 		{Features: []float64{2, 4}, Label: "Cloudy"},
 		{Features: []float64{5, 3}, Label: "Sunny"},
 	}
+	err := WriteDatatoFile("dal/data.csv", data)
 
 	// Target point to classify (representing new weather data)
 	target := Point{Features: []float64{5, 1}}
+	Data, err := ReadDataFromFile("dal/data.csv")
+	if err != nil {
+		fmt.Printf("Error reading data from csv file: %v\n", err)
+		return
+	}
+	storedData := append(Data)
 
 	// Perform KNN classification
 	k := 1 // Number of neighbors
-	label := KNN(k, data, target)
+	label := KNN(k, storedData, target)
 	fmt.Printf("The label predicted for the target is '%s'\n", label)
+
+	err = WriteDatatoFile("dal/data_updated.csv", storedData)
+	if err != nil {
+		fmt.Printf("Error writing data to csv file: %v\n", err)
+		return
+
+	}
+	fmt.Printf("Updated data written to dal/data_updated.csv")
+
 }

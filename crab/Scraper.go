@@ -6,6 +6,7 @@ import (
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
 	"io/ioutil"
+	"log"
 	"time"
 )
 
@@ -18,13 +19,13 @@ type ItemData struct {
 type GenericData struct {
 	Title          string            `json:"title"`
 	URL            string            `json:"url"`
-	Description    string            `json:"description"` // This could be the book synopsis if available
+	Description    string            `json:"description"`
 	Price          string            `json:"price"`
-	Location       string            `json:"location,omitempty"`        // Omitted if not applicable
-	Features       []string          `json:"features,omitempty"`        // Omitted if not applicable
-	Reviews        []Review          `json:"reviews,omitempty"`         // Omitted if not applicable
-	Images         []string          `json:"images,omitempty"`          // Omitted if not applicable
-	AdditionalInfo map[string]string `json:"additional_info,omitempty"` // Flexible for any additional data
+	Location       string            `json:"location,omitempty"`
+	Features       []string          `json:"features,omitempty"`
+	Reviews        []Review          `json:"reviews,omitempty"`
+	Images         []string          `json:"images,omitempty"`
+	AdditionalInfo map[string]string `json:"additional_info,omitempty"`
 	Metadata       Metadata          `json:"metadata"`
 }
 
@@ -39,72 +40,106 @@ type Metadata struct {
 	Timestamp string `json:"timestamp"`
 }
 
-func main() {
-	// Container for all scraped data
-	allData := make([]ItemData, 0)
-
-	startingURL := "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html"
-	fmt.Println("Constructed URL:", startingURL)
-
-	c := colly.NewCollector()
-	extensions.RandomUserAgent(c)
-
-	// Collect the data for each book on the first page of the fiction section
-	c.OnHTML("article.product_pod", func(e *colly.HTMLElement) {
-		bookURL := e.ChildAttr("h3 a", "href")
-		// Assuming we have a function to resolve the relative bookURL to absolute
-		bookURL = e.Request.AbsoluteURL(bookURL)
-
-		currentItem := ItemData{
-			Domain: "books",
-			Data: GenericData{
-				Title:       e.ChildText("h3 a"),
-				URL:         bookURL,
-				Description: e.ChildText("p.description"), // Selector assumed, replace with the actual selector
-				Price:       e.ChildText("div p.price_color"),
-				Metadata: Metadata{
-					Source:    startingURL,
-					Timestamp: time.Now().Format(time.RFC3339),
-				},
-			},
-		}
-
-		allData = append(allData, currentItem)
-	})
-
-	// Visit the URL with retry logic
-	maxRetries := 3
-	for i := 0; i < maxRetries; i++ {
-		err := c.Visit(startingURL)
-		if err == nil {
-			break // No error, break the retry loop
-		}
-		fmt.Printf("Error visiting %s: %s, retrying (%d/%d)\n", startingURL, err, i+1, maxRetries)
-		if i < maxRetries-1 {
-			time.Sleep(time.Second * 10) // Wait before retrying
-		}
-	}
-
-	// Sleep to prevent rate-limiting issues
-	time.Sleep(time.Second * 5)
-
-	// Wrap the data
+func marshallDataToJson(data []ItemData) ([]byte, error) {
 	wrappedData := map[string][]ItemData{
-		"items": allData,
+		"items": data,
 	}
 
-	// Marshal the wrapped data into JSON
 	jsonData, err := json.MarshalIndent(wrappedData, "", "  ")
 	if err != nil {
-		fmt.Println("Error marshalling data to JSON:", err)
-		return
+		return nil, fmt.Errorf("error marshalling data to JSON: %w", err)
 	}
 
-	// Write the JSON data to a file
-	err = ioutil.WriteFile("scrapedData.json", jsonData, 0644)
+	return jsonData, nil
+}
+
+func writeJsonToFile(filename string, jsonData []byte) error {
+	err := ioutil.WriteFile(filename, jsonData, 0644)
 	if err != nil {
-		fmt.Println("Error writing JSON to file:", err)
+		return fmt.Errorf("error writing JSON to file: %w", err)
+	}
+	return nil
+}
+
+func scrapeURLs(urls []string) []ItemData {
+	allData := make([]ItemData, 0)
+
+	for _, pageURL := range urls {
+		c := colly.NewCollector()
+		extensions.RandomUserAgent(c)
+
+		c.OnHTML("article.product_pod", func(e *colly.HTMLElement) {
+			bookURL := e.ChildAttr("h3 a", "href")
+			bookURL = e.Request.AbsoluteURL(bookURL)
+
+			currentItem := ItemData{
+				Domain: "books",
+				Data: GenericData{
+					Title:       e.ChildText("h3 a"),
+					URL:         bookURL,
+					Description: e.ChildText("p.description"),
+					Price:       e.ChildText("div p.price_color"),
+					Metadata: Metadata{
+						Source:    pageURL,
+						Timestamp: time.Now().Format(time.RFC3339),
+					},
+				},
+			}
+
+			allData = append(allData, currentItem)
+		})
+
+		maxRetries := 3
+		for i := 0; i < maxRetries; i++ {
+			err := c.Visit(pageURL)
+			if err == nil {
+				break
+			}
+			log.Printf("Error visiting %s: %s, retrying (%d/%d)\n", pageURL, err, i+1, maxRetries)
+			if i < maxRetries-1 {
+				time.Sleep(time.Second * 10)
+			}
+		}
+
+		time.Sleep(time.Second * 5)
 	}
 
-	fmt.Println("Scraping completed and data has been saved to scrapedData.json")
+	jsonData, err := marshallDataToJson(allData)
+	if err != nil {
+		log.Println(err)
+		return allData
+	}
+
+	err = writeJsonToFile("scrapedData.json", jsonData)
+	if err != nil {
+		log.Println(err)
+	}
+
+	log.Println("Scraping completed and data has been saved to scrapedData.json")
+	return allData
+}
+
+func getURLsToScrape() ([]string, error) {
+	var urls []string
+
+	jsonData, err := ioutil.ReadFile("crawledUrls.json")
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(jsonData, &urls)
+	if err != nil {
+		return nil, err
+	}
+
+	return urls, nil
+}
+
+func main() {
+	urlsToScrape, err := getURLsToScrape()
+	if err != nil {
+		log.Fatalf("Failed to get URLs to scrape: %v", err)
+	}
+	scrapedData := scrapeURLs(urlsToScrape)
+	fmt.Println("Scraped Data:", scrapedData)
 }

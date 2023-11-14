@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"sync"
 	"time"
-
 	// Import the "dal" package to access its functions.
 	"cmpscfa23team2/dal"
 )

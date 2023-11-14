@@ -1,22 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gocolly/colly"
 	"github.com/temoto/robotstxt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"sync"
 	"time"
 )
-
-//type URLData struct {
-//	URL     string
-//	Tags    map[string]interface{}
-//	Domain  string
-//	Created time.Time
-//}
 
 type URLData struct {
 	URL     string
@@ -115,10 +110,12 @@ func threadedCrawl(urls []URLData, concurrentCrawlers int) {
 		close(ch)
 	}()
 	log.Println("Crawling finished!")
+	writeCrawledURLsToFile(urls)
 }
 
 func main() {
 	InitializeCrawling() // Function to initialize crawling
+
 }
 
 func InitializeCrawling() {
@@ -139,4 +136,18 @@ func getURLsToCrawl() []URLData {
 			URL: "http://books.toscrape.com/",
 		},
 	}
+}
+
+func writeCrawledURLsToFile(urls []URLData) error {
+	urlStrings := make([]string, len(urls))
+	for i, u := range urls {
+		urlStrings[i] = u.URL
+	}
+
+	jsonData, err := json.Marshal(urlStrings)
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile("crawledUrls.json", jsonData, 0644)
 }

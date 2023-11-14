@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocolly/colly"
 	"os"
 	"sync"
@@ -220,9 +221,46 @@ func callDeleteETFByISINSP(db *sql.DB, isin string) error {
 	return err
 }
 
-//
+// Function to display ETF data from the database
+func displayETFDataFromDatabase(db *sql.DB) {
+	fmt.Println("Displaying ETF data from the database:")
+
+	rows, err := listAllETFs(db)
+	if err != nil {
+		fmt.Printf("Error fetching ETF data: %v\n", err)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var etfInfo EtfInfo
+		err := rows.Scan(&etfInfo.Title, &etfInfo.Replication, &etfInfo.Earnings, &etfInfo.TotalExpenseRatio, &etfInfo.TrackingDifference, &etfInfo.FundSize)
+		if err != nil {
+			fmt.Printf("Error scanning ETF data: %v\n", err)
+			return
+		}
+
+		fmt.Printf("ETF Title: %s\n", etfInfo.Title)
+		fmt.Printf("Replication: %s\n", etfInfo.Replication)
+		fmt.Printf("Earnings: %s\n", etfInfo.Earnings)
+		fmt.Printf("Total Expense Ratio: %s\n", etfInfo.TotalExpenseRatio)
+		fmt.Printf("Tracking Difference: %s\n", etfInfo.TrackingDifference)
+		fmt.Printf("Fund Size: %s\n", etfInfo.FundSize)
+		fmt.Println("--------------")
+	}
+
+	if err := rows.Err(); err != nil {
+		fmt.Printf("Error iterating over ETF data: %v\n", err)
+	}
+}
 
 func main() {
+	db, err := sql.Open("mysql", "root:Pane1901.@tcp(localhost:3306)/mysql")
+	if err != nil {
+		fmt.Printf("Error opening database connection: %v\n", err)
+		return
+	}
+	defer db.Close()
 	urls := []string{BaseURL, AdditionalURL}
 	var wg sync.WaitGroup
 	resultChan := make(chan interface{}, TotalURLs*URLsPerCategory)
@@ -266,4 +304,12 @@ func main() {
 
 	// Output travel information
 	enc.Encode(travelInfos)
+	// Create the ETFs table if it doesn't exist
+	if err := createETFsTable(db); err != nil {
+		fmt.Printf("Error creating ETFs table: %v\n", err)
+		return
+	}
+
+	// Display ETF data from the database
+	displayETFDataFromDatabase(db)
 }

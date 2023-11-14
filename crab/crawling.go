@@ -1,23 +1,20 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gocolly/colly"
 	"github.com/temoto/robotstxt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"sync"
 	"time"
-
-	// Import the "dal" package to access its functions.
-	"cmpscfa23team2/dal"
 )
 
 type URLData struct {
 	URL     string
-	Tags    map[string]interface{}
-	Domain  string
 	Created time.Time
 }
 
@@ -47,13 +44,10 @@ func crawlURL(urlData URLData, ch chan<- URLData, wg *sync.WaitGroup) {
 	c.OnResponse(func(r *colly.Response) {
 		if r.StatusCode == 200 {
 			// Process the response, extract data, and add to URLData.
-			urlData.Tags = make(map[string]interface{}) // Set tags to an empty map, you can fill this.
 			ch <- urlData
 
 			// Print the crawled URL data.
 			fmt.Printf("Crawled URL: %s\n", urlData.URL)
-			fmt.Printf("Tags: %+v\n", urlData.Tags)
-			fmt.Printf("Domain: %s\n", urlData.Domain)
 		} else {
 			// Handle non-200 status codes
 			fmt.Printf("Non-200 status code while crawling %s: %d\n", urlData.URL, r.StatusCode)
@@ -66,8 +60,9 @@ func crawlURL(urlData URLData, ch chan<- URLData, wg *sync.WaitGroup) {
 func isURLAllowedByRobotsTXT(urlStr string) bool {
 	// Parse domain from URL
 	parsedURL, err := url.Parse(urlStr)
+
 	if err != nil {
-		// Handle error
+		log.Println("Error parsing URL:", err)
 		return false
 	}
 	domain := parsedURL.Host
@@ -77,75 +72,63 @@ func isURLAllowedByRobotsTXT(urlStr string) bool {
 
 	resp, err := http.Get(robotsURL)
 	if err != nil {
-		// Handle the error as needed.
+		log.Println("Error fetching robots.txt:", err)
 		return true
 	}
 
 	data, err := robotstxt.FromResponse(resp)
 	if err != nil {
-		// Handle the error as needed.
+		log.Println("Error parsing robots.txt:", err)
 		return true
 	}
 
 	// Check if the URL is allowed
-	return data.TestAgent(urlStr, "YourBotName") // Replace "YourBotName" with your actual bot name.
+	return data.TestAgent(urlStr, "GoEngine")
 }
 
 func threadedCrawl(urls []URLData, concurrentCrawlers int) {
-	var wg sync.WaitGroup
-	ch := make(chan URLData, len(urls))
-
+	var wg sync.WaitGroup               // WaitGroup to wait for all crawlers to finish
+	ch := make(chan URLData, len(urls)) // Channel to receive crawled URL data
+	log.Println("Starting crawling...")
 	for _, urlData := range urls {
-		wg.Add(1)
+		wg.Add(1) // Increment the WaitGroup counter
+
+		// Call the crawlURL function as a goroutine
 		go func(u URLData) {
-			crawlURL(u, ch, &wg)
-		}(urlData)
+			crawlURL(u, ch, &wg) // Call the crawlURL function as a goroutine
+		}(urlData) // Pass the URLData to the goroutine
+		log.Println("Crawling URL:", urlData.URL)
+		// Check if the number of concurrent crawlers has reached the limit
 		if len(urls) >= concurrentCrawlers {
 			break // Limit the number of concurrent goroutines
 		}
 	}
-
+	log.Println("Waiting for crawlers to finish...")
+	// Close the channel when all crawlers are done
 	go func() {
 		wg.Wait()
 		close(ch)
 	}()
+	log.Println("Crawling finished!")
+	writeCrawledURLsToFile(urls)
 }
 
 func main() {
-	urlsToCrawl := getURLsToCrawl() // Function to fetch URLs dynamically
-	InitializeCrawling(urlsToCrawl)
+	InitializeCrawling() // Function to initialize crawling
+
 }
 
-func InitializeCrawling(urls []URLData) {
+func InitializeCrawling() {
 	// Fetch the list of URLs to crawl from the DB.
-	urlsToCrawl, err := dal.GetURLsOnly() // Use the GetURLsOnly function from the "dal" package.
-	if err != nil {
-		log.Fatal("Error fetching URLs: ", err)
-	}
-
-	var urlDataList []URLData
-	for _, url := range urlsToCrawl {
-		tags, domain, err := dal.GetURLTagsAndDomain(url) // Use the GetURLTagsAndDomain function from the "dal" package.
-		if err != nil {
-			fmt.Printf("Error fetching data for URL %s: %v\n", url, err)
-			continue
-		}
-		urlDataList = append(urlDataList, URLData{
-			URL:    url,
-			Tags:   tags,
-			Domain: domain,
-		})
-
-		// Insert the URL into the database with associated tags.
-		_, err = dal.InsertURL(url, domain, tags) // Use the InsertURL function from the "dal" package.
-		if err != nil {
-			fmt.Printf("Error inserting URL %s: %v\n", url, err)
-		}
-	}
-
+	// Get the list of URLs to crawl.
+	log.Println("Fetching URLs to crawl...")
+	urlDataList := getURLsToCrawl()
+	log.Println("URLs to crawl:", urlDataList)
+	// Call the threadedCrawl function to crawl the URLs.
 	threadedCrawl(urlDataList, 10) // Use 10 concurrent crawlers.
 }
 
+// Function to fetch URLs dynamically.
 func getURLsToCrawl() []URLData {
 	// For testing, we are using 'http://books.toscrape.com/'
 	return []URLData{
@@ -153,4 +136,18 @@ func getURLsToCrawl() []URLData {
 			URL: "http://books.toscrape.com/",
 		},
 	}
+}
+
+func writeCrawledURLsToFile(urls []URLData) error {
+	urlStrings := make([]string, len(urls))
+	for i, u := range urls {
+		urlStrings[i] = u.URL
+	}
+
+	jsonData, err := json.Marshal(urlStrings)
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile("crawledUrls.json", jsonData, 0644)
 }

@@ -6,8 +6,14 @@ import (
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
 	"io/ioutil"
+	"log"
 	"time"
 )
+
+// TopLevelStruct represents the top-level structure of the JSON file
+type TopLevelStruct struct {
+	Items []ItemData `json:"items"`
+}
 
 // ItemData represents a generic item with metadata
 type ItemData struct {
@@ -107,4 +113,24 @@ func main() {
 	}
 
 	fmt.Println("Scraping completed and data has been saved to scrapedData.json")
+
+	// Read the JSON file
+	fileContents, err := ioutil.ReadFile("scrapedData.json")
+	if err != nil {
+		log.Fatalf("Error reading JSON file: %s", err)
+	}
+
+	// Unmarshal JSON data into struct
+	var data TopLevelStruct
+	err = json.Unmarshal(fileContents, &data)
+	if err != nil {
+		log.Fatalf("Error unmarshalling JSON data: %s", err)
+	}
+
+	// Now you can access the data from the JSON file
+	// For example, printing the titles of each item
+	for _, item := range data.Items {
+		fmt.Println("Title:", item.Data.Title)
+	}
+
 }

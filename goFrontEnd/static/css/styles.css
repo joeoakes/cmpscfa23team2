@@ -1,11 +1,18 @@
+.logo {
+  height: 60px;
+}
+
 /* Custom styles for the navbar */
 .navbar {
   background-color: darkblue; /* Change navbar color to dark blue */
+  padding-right: 2rem;
+  font-size: 20px; /* Increased font size for navbar items */
 }
 
 /* Align navbar brand/logo to the left */
 .navbar-brand {
   margin-right: auto; /* This pushes the navigation items to the right */
+  font-size: 30px;
 }
 
 /* Align nav items to the right */
@@ -85,5 +92,22 @@ footer.bg-dark .text-muted {
   #features,
   #under-construction {
     padding: 10px; /* Less padding on medium screens */
+  }
+}
+
+/* Contributors Section */
+
+/* Custom styles for contributor cards */
+.contributor-card .card-img-top {
+  max-width: 100%; /* Adjusts image width to 100% of its container */
+  height: auto; /* Maintain aspect ratio */
+  object-fit: contain; /* Ensure the image is fully visible */
+}
+
+/* Responsive behavior for contributors */
+@media (max-width: 768px) {
+  .contributor-card .card-img-top {
+    max-width: 150px; /* Adjust image size on smaller screens */
+    margin: auto; /* Center the image */
   }
 }

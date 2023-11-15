@@ -7,29 +7,31 @@ import (
 	"strings"
 )
 
-// JobListing represents a job listing with its description and industry.
-type JobListing struct {
+// GenericTextData represents any text data with an associated category.
+type GenericTextData struct {
 	Description string
-	Industry    string
+	Category    string
 }
 
 // NaiveBayesClassifier struct to hold model data.
 type NaiveBayesClassifier struct {
 	wordFrequencies  map[string]map[string]int
-	industryCounts   map[string]int
+	categoryCounts   map[string]int
 	totalWords       int
-	totalUniqueWords int // New field to track unique words
+	totalUniqueWords int
 }
 
 // NewNaiveBayesClassifier creates a new Naive Bayes Classifier.
 func NewNaiveBayesClassifier() *NaiveBayesClassifier {
 	return &NaiveBayesClassifier{
-		wordFrequencies: make(map[string]map[string]int),
-		industryCounts:  make(map[string]int),
-		totalWords:      0,
+		wordFrequencies:  make(map[string]map[string]int),
+		categoryCounts:   make(map[string]int),
+		totalWords:       0,
+		totalUniqueWords: 0,
 	}
 }
 
+// stopWords is a map of common words to be excluded from the analysis.
 var stopWords = map[string]bool{
 	"and": true, "or": true, "the": true, "in": true,
 	"of": true, "a": true, "is": true, "to": true,
@@ -48,15 +50,16 @@ func preprocessText(text string) []string {
 	return processedWords
 }
 
-func (nbc *NaiveBayesClassifier) Train(data []JobListing) {
+// Train takes generic text data and trains the classifier.
+func (nbc *NaiveBayesClassifier) Train(data []GenericTextData) {
 	uniqueWords := make(map[string]bool)
 
-	for _, listing := range data {
-		words := preprocessText(listing.Description)
-		industry := listing.Industry
+	for _, item := range data {
+		words := preprocessText(item.Description)
+		category := item.Category
 
-		if nbc.wordFrequencies[industry] == nil {
-			nbc.wordFrequencies[industry] = make(map[string]int)
+		if nbc.wordFrequencies[category] == nil {
+			nbc.wordFrequencies[category] = make(map[string]int)
 		}
 
 		for _, word := range words {
@@ -65,59 +68,59 @@ func (nbc *NaiveBayesClassifier) Train(data []JobListing) {
 				nbc.totalUniqueWords++
 			}
 
-			nbc.wordFrequencies[industry][word]++
+			nbc.wordFrequencies[category][word]++
 			nbc.totalWords++
 		}
 
-		nbc.industryCounts[industry]++
+		nbc.categoryCounts[category]++
 	}
 }
 
-// calculateProbability calculates the probability of a set of words belonging to a given industry.
-func (nbc *NaiveBayesClassifier) calculateProbability(words []string, industry string) float64 {
+// calculateProbability calculates the probability of a set of words belonging to a given category.
+func (nbc *NaiveBayesClassifier) calculateProbability(words []string, category string) float64 {
 	vocabSize := nbc.totalUniqueWords
-	prob := math.Log(float64(nbc.industryCounts[industry]) / float64(len(nbc.industryCounts)))
+	prob := math.Log(float64(nbc.categoryCounts[category]) / float64(len(nbc.categoryCounts)))
 
 	for _, word := range words {
-		wordFrequency := nbc.wordFrequencies[industry][word]
+		wordFrequency := nbc.wordFrequencies[category][word]
 		prob += math.Log(float64(wordFrequency+1) / float64(nbc.totalWords+vocabSize))
 	}
 
 	return prob
 }
 
-// PredictWithProbabilities predicts the industry for a given job description and returns probabilities.
+// PredictWithProbabilities predicts the category for a given description and returns probabilities.
 func (nbc *NaiveBayesClassifier) PredictWithProbabilities(description string) (string, map[string]float64) {
 	words := preprocessText(description)
-	industryProbabilities := make(map[string]float64)
+	categoryProbabilities := make(map[string]float64)
 
-	for industry := range nbc.industryCounts {
-		prob := nbc.calculateProbability(words, industry)
-		industryProbabilities[industry] = math.Exp(prob) // Convert log probability back
+	for category := range nbc.categoryCounts {
+		prob := nbc.calculateProbability(words, category)
+		categoryProbabilities[category] = math.Exp(prob) // Convert log probability back
 	}
 
-	// Get the industry with the highest probability
-	var topIndustry string
+	// Get the category with the highest probability
+	var topCategory string
 	maxProb := 0.0
-	for industry, prob := range industryProbabilities {
+	for category, prob := range categoryProbabilities {
 		if prob > maxProb {
 			maxProb = prob
-			topIndustry = industry
+			topCategory = category
 		}
 	}
 
-	return topIndustry, industryProbabilities
+	return topCategory, categoryProbabilities
 }
 
-// displayTopIndustries displays top 'n' industries based on probability.
-func displayTopIndustries(probs map[string]float64, n int) {
-	type industryProb struct {
-		Industry string
+// displayTopCategories displays top 'n' categories based on probability.
+func displayTopCategories(probs map[string]float64, n int) {
+	type categoryProb struct {
+		Category string
 		Prob     float64
 	}
-	var sortedProbs []industryProb
-	for industry, prob := range probs {
-		sortedProbs = append(sortedProbs, industryProb{industry, prob})
+	var sortedProbs []categoryProb
+	for category, prob := range probs {
+		sortedProbs = append(sortedProbs, categoryProb{category, prob})
 	}
 
 	sort.Slice(sortedProbs, func(i, j int) bool {
@@ -125,12 +128,12 @@ func displayTopIndustries(probs map[string]float64, n int) {
 	})
 
 	for i := 0; i < n && i < len(sortedProbs); i++ {
-		fmt.Printf("%d. %s: %e\n", i+1, sortedProbs[i].Industry, sortedProbs[i].Prob)
+		fmt.Printf("%d. %s: %e\n", i+1, sortedProbs[i].Category, sortedProbs[i].Prob)
 	}
 }
 
 func main() {
-	data := []JobListing{
+	data := []GenericTextData{
 		// Agriculture
 		{"Agricultural technology and farm management", "Agriculture"},
 		{"Sustainable farming practices", "Agriculture"},
@@ -260,9 +263,9 @@ func main() {
 
 	fmt.Printf("Predicted Industry: %s\n", predictedIndustry)
 	fmt.Println("Top Industries with Probabilities:")
-	displayTopIndustries(probs, 3)
+	displayTopCategories(probs, 3)
 
-	// Test Case 1
+	// Test Case 1 - this doesnt work right
 	testJobDescription1 := "Designing user interfaces and user experiences"
 	predictedIndustry1, _ := classifier.PredictWithProbabilities(testJobDescription1)
 	fmt.Printf("Test 1 - Job Description: '%s'\nPredicted Industry: %s\n\n", testJobDescription1, predictedIndustry1)
@@ -282,3 +285,53 @@ func main() {
 	predictedIndustry4, _ := classifier.PredictWithProbabilities(testJobDescription4)
 	fmt.Printf("Test 4 - Job Description: '%s'\nPredicted Industry: %s\n", testJobDescription4, predictedIndustry4)
 }
+
+//func main() {
+//	// Diverse data for different domains
+//	data := []GenericTextData{
+//		// Weather Domain
+//		{"Sunny and warm conditions expected", "Weather"},
+//		{"Heavy rainfall and thunderstorms in the area", "Weather"},
+//		{"Cold temperatures and snow showers", "Weather"},
+//
+//		// E-commerce Domain
+//		{"Latest smartphones with advanced features", "E-commerce"},
+//		{"Fashionable clothing and accessories on sale", "E-commerce"},
+//		{"Home appliances and electronics at discount prices", "E-commerce"},
+//
+//		// Healthcare Domain
+//		{"Advancements in medical research and drug development", "Healthcare"},
+//		{"Nutritional advice and diet planning", "Healthcare"},
+//		{"Pediatric care and children's health services", "Healthcare"},
+//
+//		// Technology Domain
+//		{"Innovations in artificial intelligence and machine learning", "Technology"},
+//		{"Cloud computing services and solutions", "Technology"},
+//		{"Cybersecurity threats and data protection measures", "Technology"},
+//
+//		// Education Domain
+//		{"Online learning platforms and e-learning tools", "Education"},
+//		{"Scholarship opportunities and academic programs", "Education"},
+//		{"Educational policy reforms and teaching methods", "Education"},
+//	}
+//
+//	classifier := NewNaiveBayesClassifier()
+//	classifier.Train(data)
+//
+//	// Test Cases for different domains
+//	testDescriptions := []string{
+//		"Cloudy with a chance of rain",
+//		"Summer fashion trends and styles",
+//		"Breakthrough in cancer treatment",
+//		"Developing secure web applications",
+//		"Remote teaching and virtual classrooms",
+//	}
+//
+//	for _, description := range testDescriptions {
+//		predictedCategory, probs := classifier.PredictWithProbabilities(description)
+//		fmt.Printf("Description: '%s'\nPredicted Category: %s\n", description, predictedCategory)
+//		fmt.Println("Top Categories with Probabilities:")
+//		displayTopCategories(probs, 3)
+//		fmt.Println()
+//	}
+//}

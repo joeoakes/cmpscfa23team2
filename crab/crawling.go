@@ -135,6 +135,24 @@ func getURLsToCrawl() []URLData {
 		{
 			URL: "http://books.toscrape.com/",
 		},
+		{
+			URL: "http://www.trulia.com",
+		},
+		{
+			URL: "http://www.zillow.com",
+		},
+		{
+			URL: "http://www.realtor.com",
+		},
+		{
+			URL: "http://www.redfin.com",
+		},
+		{
+			URL: "http://www.craigslist.com",
+		},
+		{
+			URL: "http://www.propertyguru.com",
+		},
 	}
 }
 

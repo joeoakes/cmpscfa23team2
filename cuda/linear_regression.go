@@ -27,7 +27,8 @@ func readCSV(filePath string) [][]string {
 		log.Fatal(err)
 	}
 	for i, record := range records {
-		if len(record) != 3 { // Expecting 3 columns: domain, x, y
+		
+		if len(record) != 21 { // Expecting 3 columns: domain, x, y
 			log.Fatalf("Error in line %d: Expected 3 fields, got %d", i+1, len(record))
 		}
 		fmt.Printf("Line %d: %v\n", i+1, record)
@@ -135,7 +136,7 @@ func main() {
 	domainData := make(map[string][][]string)
 	for _, record := range records[1:] { // Skipping header
 		domain := record[0]
-		domainData[domain] = append(domainData[domain], record[1:3]) // Taking only x and y
+		domainData[domain] = append(domainData[domain], record[1:21]) // Taking only x and y
 	}
 
 	for domain, data := range domainData {

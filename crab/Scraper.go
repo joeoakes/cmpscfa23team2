@@ -2,13 +2,13 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
-	"golang.org/x/exp/rand"
 	"io/ioutil"
 	"log"
-	"net/http"
+	"math/rand"
+	"net/url"
+	"strings"
 	"time"
 )
 
@@ -16,6 +16,8 @@ import (
 type TopLevelStruct struct {
 	Items []ItemData `json:"items"`
 }
+
+type SiteMap map[string][]string
 
 // ItemData represents a generic item with metadata
 type ItemData struct {
@@ -47,27 +49,6 @@ type Metadata struct {
 	Timestamp string `json:"timestamp"`
 }
 
-func marshallDataToJson(data []ItemData) ([]byte, error) {
-	wrappedData := map[string][]ItemData{
-		"items": data,
-	}
-
-	jsonData, err := json.MarshalIndent(wrappedData, "", "  ")
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling data to JSON: %w", err)
-	}
-
-	return jsonData, nil
-}
-
-func writeJsonToFile(filename string, jsonData []byte) error {
-	err := ioutil.WriteFile(filename, jsonData, 0644)
-	if err != nil {
-		return fmt.Errorf("error writing JSON to file: %w", err)
-	}
-	return nil
-}
-
 var userAgents = []string{
 	"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
 	"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15",
@@ -82,59 +63,68 @@ var userAgents = []string{
 }
 
 func getRandomUserAgent() string {
-	rand.Seed(uint64(time.Now().UnixNano()))
+	rand.Seed(int64(uint64(time.Now().UnixNano())))
 	index := rand.Intn(len(userAgents))
 	return userAgents[index]
 }
 
-func scrapeURLs(urls []string) []ItemData {
+// Function to read site map from a JSON file
+func readSiteMap(filePath string) (SiteMap, error) {
+	var siteMap SiteMap
+	fileContents, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(fileContents, &siteMap); err != nil {
+		return nil, err
+	}
+	return siteMap, nil
+}
 
-	allData := make([]ItemData, 0)
+// Function to save data to a JSON file
+func saveToJson(filePath string, data interface{}) error {
+	jsonData, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(filePath, jsonData, 0644)
+}
 
-	client := &http.Client{}
-
-	for _, url := range urls {
-		req, err := http.NewRequest("GET", url, nil)
-		if err != nil {
-			log.Printf("Failed to create request for URL %s: %v", url, err)
-			continue
-		}
-
-		req.Header.Set("User-Agent", getRandomUserAgent())
-
-		resp, err := client.Do(req)
-		if err != nil {
-			log.Printf("Failed to get URL %s: %v", url, err)
-			continue
-		}
-
-		// Process the response as needed, for example, read the body
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Printf("Failed to read response body for URL %s: %v", url, err)
-			resp.Body.Close()
-			continue
-		}
-		resp.Body.Close()
-
-		// For demonstration purposes, we're just printing the length of the body
-		fmt.Printf("URL: %s, Response body length: %d\n", url, len(body))
-		fmt.Println("Response body:", string(body))
+func getDomainFromURL(urlStr string) string {
+	parsedURL, err := url.Parse(urlStr)
+	if err != nil {
+		// Handle the error according to your needs
+		log.Printf("Error parsing URL '%s': %v", urlStr, err)
+		return ""
 	}
 
-	c := colly.NewCollector()
-	extensions.RandomUserAgent(c)
+	// Split the host by '.' and extract the domain part
+	// This simple split by '.' assumes a basic domain structure like 'example.com'
+	parts := strings.Split(parsedURL.Host, ".")
+	if len(parts) > 1 {
+		return parts[len(parts)-2] + "." + parts[len(parts)-1]
+	}
+	return parsedURL.Host
+}
+
+func scrapeURLs(urls []string) []ItemData {
+	allData := make([]ItemData, 0)
 
 	for _, pageURL := range urls {
-		c := colly.NewCollector()
+		c := colly.NewCollector(
+			colly.UserAgent(getRandomUserAgent()),
+		)
+		// Random user agent for each request
 		extensions.RandomUserAgent(c)
+
+		domain := getDomainFromURL(pageURL)
 
 		c.OnHTML("article.product_pod", func(e *colly.HTMLElement) {
 			bookURL := e.ChildAttr("h3 a", "href")
 			bookURL = e.Request.AbsoluteURL(bookURL)
 
 			currentItem := ItemData{
-				Domain: "books",
+				Domain: domain, // Use the extracted domain
 				Data: GenericData{
 					Title:       e.ChildText("h3 a"),
 					URL:         bookURL,
@@ -152,11 +142,10 @@ func scrapeURLs(urls []string) []ItemData {
 
 		maxRetries := 3
 		for i := 0; i < maxRetries; i++ {
-			err := c.Visit(pageURL)
-			if err == nil {
+			if err := c.Visit(pageURL); err == nil {
 				break
 			}
-			log.Printf("Error visiting %s: %s, retrying (%d/%d)\n", pageURL, err, i+1, maxRetries)
+			log.Printf("Error visiting %s: %s, retrying (%d/%d)\n", pageURL, i+1, maxRetries)
 			if i < maxRetries-1 {
 				time.Sleep(time.Second * 10)
 			}
@@ -165,64 +154,58 @@ func scrapeURLs(urls []string) []ItemData {
 		time.Sleep(time.Second * 5)
 	}
 
-	jsonData, err := marshallDataToJson(allData)
-	if err != nil {
-		log.Println(err)
-		return allData
-	}
-
-	err = writeJsonToFile("scrapedData.json", jsonData)
-	if err != nil {
-		log.Println(err)
-	}
-
 	log.Println("Scraping completed and data has been saved to scrapedData.json")
 	return allData
 }
 
 func getURLsToScrape() ([]string, error) {
-	var urls []string
-
-	jsonData, err := ioutil.ReadFile("crawledUrls.json")
+	var siteMap SiteMap
+	jsonData, err := ioutil.ReadFile("processedSiteMap.json")
 	if err != nil {
 		return nil, err
 	}
 
-	err = json.Unmarshal(jsonData, &urls)
+	err = json.Unmarshal(jsonData, &siteMap)
 	if err != nil {
 		return nil, err
+	}
+
+	// Extract URLs from the siteMap
+	var urls []string
+	for url := range siteMap {
+		urls = append(urls, url)
 	}
 
 	return urls, nil
 }
 
 func main() {
+	// Load site map from file
+	siteMap, err := readSiteMap("siteMap.json")
+	if err != nil {
+		log.Fatalf("Error reading site map: %v", err)
+	}
+
+	// Save the unmarshaled data to a new file for later access
+	err = saveToJson("processedSiteMap.json", siteMap)
+	if err != nil {
+		log.Fatalf("Error saving processed site map: %v", err)
+	}
+
+	// Get URLs to scrape from the processed site map
 	urlsToScrape, err := getURLsToScrape()
 	if err != nil {
 		log.Fatalf("Failed to get URLs to scrape: %v", err)
 	}
+
+	// Scrape URLs
 	scrapedData := scrapeURLs(urlsToScrape)
-	fmt.Println("Scraped Data:", scrapedData)
+	log.Printf("Scraped Data: %+v\n", scrapedData)
 
-	fmt.Println("Scraping completed and data has been saved to scrapedData.json")
-
-	// Read the JSON file
-	fileContents, err := ioutil.ReadFile("scrapedData.json")
-	if err != nil {
-		log.Fatalf("Error reading JSON file: %s", err)
+	// Save scraped data
+	if err := saveToJson("scrapedData.json", scrapedData); err != nil {
+		log.Fatalf("Error saving scraped data: %v", err)
 	}
 
-	// Unmarshal JSON data into struct
-	var data TopLevelStruct
-	err = json.Unmarshal(fileContents, &data)
-	if err != nil {
-		log.Fatalf("Error unmarshalling JSON data: %s", err)
-	}
-
-	// Now you can access the data from the JSON file
-	// For example, printing the titles of each item
-	for _, item := range data.Items {
-		fmt.Println("Title:", item.Data.Title)
-	}
-
+	log.Println("Scraping completed and data has been saved to scrapedData.json")
 }

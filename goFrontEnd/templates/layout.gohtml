@@ -20,6 +20,8 @@
   {{ template "contributors" . }}
 {{ else if eq .Content "login" }}
   {{ template "login" . }}
+{{ else if eq .Content "register" }}
+  {{ template "register" . }}
 {{ end }}
 
 {{ template "footer" . }}

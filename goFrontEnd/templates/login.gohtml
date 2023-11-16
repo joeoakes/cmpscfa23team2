@@ -1,58 +1,71 @@
 {{ define "login" }}
-  <!-- Login Modal -->
-  <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <!-- Modal Header -->
-        <div class="modal-header">
-          <h5 class="modal-title" id="loginModalLabel">Login to PredictAI</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
 
-        <!-- Modal Body -->
-        <div class="modal-body">
-          <form id="loginForm">
-            <div class="form-group">
-              <label for="username">Username:</label>
-              <input type="text" class="form-control" id="username" required />
+  <section class="vh-100">
+    <div class="container-fluid h-custom">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-md-9 col-lg-6 col-xl-5">
+          <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
+               class="img-fluid" alt="Sample image">
+        </div>
+        <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+          <form method="post" action="/login">
+            <div class="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
+              <p class="lead fw-normal mb-0 me-3">Sign in with</p>
+              <!-- Social Media Login Buttons -->
+              <button type="button" class="btn btn-primary btn-floating mx-1">
+                <i class="fab fa-facebook-f"></i>
+              </button>
+              <button type="button" class="btn btn-primary btn-floating mx-1">
+                <i class="fab fa-twitter"></i>
+              </button>
+              <button type="button" class="btn btn-primary btn-floating mx-1">
+                <i class="fab fa-linkedin-in"></i>
+              </button>
             </div>
-            <div class="form-group">
-              <label for="password">Password:</label>
-              <input type="password" class="form-control" id="password" required />
+
+            <div class="divider d-flex align-items-center my-4">
+              <p class="text-center fw-bold mx-3 mb-0">Or</p>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Login</button>
+
+            <!-- Email and Password Input -->
+            <div class="form-outline mb-4">
+              <input type="email" id="email" name="email" class="form-control form-control-lg"
+                     placeholder="Enter a valid email address" required />
+              <label class="form-label" for="email">Email address</label>
+            </div>
+
+            <div class="form-outline mb-3">
+              <input type="password" id="password" name="password" class="form-control form-control-lg"
+                     placeholder="Enter password" required />
+              <label class="form-label" for="password">Password</label>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="form-check mb-0">
+                <input class="form-check-input me-2" type="checkbox" value="" id="form2Example3" />
+                <label class="form-check-label" for="form2Example3">
+                  Remember me
+                </label>
+              </div>
+              <a href="#!" class="text-body">Forgot password?</a>
+            </div>
+
+            <div class="text-center text-lg-start mt-4 pt-2">
+              <button type="submit" class="btn btn-primary btn-lg"
+                      style="padding-left: 2.5rem; padding-right: 2.5rem;">Login</button>
+              <p class="small fw-bold mt-2 pt-1 mb-0">Don't have an account? <a href="/register"
+                                                                                class="link-danger">Register</a></p>
+            </div>
+
           </form>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Admin Page Enhanced -->
-  <div id="adminPage" class="container mt-5">
-    <h2>Admin Dashboard</h2>
-    <p>Welcome to the admin panel. Manage application settings, users, and more.</p>
-
-    <!-- User Selections Dropdown -->
-    <div class="form-group">
-      <label for="userSelection">Select Option:</label>
-      <select class="form-control" id="userSelection">
-        <option value="option1">Option 1</option>
-        <option value="option2">Option 2</option>
-        <option value="option3">Option 3</option>
-        <!-- Add more options as needed -->
-      </select>
-    </div>
-
-    <!-- User Input Field -->
-    <div class="form-group">
-      <label for="userInput">Enter Data:</label>
-      <input type="text" class="form-control" id="userInput" placeholder="Enter data here" />
-    </div>
-
-    <!-- Logout Button -->
-    <button onclick="logout()" class="btn btn-secondary">Logout</button>
-    <!-- More admin functionalities can be added here -->
-  </div>
 {{ end }}
+
+
+<!-- Logout Button -->
+    {{/*    <button onclick="logout()" class="btn btn-secondary">Logout</button>*/}}
+    <!-- More admin functionalities can be added here -->

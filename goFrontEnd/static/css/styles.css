@@ -1,3 +1,10 @@
+
+/* Additional custom styles */
+body {
+  font-family: Arial, sans-serif;
+  /*font-size: 30px;*/
+}
+
 .logo {
   height: 60px;
 }
@@ -20,14 +27,46 @@
   margin-left: auto; /* This ensures nav items align to the right */
 }
 
-/* Additional custom styles */
-body {
-  font-family: Arial, sans-serif;
+
+/* AI Engine Form Styling */
+.ai-engine-input {
+  background-color: #fff;
+  border-radius: 0.25rem;
+  padding: 2rem;
+  margin-top: 2rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
+/* Engine Output Styling */
+#engineOutput {
+  background-color: #f8f9fa;
+  border-radius: 0.25rem;
+  padding: 1rem;
+  margin-top: 2rem;
+}
+
+/* Jumbotron Custom Styling */
 .jumbotron {
   background-color: #f1f1f1;
+  border-radius: 0.25rem;
   text-align: center;
+}
+
+/* General Padding for Form Elements */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+/* Button Styling */
+.btn-primary {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+/* Link Styling */
+a:hover {
+  text-decoration: none;
+  opacity: 0.8;
 }
 
 #features,
@@ -35,11 +74,6 @@ body {
   background-color: #f9f9f9;
   padding: 20px;
   margin-top: 20px;
-}
-
-#under-construction {
-  text-align: center;
-  font-size: 24px;
 }
 
 .container {
@@ -111,3 +145,50 @@ footer.bg-dark .text-muted {
     margin: auto; /* Center the image */
   }
 }
+
+/* Login Page */
+.divider:after,
+.divider:before {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #eee;
+}
+.h-custom {
+  height: calc(100% - 73px);
+}
+@media (max-width: 450px) {
+  .h-custom {
+    height: 100%;
+  }
+}
+
+/*.form-signin {*/
+/*  width: 100%;*/
+/*  max-width: 330px;*/
+/*  padding: 15px;*/
+/*  margin: auto;*/
+/*}*/
+/*.form-signin .checkbox {*/
+/*  font-weight: 400;*/
+/*}*/
+/*.form-signin .form-control {*/
+/*  position: relative;*/
+/*  box-sizing: border-box;*/
+/*  height: auto;*/
+/*  padding: 10px;*/
+/*  font-size: 16px;*/
+/*}*/
+/*.form-signin .form-control:focus {*/
+/*  z-index: 2;*/
+/*}*/
+/*.form-signin input[type="email"] {*/
+/*  margin-bottom: -1px;*/
+/*  border-bottom-right-radius: 0;*/
+/*  border-bottom-left-radius: 0;*/
+/*}*/
+/*.form-signin input[type="password"] {*/
+/*  margin-bottom: 10px;*/
+/*  border-top-left-radius: 0;*/
+/*  border-top-right-radius: 0;*/
+/*}*/

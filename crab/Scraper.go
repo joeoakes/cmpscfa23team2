@@ -117,28 +117,44 @@ func scrapeURLs(urls []string) []ItemData {
 		// Random user agent for each request
 		extensions.RandomUserAgent(c)
 
-		domain := getDomainFromURL(pageURL)
+		c.OnHTML("*", func(e *colly.HTMLElement) { // Use a very broad selector
+			// Example of a heuristic approach
+			title := e.ChildText("h1")
+			if title != "" {
+				data := GenericData{
+					Title: title,
+					URL:   e.Request.URL.String(),
+					// Other fields can be extracted based on additional heuristics
+				}
 
-		c.OnHTML("article.product_pod", func(e *colly.HTMLElement) {
-			bookURL := e.ChildAttr("h3 a", "href")
-			bookURL = e.Request.AbsoluteURL(bookURL)
-
-			currentItem := ItemData{
-				Domain: domain, // Use the extracted domain
-				Data: GenericData{
-					Title:       e.ChildText("h3 a"),
-					URL:         bookURL,
-					Description: e.ChildText("p.description"),
-					Price:       e.ChildText("div p.price_color"),
-					Metadata: Metadata{
-						Source:    pageURL,
-						Timestamp: time.Now().Format(time.RFC3339),
-					},
-				},
+				domain := getDomainFromURL(pageURL)
+				allData = append(allData, ItemData{Domain: domain, Data: data})
 			}
-
-			allData = append(allData, currentItem)
 		})
+
+		//old ome working with books
+		//domain := getDomainFromURL(pageURL)
+		//
+		//c.OnHTML("article.product_pod", func(e *colly.HTMLElement) {
+		//	bookURL := e.ChildAttr("h3 a", "href")
+		//	bookURL = e.Request.AbsoluteURL(bookURL)
+		//
+		//	currentItem := ItemData{
+		//		Domain: domain, // Use the extracted domain
+		//		Data: GenericData{
+		//			Title:       e.ChildText("h3 a"),
+		//			URL:         bookURL,
+		//			Description: e.ChildText("p.description"),
+		//			Price:       e.ChildText("div p.price_color"),
+		//			Metadata: Metadata{
+		//				Source:    pageURL,
+		//				Timestamp: time.Now().Format(time.RFC3339),
+		//			},
+		//		},
+		//	}
+		//
+		//	allData = append(allData, currentItem)
+		//})
 
 		maxRetries := 3
 		for i := 0; i < maxRetries; i++ {

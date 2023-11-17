@@ -1,0 +1,84 @@
+{
+  "items": [
+    {
+      "domain": "e-commerce",
+      "data": {
+        "title": "Item or Listing Title",
+        "url": "URL of the item or listing",
+        "description": "Detailed description or summary",
+        "price": "Price or cost if applicable",
+        "location": "Location information if applicable",
+        "features": [
+          "Feature 1",
+          "Feature 2"
+        ],
+        "reviews": [
+          {
+            "user": "Username or reviewer ID",
+            "rating": 5,
+            "comment": "Review comment"
+          }
+        ],
+        "images": [
+          "URL of the image 1",
+          "URL of the image 2"
+        ],
+        "additional_info": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "metadata": {
+          "source": "Data source or reference",
+          "timestamp": "Data retrieval timestamp"
+        }
+      }
+    },
+    {
+      "domain": "real-estate",
+      "data": {
+        "title": "Property Listing Title",
+        "url": "URL of the property listing",
+        "description": "Detailed property description or summary",
+        "price": "Listed price or cost",
+        "location": "Property location information",
+        "features": [
+          "Bedrooms: 3",
+          "Bathrooms: 2"
+        ],
+        "images": [
+          "URL of the property image 1",
+          "URL of the property image 2"
+        ],
+        "additional_info": {
+          "property_type": "Apartment",
+          "year_built": "1990"
+        },
+        "metadata": {
+          "source": "Real estate website",
+          "timestamp": "Data retrieval timestamp"
+        }
+      }
+    },
+    {
+      "domain": "job-market",
+      "data": {
+        "title": "Job Position Title",
+        "url": "URL of the job listing",
+        "description": "Detailed job description or summary",
+        "location": "Job location information",
+        "features": [
+          "Skill 1",
+          "Skill 2"
+        ],
+        "additional_info": {
+          "company": "Company Name",
+          "employment_type": "Full-time"
+        },
+        "metadata": {
+          "source": "Job listing website",
+          "timestamp": "Data retrieval timestamp"
+        }
+      }
+    }
+  ]
+}

@@ -1,13 +1,12 @@
 package main
 
 import (
-	"encoding/json"
+	"encoding/csv"
 	"fmt"
-	"io/ioutil"
 	"math"
-	"math/rand"
+	"os"
 	"sort"
-	"time"
+	"strconv"
 )
 
 // WeatherData Hard coded weather data
@@ -15,28 +14,6 @@ type WeatherData struct {
 	Location    string
 	Date        string
 	Temperature float64
-}
-type Item struct {
-	Domain string `json:"domain"`
-	Data   struct {
-		Title       string   `json:"title"`
-		URL         string   `json:"url"`
-		Description string   `json:"description"`
-		Price       string   `json:"price"`
-		Location    string   `json:"location"`
-		Features    []string `json:"features"`
-		Reviews     []struct {
-			User    string `json:"user"`
-			Rating  int    `json:"rating"`
-			Comment string `json:"comment"`
-		}
-		Images         []string          `json:"images"`
-		AdditionalInfo map[string]string `json:"additional_info"`
-		Metadata       struct {
-			Source    string `json:"source"`
-			Timestamp string `json:"timestamp"`
-		} `json:"metadata"`
-	} `json:"data"`
 }
 
 // Point represents a data point in 2D space
@@ -94,69 +71,112 @@ func KNN(k int, data []Point, target Point) string {
 	return predictedLabel
 }
 
-func ConvertItemsToPoints(items []Item) []Point {
+// reads data from a csv file. Change to however you want it to be or have it do
+func ReadDataFromFile(filename string) ([]Point, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+
+		}
+	}(file)
+	reader := csv.NewReader(file)
+	lines, err := reader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
 	var data []Point
-	for _, item := range items {
+	for _, line := range lines {
 		var features []float64
-		switch item.Domain {
-		case "e-commerce":
-			features = []float64{float64(len(item.Data.Description)), float64(len(item.Data.Features))}
-		case "real-estate":
-			features = []float64{float64(len(item.Data.Description)), float64(countSubstring(item.Data.Features, "Bedrooms"))}
-		case "job-market":
-			features = []float64{float64(len(item.Data.Description)), float64(len(item.Data.Features))}
-
+		for _, value := range line[:len(line)-1] {
+			feature, err := strconv.ParseFloat(value, 64)
+			if err != nil {
+				return nil, err
+			}
+			features = append(features, feature)
 		}
-		label := item.Domain
+		label := line[len(line)-1]
+
 		data = append(data, Point{Features: features, Label: label})
-
 	}
-	return data
+	return data, nil
 }
-func countSubstring(slice []string, substring string) int {
-	count := 0
-	for _, s := range slice {
-		if s == substring {
-			count++
+
+// write the data to csv file
+func WriteDatatoFile(filename string, data []Point) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+
+		}
+	}(file)
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	for _, point := range data {
+		var record []string
+		for _, feature := range point.Features {
+			record = append(record, strconv.FormatFloat(feature, 'f', -1, 64))
+
+		}
+		record = append(record, point.Label)
+		err := writer.Write(record)
+		if err != nil {
+			return err
 		}
 	}
-	return count
+	return nil
 }
 
 // added this here just in case we need it to read a csv file
 
 func main() {
-	// reading data from JSON file
-	file, err := ioutil.ReadFile("crab/template.json")
-	if err != nil {
-		fmt.Printf("Error reading JSON file: %v\n", err)
-		return
-	}
-	// turn JSON data into items
-	var jsonData map[string][]Item
-	err = json.Unmarshal(file, &jsonData)
-	if err != nil {
-		fmt.Printf("Error unmarshalling JSON: %v\n", err)
-		return
-	}
-	items, ok := jsonData["items"]
-	if !ok {
-		fmt.Printf("Error: 'items' field not found in JSON.\n")
-		return
-	}
-	// convert items to points
-	data := ConvertItemsToPoints(items)
-	// seed random number generator to make it truly random
-	rand.Seed(time.Now().UnixNano())
+	//filename := "your_data.csv"
+	//data, err := ReadDataFromFile(filename)
+	//if err != nil {
+	//	fmt.Printf("Error reading data from file: %v\n", err)
+	//	return
+	//}
+	// calling function to read the csv file
+	// but unsure of whether it will be used in the future
+	// so leave it there - Binh
 
-	// randomly choose a target point from the dataset
-	targetIndex := rand.Intn(len(items))
-	targetItem := items[targetIndex]
-	target := ConvertItemsToPoints([]Item{targetItem})[0]
-	// target point to classify
-	//target := Point{Features: []float64{79, 12}} // replace with relevant features for target
-	k := 1
-	label := KNN(k, data, target)
-	fmt.Printf("Label predicted for target is '%s'\n", label)
+	// KNN with hard coded weather data
+	data := []Point{
+		{Features: []float64{1, 2}, Label: "Sunny"},
+		{Features: []float64{3, 1}, Label: "Rainy"},
+		{Features: []float64{2, 4}, Label: "Cloudy"},
+		{Features: []float64{5, 3}, Label: "Sunny"},
+	}
+	err := WriteDatatoFile("dal/data.csv", data)
+
+	// Target point to classify (representing new weather data)
+	target := Point{Features: []float64{5, 1}}
+	Data, err := ReadDataFromFile("dal/data.csv")
+	if err != nil {
+		fmt.Printf("Error reading data from csv file: %v\n", err)
+		return
+	}
+	storedData := append(Data)
+
+	// Perform KNN classification
+	k := 1 // Number of neighbors
+	label := KNN(k, storedData, target)
+	fmt.Printf("The label predicted for the target is '%s'\n", label)
+
+	err = WriteDatatoFile("dal/data_updated.csv", storedData)
+	if err != nil {
+		fmt.Printf("Error writing data to csv file: %v\n", err)
+		return
+
+	}
+	fmt.Printf("Updated data written to dal/data_updated.csv")
 
 }

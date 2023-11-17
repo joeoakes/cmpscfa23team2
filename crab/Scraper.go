@@ -104,6 +104,7 @@ type ItemData struct {
 }
 
 func main() {
+	// can add all URL's here
 	startingURLs := []string{
 		"http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
 		"https://books.toscrape.com/catalogue/category/books/philosophy_7/index.html",

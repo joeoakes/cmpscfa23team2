@@ -1,73 +1,73 @@
-$(document).ready(function () {
-  $("#learnMoreBtn").click(function () {
-    $("#loginModal").modal("show");
+$(document).ready(function() {
+  // When the 'Learn More' button is clicked, show the login modal
+  $('#learnMoreBtn').click(function() {
+    $('#loginModal').modal('show');
   });
 
-  $("#loginForm").on("submit", function (event) {
+  // Handle login form submission
+  $('#loginForm').submit(function(event) {
     event.preventDefault();
+    var username = $('#username').val();
+    var password = $('#password').val();
+
+    // AJAX call to the Go backend for login
     $.ajax({
-      url: "/login",
-      method: "POST",
-      contentType: "application/json",
-      data: JSON.stringify({
-        username: $("#username").val(),
-        password: $("#password").val(),
-      }),
-      success: function (response) {
-        console.log("Login successful:", response);
-        $("#loginModal").modal("hide");
-        // You can store the token in localStorage and redirect to a dashboard etc.
-        // localStorage.setItem('token', response.token);
-        // window.location.href = '/dashboard'; // The dashboard URL if exists
+      url: '/login',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ username: username, password: password }),
+      success: function(response) {
+        // Assuming the response contains a token
+        onLoginSuccess(response.token);
       },
-      error: function (xhr, status, error) {
-        console.error("Login failed:", error);
-      },
+      error: function(xhr, status, error) {
+        console.error('Login failed:', error);
+        alert('Login failed: ' + error);
+      }
     });
   });
-});
 
-$(document).ready(function () {
-  $("#learnMoreBtn").click(function () {
-    $("#loginModal").modal("show");
+  // Attach event listeners for settings buttons
+  $('.btn-settings').click(function() {
+    var action = $(this).text().trim();
+    var module = $(this).closest('.tab-pane').attr('id');
+    performAction(module, action);
   });
 
-  $("#loginForm").on("submit", function (event) {
-    event.preventDefault();
-    if ($("#username").val() === "test" && $("#password").val() === "test") {
-      // Dummy admin login success
-      onLoginSuccess({ token: "dummy-token" });
-    } else {
-      alert("Incorrect username or password.");
+  // Logout functionality
+  $('#logoutBtn').click(function() {
+    logout();
+  });
+});
+
+// Function to handle settings actions
+function performAction(module, action) {
+  console.log(module + ' action:', action);
+  // Implement AJAX calls or other functionality based on the action
+  // Example AJAX call:
+  $.ajax({
+    url: '/settings/' + module + '/' + action.toLowerCase(),
+    type: 'POST',
+    success: function(response) {
+      console.log(response.message);
+    },
+    error: function(xhr, status, error) {
+      console.error(module + ' ' + action + ' failed:', error);
     }
   });
-});
-
-function onLoginSuccess(response) {
-  console.log("Login successful:", response);
-  $("#loginModal").modal("hide");
-  $("#adminPage").show();
-  localStorage.setItem("token", response.token);
 }
 
+// Function to run on login success
+function onLoginSuccess(token) {
+  console.log('Login successful, token:', token);
+  $('#loginModal').modal('hide');
+  localStorage.setItem('token', token);
+  // Redirect to dashboard or update UI
+}
+
+// Function to logout
 function logout() {
-  localStorage.removeItem("token");
-  $("#adminPage").hide();
-  window.location.href = "/";
+  localStorage.removeItem('token');
+  // Redirect to the home page or update UI
+  window.location.href = '/';
 }
-
-// Add a successful login callback
-// function onLoginSuccess(response) {
-//   console.log("Login successful:", response);
-
-//   $("#loginModal").modal("hide");
-//   // Display the admin page section
-
-//   $("#adminPage").show();
-
-//   // Assuming you have a token in the response
-//   localStorage.setItem("token", response.token);
-
-//   // Redirect to the admin page if it's a separate HTML file
-//   window.location.href = "/admin.html"; // The admin page URL if exists
-// }

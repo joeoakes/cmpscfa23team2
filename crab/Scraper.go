@@ -24,6 +24,7 @@ func NewScraperConfig(startingURLs []string) ScraperConfig {
 
 func insertData(db *sql.DB, data ItemData) error {
 	// Prepare the SQL statement for insertion
+	// TABLE NEEDS TO BE CREATED
 	stmt, err := db.Prepare("INSERT INTO scrapedData (domain, title, url, description, price, source, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return err

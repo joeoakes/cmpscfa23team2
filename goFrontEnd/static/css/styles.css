@@ -1,13 +1,12 @@
 
-/* Additional custom styles */
+html,
 body {
+  height: 100%;
+  margin: 0;
   font-family: Arial, sans-serif;
-  /*font-size: 30px;*/
+
 }
 
-.logo {
-  height: 60px;
-}
 
 /* Custom styles for the navbar */
 .navbar {
@@ -97,8 +96,19 @@ a:hover {
   height: auto;
 }
 
-/* For some reason the bootstrap is overruling the css for the footer*/
+.logo {
+  height: 60px;
+}
 
+/* Footer */
+
+#page-content {
+  flex: 1 0 auto;
+}
+
+#footer {
+  flex-shrink: 0;
+}
 /* Specificity increased by targeting the body element */
 body footer.bg-dark {
   color: white; /* White text color for the footer */
@@ -162,33 +172,3 @@ footer.bg-dark .text-muted {
     height: 100%;
   }
 }
-
-/*.form-signin {*/
-/*  width: 100%;*/
-/*  max-width: 330px;*/
-/*  padding: 15px;*/
-/*  margin: auto;*/
-/*}*/
-/*.form-signin .checkbox {*/
-/*  font-weight: 400;*/
-/*}*/
-/*.form-signin .form-control {*/
-/*  position: relative;*/
-/*  box-sizing: border-box;*/
-/*  height: auto;*/
-/*  padding: 10px;*/
-/*  font-size: 16px;*/
-/*}*/
-/*.form-signin .form-control:focus {*/
-/*  z-index: 2;*/
-/*}*/
-/*.form-signin input[type="email"] {*/
-/*  margin-bottom: -1px;*/
-/*  border-bottom-right-radius: 0;*/
-/*  border-bottom-left-radius: 0;*/
-/*}*/
-/*.form-signin input[type="password"] {*/
-/*  margin-bottom: 10px;*/
-/*  border-top-left-radius: 0;*/
-/*  border-top-right-radius: 0;*/
-/*}*/

@@ -1,0 +1,174 @@
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: Arial, sans-serif;
+
+}
+
+
+/* Custom styles for the navbar */
+.navbar {
+  background-color: darkblue; /* Change navbar color to dark blue */
+  padding-right: 2rem;
+  font-size: 20px; /* Increased font size for navbar items */
+}
+
+/* Align navbar brand/logo to the left */
+.navbar-brand {
+  margin-right: auto; /* This pushes the navigation items to the right */
+  font-size: 30px;
+}
+
+/* Align nav items to the right */
+.navbar-nav {
+  margin-left: auto; /* This ensures nav items align to the right */
+}
+
+
+/* AI Engine Form Styling */
+.ai-engine-input {
+  background-color: #fff;
+  border-radius: 0.25rem;
+  padding: 2rem;
+  margin-top: 2rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Engine Output Styling */
+#engineOutput {
+  background-color: #f8f9fa;
+  border-radius: 0.25rem;
+  padding: 1rem;
+  margin-top: 2rem;
+}
+
+/* Jumbotron Custom Styling */
+.jumbotron {
+  background-color: #f1f1f1;
+  border-radius: 0.25rem;
+  text-align: center;
+}
+
+/* General Padding for Form Elements */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+/* Button Styling */
+.btn-primary {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+/* Link Styling */
+a:hover {
+  text-decoration: none;
+  opacity: 0.8;
+}
+
+#features,
+#under-construction {
+  background-color: #f9f9f9;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.container {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+#carouselExampleCaptions {
+  max-width: 90%;
+  margin: auto; /* Center the carousel */
+}
+
+#adminPage {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Make images responsive */
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+}
+
+.logo {
+  height: 60px;
+}
+
+/* Footer */
+
+#page-content {
+  flex: 1 0 auto;
+}
+
+#footer {
+  flex-shrink: 0;
+}
+/* Specificity increased by targeting the body element */
+body footer.bg-dark {
+  color: white; /* White text color for the footer */
+  background-color: darkblue; /* Background color for the footer */
+  text-align: center;
+}
+
+body footer.bg-dark a {
+  color: white; /* White text color for links in the footer */
+}
+
+footer.bg-dark .text-muted {
+  color: white !important;
+}
+
+/* Ensure text scales properly on different screens */
+@media (max-width: 768px) {
+  .display-4 {
+    font-size: 2.5rem; /* Smaller font size on small screens */
+  }
+}
+
+/* Responsive padding for sections */
+@media (max-width: 992px) {
+  #features,
+  #under-construction {
+    padding: 10px; /* Less padding on medium screens */
+  }
+}
+
+/* Contributors Section */
+
+/* Custom styles for contributor cards */
+.contributor-card .card-img-top {
+  max-width: 100%; /* Adjusts image width to 100% of its container */
+  height: auto; /* Maintain aspect ratio */
+  object-fit: contain; /* Ensure the image is fully visible */
+}
+
+/* Responsive behavior for contributors */
+@media (max-width: 768px) {
+  .contributor-card .card-img-top {
+    max-width: 150px; /* Adjust image size on smaller screens */
+    margin: auto; /* Center the image */
+  }
+}
+
+/* Login Page */
+.divider:after,
+.divider:before {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #eee;
+}
+.h-custom {
+  height: calc(100% - 73px);
+}
+@media (max-width: 450px) {
+  .h-custom {
+    height: 100%;
+  }
+}

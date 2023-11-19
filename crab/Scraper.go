@@ -1,5 +1,7 @@
 package main
 
+// which table is the info being saved?
+
 import (
 	"database/sql"
 	"fmt"

@@ -2,6 +2,8 @@ package main
 
 // The errors: the file does not see the other methods from the middleware
 // change the configurations of the build to: from 'file' to 'directory' goFrontEnd
+// This is how the filepath looks for me:
+// C:\Users\Public\GoLandProjects\PredictAi\carp\goFrontEnd
 
 import (
 	"html/template"

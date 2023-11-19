@@ -96,7 +96,6 @@
                     id="password"
                     required />
           </div>
-          <!-- Modification: Changed type to "button" and added onclick event -->
           <button type="button" class="btn btn-primary" onclick="performLogin()">Login</button>
         </form>
       </div>
@@ -245,23 +244,45 @@
 <script src="scripts.js"></script>
 <!-- Added script for authentication -->
 <script>
-  function performLogin() {
-    // Get the values from the form
+  // Function to authenticate user
+  function authenticateUser() {
     var username = document.getElementById("username").value;
     var password = document.getElementById("password").value;
+    authenticateUserBackend(username, password);
+  }
 
-    // Call the authentication function from authentication.go
-    // Example: authenticateUser(username, password);
-    // Make an AJAX request or any suitable method to communicate with your backend
+  function authenticateUserBackend(username, password) {
+    console.log("Calling backend authentication function with username:", username, "and password:", password);
+
+    // Make an AJAX request or any suitable method to communicate with backend
     // and handle the authentication process.
 
-    // For testing purposes, you can log the values to the console
-    console.log("Username: " + username);
-    console.log("Password: " + password);
+    // Call the actual authentication function from authentication.go
+    // Example: ValidateUserCredentials(username, password);
+    $.ajax({
+      type: "POST",
+      url: "/authenticate", // Replace with the actual endpoint for authentication
+      data: {
+        username: username,
+        password: password
+      },
+      success: function(response) {
+        console.log("Authentication successful:", response);
+        // Perform actions after a successful authentication, such as redirecting the user.
+        // Call ValidateUserCredentials here if needed.
+      },
+      error: function(error) {
+        console.error("Authentication failed:", error);
+        // Handle authentication failure, such as displaying an error message.
+      }
+    });
+  }
 
-    // After successful authentication, you can show the admin page or perform other actions.
-    // Example: document.getElementById("adminPage").style.display = "block";
+  function logout() {
+    console.log("Logout function called");
+    // Implement logout functionality
   }
 </script>
+
 </body>
 </html>

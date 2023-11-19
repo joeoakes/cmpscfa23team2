@@ -27,7 +27,7 @@ func readCSV(filePath string) [][]string {
 		log.Fatal(err)
 	}
 	for i, record := range records {
-		
+
 		if len(record) != 21 { // Expecting 3 columns: domain, x, y
 			log.Fatalf("Error in line %d: Expected 3 fields, got %d", i+1, len(record))
 		}
@@ -122,7 +122,7 @@ func createScatterPlot(x, y []float64, a, b float64, title, filename, xLabel, yL
 	}
 }
 func main() {
-	filePath := "C:\\Users\\shivb\\GolandProjects\\cmpscfa23team2\\cuda\\data2.csv"
+	filePath := "cuda\\data2.csv"
 	records := readCSV(filePath)
 
 	// Domain to axis labels mapping

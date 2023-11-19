@@ -1,0 +1,73 @@
+/* Custom styles for the navbar */
+.navbar {
+  background-color: darkblue; /* Change navbar color to dark blue */
+}
+
+/* Align navbar brand/logo to the left */
+.navbar-brand {
+  margin-right: auto; /* This pushes the navigation items to the right */
+}
+
+/* Align nav items to the right */
+.navbar-nav {
+  margin-left: auto; /* This ensures nav items align to the right */
+}
+
+/* Additional custom styles */
+body {
+  font-family: Arial, sans-serif;
+}
+
+.jumbotron {
+  background-color: #f1f1f1;
+  text-align: center;
+}
+
+#features,
+#under-construction {
+  background-color: #f9f9f9;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+#under-construction {
+  text-align: center;
+  font-size: 24px;
+}
+
+.container {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+#carouselExampleCaptions {
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#adminPage {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Make images responsive */
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Ensure text scales properly on different screens */
+@media (max-width: 768px) {
+  .display-4 {
+    font-size: 2.5rem; /* Smaller font size on small screens */
+  }
+}
+
+/* Responsive padding for sections */
+@media (max-width: 992px) {
+  #features,
+  #under-construction {
+    padding: 10px; /* Less padding on medium screens */
+  }
+}

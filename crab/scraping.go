@@ -1,5 +1,7 @@
 package main
 
+//Error creating ETFs table: Error 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES) ?
+// how can we address this error?
 import (
 	"database/sql"
 	"encoding/json"

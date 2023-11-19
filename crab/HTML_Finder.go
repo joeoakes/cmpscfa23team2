@@ -8,7 +8,7 @@ import (
 	"github.com/gocolly/colly/extensions"
 )
 
-func main() {
+func main1() {
 	// Create a new Collector instance from the colly package.
 	c := colly.NewCollector()
 

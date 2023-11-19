@@ -6,89 +6,31 @@ import (
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
 	"io/ioutil"
-	"sync"
+	"log"
 	"time"
 )
 
-// ScraperConfig holds the configuration for the scraper
-type ScraperConfig struct {
-	StartingURLs []string
+// TopLevelStruct represents the top-level structure of the JSON file
+type TopLevelStruct struct {
+	Items []ItemData `json:"items"`
 }
 
-// NewScraperConfig creates a new ScraperConfig with default values
-func NewScraperConfig(startingURLs []string) ScraperConfig {
-	return ScraperConfig{
-		StartingURLs: startingURLs,
-	}
-}
-
-// Scrape performs the scraping based on the provided configuration
-func Scrape(startingURL string, domain string, wg *sync.WaitGroup, resultChan chan []ItemData) {
-	defer wg.Done()
-
-	// Container for scraped data
-	var allData []ItemData
-
-	c := colly.NewCollector()
-	extensions.RandomUserAgent(c)
-
-	// Collect the data for each book on the first page of each URL
-	c.OnHTML("article.product_pod", func(e *colly.HTMLElement) {
-		bookURL := e.ChildAttr("h3 a", "href")
-		// Assuming we have a function to resolve the relative bookURL to absolute
-		bookURL = e.Request.AbsoluteURL(bookURL)
-
-		currentItem := ItemData{
-			Domain: domain,
-			Data: GenericData{
-				Title:       e.ChildText("h3 a"),
-				URL:         bookURL,
-				Description: e.ChildText("p.description"), // Selector assumed, replace with the actual selector
-				Price:       e.ChildText("div p.price_color"),
-				Metadata: Metadata{
-					Source:    e.Request.URL.String(),
-					Timestamp: time.Now().Format(time.RFC3339),
-				},
-			},
-		}
-
-		allData = append(allData, currentItem)
-	})
-
-	// Visit the URL with retry logic
-	maxRetries := 3
-	for i := 0; i < maxRetries; i++ {
-		err := c.Visit(startingURL)
-		if err == nil {
-			break // No error, break the retry loop
-		}
-		fmt.Printf("Error visiting %s: %s, retrying (%d/%d)\n", startingURL, err, i+1, maxRetries)
-		if i < maxRetries-1 {
-			time.Sleep(time.Second * 10) // Wait before retrying
-		}
-	}
-
-	// Sleep to prevent rate-limiting issues
-	time.Sleep(time.Second * 5)
-
-	resultChan <- allData
-}
-
-type Metadata struct {
-	Source    string `json:"source"`
-	Timestamp string `json:"timestamp"`
+// ItemData represents a generic item with metadata
+type ItemData struct {
+	Domain string      `json:"domain"`
+	Data   GenericData `json:"data"`
 }
 
 type GenericData struct {
 	Title          string            `json:"title"`
 	URL            string            `json:"url"`
-	Description    string            `json:"description"` // This could be the book synopsis if available
+	Description    string            `json:"description"`
 	Price          string            `json:"price"`
-	Location       string            `json:"location,omitempty"`        // Omitted if not applicable
-	Features       []string          `json:"features,omitempty"`        // Omitted if not applicable
-	Reviews        []Review          `json:"reviews,omitempty"`         // Omitted if not applicable
-	Images         []string          `json:"images,omitempty"`          // Omitted if not applicable
-	AdditionalInfo map[string]string `json:"additional_info,omitempty"` // Flexible for any additional data
+	Location       string            `json:"location,omitempty"`
+	Features       []string          `json:"features,omitempty"`
+	Reviews        []Review          `json:"reviews,omitempty"`
+	Images         []string          `json:"images,omitempty"`
+	AdditionalInfo map[string]string `json:"additional_info,omitempty"`
 	Metadata       Metadata          `json:"metadata"`
 }
 
@@ -98,209 +40,133 @@ type Review struct {
 	Comment string `json:"comment"`
 }
 
-type ItemData struct {
-	Domain string      `json:"domain"`
-	Data   GenericData `json:"data"`
+type Metadata struct {
+	Source    string `json:"source"`
+	Timestamp string `json:"timestamp"`
+}
+
+func marshallDataToJson(data []ItemData) ([]byte, error) {
+	wrappedData := map[string][]ItemData{
+		"items": data,
+	}
+
+	jsonData, err := json.MarshalIndent(wrappedData, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling data to JSON: %w", err)
+	}
+
+	return jsonData, nil
+}
+
+func writeJsonToFile(filename string, jsonData []byte) error {
+	err := ioutil.WriteFile(filename, jsonData, 0644)
+	if err != nil {
+		return fmt.Errorf("error writing JSON to file: %w", err)
+	}
+	return nil
+}
+
+func scrapeURLs(urls []string) []ItemData {
+	allData := make([]ItemData, 0)
+
+	for _, pageURL := range urls {
+		c := colly.NewCollector()
+		extensions.RandomUserAgent(c)
+
+		c.OnHTML("article.product_pod", func(e *colly.HTMLElement) {
+			bookURL := e.ChildAttr("h3 a", "href")
+			bookURL = e.Request.AbsoluteURL(bookURL)
+
+			currentItem := ItemData{
+				Domain: "books",
+				Data: GenericData{
+					Title:       e.ChildText("h3 a"),
+					URL:         bookURL,
+					Description: e.ChildText("p.description"),
+					Price:       e.ChildText("div p.price_color"),
+					Metadata: Metadata{
+						Source:    pageURL,
+						Timestamp: time.Now().Format(time.RFC3339),
+					},
+				},
+			}
+
+			allData = append(allData, currentItem)
+		})
+
+		maxRetries := 3
+		for i := 0; i < maxRetries; i++ {
+			err := c.Visit(pageURL)
+			if err == nil {
+				break
+			}
+			log.Printf("Error visiting %s: %s, retrying (%d/%d)\n", pageURL, err, i+1, maxRetries)
+			if i < maxRetries-1 {
+				time.Sleep(time.Second * 10)
+			}
+		}
+
+		time.Sleep(time.Second * 5)
+	}
+
+	jsonData, err := marshallDataToJson(allData)
+	if err != nil {
+		log.Println(err)
+		return allData
+	}
+
+	err = writeJsonToFile("scrapedData.json", jsonData)
+	if err != nil {
+		log.Println(err)
+	}
+
+	log.Println("Scraping completed and data has been saved to scrapedData.json")
+	return allData
+}
+
+func getURLsToScrape() ([]string, error) {
+	var urls []string
+
+	jsonData, err := ioutil.ReadFile("crawledUrls.json")
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(jsonData, &urls)
+	if err != nil {
+		return nil, err
+	}
+
+	return urls, nil
 }
 
 func main() {
-	// can add all URL's here
-	startingURLs := []string{
-		"http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
-		"https://books.toscrape.com/catalogue/category/books/philosophy_7/index.html",
-	}
-
-	var wg sync.WaitGroup
-	resultChan := make(chan []ItemData, len(startingURLs))
-
-	// Launch a goroutine for each URL
-	for _, url := range startingURLs {
-		wg.Add(1)
-		go Scrape(url, "dynamic_domain", &wg, resultChan) // Pass the dynamic domain here
-	}
-
-	// Wait for all goroutines to finish
-	go func() {
-		wg.Wait()
-		close(resultChan)
-	}()
-
-	// Collect results from channels
-	var allData []ItemData
-	for result := range resultChan {
-		allData = append(allData, result...)
-	}
-
-	// Wrap the data
-	wrappedData := map[string][]ItemData{
-		"items": allData,
-	}
-
-	// Marshal the wrapped data into JSON
-	jsonData, err := json.MarshalIndent(wrappedData, "", "  ")
+	urlsToScrape, err := getURLsToScrape()
 	if err != nil {
-		fmt.Println("Error marshalling data to JSON:", err)
-		return
+		log.Fatalf("Failed to get URLs to scrape: %v", err)
 	}
-
-	// Write the JSON data to a file
-	err = ioutil.WriteFile("scrapedData.json", jsonData, 0644)
-	if err != nil {
-		fmt.Println("Error writing JSON to file:", err)
-	}
+	scrapedData := scrapeURLs(urlsToScrape)
+	fmt.Println("Scraped Data:", scrapedData)
 
 	fmt.Println("Scraping completed and data has been saved to scrapedData.json")
-}
 
-//package main
-//
-//import (
-//	"encoding/json"
-//	"fmt"
-//	"github.com/gocolly/colly"
-//	"github.com/gocolly/colly/extensions"
-//	"io/ioutil"
-//	"sync"
-//	"time"
-//)
-//
-//// ScraperConfig holds the configuration for the scraper
-//type ScraperConfig struct {
-//	StartingURLs []string
-//}
-//
-//// NewScraperConfig creates a new ScraperConfig with default values
-//func NewScraperConfig(startingURLs []string) ScraperConfig {
-//	return ScraperConfig{
-//		StartingURLs: startingURLs,
-//	}
-//}
-//
-//// Scrape performs the scraping based on the provided configuration
-//func Scrape(startingURL string, domain string, wg *sync.WaitGroup, resultChan chan []ItemData) {
-//	defer wg.Done()
-//
-//	// Container for scraped data
-//	var allData []ItemData
-//
-//	c := colly.NewCollector()
-//	extensions.RandomUserAgent(c)
-//
-//	// Collect the data for each book on the first page of each URL
-//	c.OnHTML("article.product_pod", func(e *colly.HTMLElement) {
-//		bookURL := e.ChildAttr("h3 a", "href")
-//		// Assuming we have a function to resolve the relative bookURL to absolute
-//		bookURL = e.Request.AbsoluteURL(bookURL)
-//
-//		currentItem := ItemData{
-//			Domain: domain,
-//			Data: GenericData{
-//				Title:       e.ChildText("h3 a"),
-//				URL:         bookURL,
-//				Description: e.ChildText("p.description"), // Selector assumed, replace with the actual selector
-//				Price:       e.ChildText("div p.price_color"),
-//				Metadata: Metadata{
-//					Source:    e.Request.URL.String(),
-//					Timestamp: time.Now().Format(time.RFC3339),
-//				},
-//			},
-//		}
-//
-//		allData = append(allData, currentItem)
-//	})
-//
-//	// Visit the URL with retry logic
-//	maxRetries := 3
-//	for i := 0; i < maxRetries; i++ {
-//		err := c.Visit(startingURL)
-//		if err == nil {
-//			break // No error, break the retry loop
-//		}
-//		fmt.Printf("Error visiting %s: %s, retrying (%d/%d)\n", startingURL, err, i+1, maxRetries)
-//		if i < maxRetries-1 {
-//			time.Sleep(time.Second * 10) // Wait before retrying
-//		}
-//	}
-//
-//	// Sleep to prevent rate-limiting issues
-//	time.Sleep(time.Second * 5)
-//
-//	resultChan <- allData
-//}
-//
-//type Metadata struct {
-//	Source    string `json:"source"`
-//	Timestamp string `json:"timestamp"`
-//}
-//
-//type GenericData struct {
-//	Title          string            `json:"title"`
-//	URL            string            `json:"url"`
-//	Description    string            `json:"description"` // This could be the book synopsis if available
-//	Price          string            `json:"price"`
-//	Location       string            `json:"location,omitempty"`        // Omitted if not applicable
-//	Features       []string          `json:"features,omitempty"`        // Omitted if not applicable
-//	Reviews        []Review          `json:"reviews,omitempty"`         // Omitted if not applicable
-//	Images         []string          `json:"images,omitempty"`          // Omitted if not applicable
-//	AdditionalInfo map[string]string `json:"additional_info,omitempty"` // Flexible for any additional data
-//	Metadata       Metadata          `json:"metadata"`
-//}
-//
-//type Review struct {
-//	User    string `json:"user"`
-//	Rating  int    `json:"rating"`
-//	Comment string `json:"comment"`
-//}
-//
-//type ItemData struct {
-//	Domain string      `json:"domain"`
-//	Data   GenericData `json:"data"`
-//}
-//
-//func main() {
-//	startingURLs := []string{
-//		"http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
-//		"https://books.toscrape.com/catalogue/category/books/philosophy_7/index.html",
-//	}
-//
-//	var wg sync.WaitGroup
-//	resultChan := make(chan []ItemData, len(startingURLs))
-//
-//	// Launch a goroutine for each URL
-//	for _, url := range startingURLs {
-//		wg.Add(1)
-//		go Scrape(url, "dynamic_domain", &wg, resultChan) // Pass the dynamic domain here
-//	}
-//
-//	// Wait for all goroutines to finish
-//	go func() {
-//		wg.Wait()
-//		close(resultChan)
-//	}()
-//
-//	// Collect results from channels
-//	var allData []ItemData
-//	for result := range resultChan {
-//		allData = append(allData, result...)
-//	}
-//
-//	// Wrap the data
-//	wrappedData := map[string][]ItemData{
-//		"items": allData,
-//	}
-//
-//	// Marshal the wrapped data into JSON
-//	jsonData, err := json.MarshalIndent(wrappedData, "", "  ")
-//	if err != nil {
-//		fmt.Println("Error marshalling data to JSON:", err)
-//		return
-//	}
-//
-//	// Write the JSON data to a file
-//	err = ioutil.WriteFile("scrapedData.json", jsonData, 0644)
-//	if err != nil {
-//		fmt.Println("Error writing JSON to file:", err)
-//	}
-//
-//	fmt.Println("Scraping completed and data has been saved to scrapedData.json")
-//}
+	// Read the JSON file
+	fileContents, err := ioutil.ReadFile("scrapedData.json")
+	if err != nil {
+		log.Fatalf("Error reading JSON file: %s", err)
+	}
+
+	// Unmarshal JSON data into struct
+	var data TopLevelStruct
+	err = json.Unmarshal(fileContents, &data)
+	if err != nil {
+		log.Fatalf("Error unmarshalling JSON data: %s", err)
+	}
+
+	// Now you can access the data from the JSON file
+	// For example, printing the titles of each item
+	for _, item := range data.Items {
+		fmt.Println("Title:", item.Data.Title)
+	}
+
+}

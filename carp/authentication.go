@@ -13,12 +13,14 @@ func ValidateUserCredentials(userLogin, userPassword string) (*dal.User, error) 
 	// Retrieve user information by login
 	user, err := dal.GetUserByLogin(userLogin)
 	if err != nil {
-		return nil, errors.New("invalid login credentials")
+		log.Printf("Authentication failed: %v", err)
+		return nil, errors.New("authentication failed: invalid login credentials")
 	}
 
 	// Validate the password
 	if !comparePasswords(userPassword, string(user.UserPassword)) {
-		return nil, errors.New("invalid login credentials")
+		log.Printf("Authentication failed: invalid password for user %s", userLogin)
+		return nil, errors.New("authentication failed: invalid login credentials")
 	}
 
 	return user, nil
@@ -37,7 +39,11 @@ func comparePasswords(plainPwd, hashedPwd string) bool {
 func HashPassword(plainPwd string) (string, error) {
 	// Use bcrypt to hash the password
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(plainPwd), bcrypt.DefaultCost)
-	return string(hashedPwd), err
+	if err != nil {
+		log.Printf("Error hashing password: %v", err)
+		return "", errors.New("internal server error")
+	}
+	return string(hashedPwd), nil
 }
 
 // For Testing

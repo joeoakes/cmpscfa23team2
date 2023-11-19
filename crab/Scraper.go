@@ -16,6 +16,42 @@ import (
 type ScraperConfig struct {
 	StartingURLs []string
 }
+type DomainConfig struct {
+	Name                string
+	ItemSelector        string
+	TitleSelector       string
+	URLSelector         string
+	DescriptionSelector string
+	PriceSelector       string
+	// Add any other domain-specific selectors or information needed for scraping
+}
+
+var domainConfigurations = map[string]DomainConfig{
+	"ecommerce": {
+		Name:                "ecommerce",
+		ItemSelector:        "div.product",
+		TitleSelector:       "h2.product-title a",
+		URLSelector:         "h2.product-title a",
+		DescriptionSelector: "div.product-description",
+		PriceSelector:       "span.product-price",
+	},
+	"real-estate": {
+		Name:                "real-estate",
+		ItemSelector:        "article.property-listing",
+		TitleSelector:       "h2.property-title",
+		URLSelector:         "a.property-link",
+		DescriptionSelector: "div.property-description",
+		PriceSelector:       "div.property-price",
+	},
+	"job-market": {
+		Name:                "job-market",
+		ItemSelector:        "div.job-posting",
+		TitleSelector:       "h2.job-title",
+		URLSelector:         "a.job-apply-link",
+		DescriptionSelector: "div.job-description",
+		PriceSelector:       "", // In job market, you might have salary rather than price
+	},
+}
 
 // NewScraperConfig creates a new ScraperConfig with default values
 func NewScraperConfig(startingURLs []string) ScraperConfig {
@@ -43,7 +79,7 @@ func insertData(db *sql.DB, data ItemData) error {
 }
 
 // Scrape performs the scraping based on the provided configuration
-func Scrape(startingURL string, domain string, wg *sync.WaitGroup) {
+func Scrape(startingURL string, domainConfig DomainConfig, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	// Container for scraped data
@@ -61,18 +97,17 @@ func Scrape(startingURL string, domain string, wg *sync.WaitGroup) {
 	extensions.RandomUserAgent(c)
 
 	// Collect the data for each book on the first page of each URL
-	c.OnHTML("article.product_pod", func(e *colly.HTMLElement) {
-		bookURL := e.ChildAttr("h3 a", "href")
-		// Assuming we have a function to resolve the relative bookURL to absolute
-		bookURL = e.Request.AbsoluteURL(bookURL)
+	c.OnHTML(domainConfig.ItemSelector, func(e *colly.HTMLElement) {
+		itemURL := e.ChildAttr(domainConfig.URLSelector, "href")
+		itemURL = e.Request.AbsoluteURL(itemURL)
 
 		currentItem := ItemData{
-			Domain: domain,
+			Domain: domainConfig.Name,
 			Data: GenericData{
-				Title:       e.ChildText("h3 a"),
-				URL:         bookURL,
-				Description: e.ChildText("p.description"), // Selector assumed, replace with the actual selector
-				Price:       e.ChildText("div p.price_color"),
+				Title:       e.ChildText(domainConfig.TitleSelector),
+				URL:         itemURL,
+				Description: e.ChildText(domainConfig.DescriptionSelector),
+				Price:       e.ChildText(domainConfig.PriceSelector),
 				Metadata: Metadata{
 					Source:    e.Request.URL.String(),
 					Timestamp: time.Now().Format(time.RFC3339),
@@ -106,6 +141,59 @@ func Scrape(startingURL string, domain string, wg *sync.WaitGroup) {
 	time.Sleep(time.Second * 5)
 }
 
+func selectDomain() string {
+	var domainName string
+	fmt.Println("Please enter the domain you'd like to scrape: (ecommerce, real-estate, job-market)")
+	fmt.Scanln(&domainName)
+	return domainName
+}
+func testScrape() {
+	// Assume these are your test URLs that you want to use for each domain
+	testURLs := map[string][]string{
+		"ecommerce":   {"http://example-ecommerce.com/deals"},
+		"real-estate": {"http://example-realestate.com/listings"},
+		"job-market":  {"http://example-jobmarket.com/opportunities"},
+	}
+
+	domainName := selectDomain()
+	domainConfig, exists := domainConfigurations[domainName]
+	if !exists {
+		fmt.Printf("Invalid domain name provided: %s\n", domainName)
+		return
+	}
+
+	startingURLs := testURLs[domainName]
+	var wg sync.WaitGroup
+	resultChan := make(chan []ItemData, len(startingURLs))
+
+	// Launch a goroutine for each URL
+	for _, url := range startingURLs {
+		wg.Add(1)
+		go Scrape(url, domainConfig, &wg)
+	}
+
+	// Wait for all goroutines to finish
+	go func() {
+		wg.Wait()
+		close(resultChan)
+	}()
+
+	// Collect results
+	var allResults [][]ItemData
+	for result := range resultChan {
+		allResults = append(allResults, result)
+	}
+
+	// Here you can process the results as needed
+	for _, results := range allResults {
+		for _, item := range results {
+			fmt.Printf("Scraped item: %+v\n", item)
+		}
+	}
+
+	fmt.Println("Testing completed and data has been scraped")
+}
+
 type Metadata struct {
 	Source    string `json:"source"`
 	Timestamp string `json:"timestamp"`
@@ -137,10 +225,19 @@ type ItemData struct {
 
 func main() {
 
-	// can add all URL's here
+	testScrape()
+
 	startingURLs := []string{
 		"http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
 		"https://books.toscrape.com/catalogue/category/books/philosophy_7/index.html",
+		"https://books.toscrape.com/catalogue/category/books/philosophy_7/index.html",
+	}
+
+	domainName := "ecommerce" // This should be chosen based on user input, for example
+	domainConfig, exists := domainConfigurations[domainName]
+	if !exists {
+		fmt.Printf("Invalid domain name provided: %s\n", domainName)
+		return
 	}
 
 	var wg sync.WaitGroup
@@ -149,7 +246,7 @@ func main() {
 	// Launch a goroutine for each URL
 	for _, url := range startingURLs {
 		wg.Add(1)
-		go Scrape(url, "dynamic_domain", &wg) // Pass the dynamic domain here
+		go Scrape(url, domainConfig, &wg)
 	}
 
 	// Wait for all goroutines to finish

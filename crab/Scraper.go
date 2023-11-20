@@ -149,7 +149,7 @@ func selectDomain() string {
 func testScrape() {
 	// Assume these are your test URLs that you want to use for each domain
 	testURLs := map[string][]string{
-		"ecommerce":   {"http://books.toscrape.com/catalogue/soumission_998/index.html"},
+		"ecommerce":   {"https://www.trackingdifferences.com/ETF/ISIN/"},
 		"real-estate": {"http://books.toscrape.com/catalogue/soumission_998/index.html"},
 		"job-market":  {"https://www.bls.gov/"},
 	}

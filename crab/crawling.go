@@ -44,6 +44,19 @@ type GasolineData struct {
 	GasPricesAdjustedForInfl string `json:"gas_prices_adjusted_for_inflation"`
 }
 
+type PropertyData struct {
+	Status    string `json:"status"`
+	Bedrooms  string `json:"bedrooms"`
+	Bathrooms string `json:"bathrooms"`
+	AcreLot   string `json:"acre_lot"`
+	City      string `json:"city"`
+	State     string `json:"state"`
+	ZipCode   string `json:"zip_code"`
+	HouseSize string `json:"house_size"`
+	SoldDate  string `json:"prev_sold_date"`
+	Price     string `json:"price"`
+}
+
 // crawlURL is responsible for crawling a single URL.
 func crawlURL(urlData URLData, ch chan<- URLData, wg *sync.WaitGroup) {
 	defer wg.Done() // Ensure the WaitGroup counter is decremented on function exit
@@ -403,9 +416,70 @@ func scrapeGasInflationData() {
 	fmt.Println("Gasoline data written to gasoline_data.json")
 }
 
+func scrapeHousingData() {
+	urlll := "https://www.kaggle.com/datasets/ahmedshahriarsakib/usa-real-estate-dataset"
+	res, err := http.Get(urlll)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
+	}
+
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var properties []PropertyData
+	doc.Find(".sc-fLdTid.sc-eZkIzG.iXbLwD.cefCfQ").Each(func(i int, s *goquery.Selection) {
+		var data PropertyData
+		s.Find("div").Each(func(index int, item *goquery.Selection) {
+			switch index {
+			case 0:
+				data.Status = item.Text()
+			case 1:
+				data.Bedrooms = item.Text()
+			case 2:
+				data.Bathrooms = item.Text()
+			case 3:
+				data.AcreLot = item.Text()
+			case 4:
+				data.City = item.Text()
+			case 5:
+				data.State = item.Text()
+			case 6:
+				data.ZipCode = item.Text()
+			case 7:
+				data.HouseSize = item.Text()
+			case 8:
+				data.SoldDate = item.Text()
+			case 9:
+				data.Price = item.Text()
+			}
+		})
+		properties = append(properties, data)
+	})
+
+	jsonData, err := json.MarshalIndent(properties, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = ioutil.WriteFile("property_data.json", jsonData, 0644)
+	if err != nil {
+		log.Fatalf("Failed to write JSON data to file: %s", err)
+	}
+
+	fmt.Println("Property data written to property_data.json")
+}
+
 func main() {
 	InitializeCrawling()
 	airdatatest()
 	scrapeInflationData()
 	scrapeGasInflationData()
+	scrapeHousingData()
 }

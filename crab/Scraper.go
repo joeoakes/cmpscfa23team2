@@ -3,12 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
-	"io/ioutil"
-	"log"
 	"os"
-	"strings"
 	"sync"
 	"time"
 )
@@ -168,70 +164,6 @@ func Scrape(startingURL string, domainConfig DomainConfig, wg *sync.WaitGroup) {
 	if err != nil {
 		fmt.Printf("Error saving data to JSON file: %v\n", err)
 	}
-}
-func airfair() {
-	content, err := ioutil.ReadFile("data.html")
-	if err != nil {
-		log.Fatal(err)
-	}
-	html := string(content)
-
-	var data []YearData
-
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	doc.Find("table tbody tr").Each(func(rowIndex int, rowHtml *goquery.Selection) {
-		if rowIndex == 0 { // Skip the header row
-			return
-		}
-
-		var yearData YearData
-		rowHtml.Find("td").Each(func(cellIndex int, cellHtml *goquery.Selection) {
-			switch cellIndex {
-			case 0:
-				yearData.Year = cellHtml.Text()
-			case 1:
-				yearData.Jan = cellHtml.Text()
-			case 2:
-				yearData.Feb = cellHtml.Text()
-			case 3:
-				yearData.Mar = cellHtml.Text()
-			case 4:
-				yearData.Apr = cellHtml.Text()
-			case 5:
-				yearData.May = cellHtml.Text()
-			case 6:
-				yearData.Jun = cellHtml.Text()
-			case 7:
-				yearData.July = cellHtml.Text()
-			case 8:
-				yearData.Aug = cellHtml.Text()
-			case 9:
-				yearData.Sept = cellHtml.Text()
-			case 10:
-				yearData.Oct = cellHtml.Text()
-			case 11:
-				yearData.Nov = cellHtml.Text()
-			case 12:
-				yearData.Dec = cellHtml.Text()
-			case 13:
-				yearData.Avg = cellHtml.Text()
-
-			}
-		})
-
-		data = append(data, yearData)
-	})
-
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(string(jsonData))
 }
 func testScrape(domainName string) {
 	domainConfig, exists := domainConfigurations[domainName]

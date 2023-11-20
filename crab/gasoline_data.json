@@ -1,0 +1,272 @@
+[
+  {
+    "year": "1978",
+    "average_gasoline_prices": "0.652",
+    "average_annual_cpi_for_gasoline": "51.900",
+    "gas_prices_adjusted_for_inflation": "$4.37 "
+  },
+  {
+    "year": "1979",
+    "average_gasoline_prices": "0.882",
+    "average_annual_cpi_for_gasoline": "70.200",
+    "gas_prices_adjusted_for_inflation": "$4.37 "
+  },
+  {
+    "year": "1980",
+    "average_gasoline_prices": "1.221",
+    "average_annual_cpi_for_gasoline": "97.500",
+    "gas_prices_adjusted_for_inflation": "$4.36 "
+  },
+  {
+    "year": "1981",
+    "average_gasoline_prices": "1.353",
+    "average_annual_cpi_for_gasoline": "108.500",
+    "gas_prices_adjusted_for_inflation": "$4.34 "
+  },
+  {
+    "year": "1982",
+    "average_gasoline_prices": "1.281",
+    "average_annual_cpi_for_gasoline": "102.800",
+    "gas_prices_adjusted_for_inflation": "$4.33 "
+  },
+  {
+    "year": "1983",
+    "average_gasoline_prices": "1.225",
+    "average_annual_cpi_for_gasoline": "99.400",
+    "gas_prices_adjusted_for_inflation": "$4.28 "
+  },
+  {
+    "year": "1984",
+    "average_gasoline_prices": "1.198",
+    "average_annual_cpi_for_gasoline": "97.800",
+    "gas_prices_adjusted_for_inflation": "$4.26 "
+  },
+  {
+    "year": "1985",
+    "average_gasoline_prices": "1.196",
+    "average_annual_cpi_for_gasoline": "98.600",
+    "gas_prices_adjusted_for_inflation": "$4.22 "
+  },
+  {
+    "year": "1986",
+    "average_gasoline_prices": "0.931",
+    "average_annual_cpi_for_gasoline": "77.000",
+    "gas_prices_adjusted_for_inflation": "$4.20 "
+  },
+  {
+    "year": "1987",
+    "average_gasoline_prices": "0.957",
+    "average_annual_cpi_for_gasoline": "80.100",
+    "gas_prices_adjusted_for_inflation": "$4.16 "
+  },
+  {
+    "year": "1988",
+    "average_gasoline_prices": "0.964",
+    "average_annual_cpi_for_gasoline": "80.800",
+    "gas_prices_adjusted_for_inflation": "$4.15 "
+  },
+  {
+    "year": "1989",
+    "average_gasoline_prices": "1.060",
+    "average_annual_cpi_for_gasoline": "88.500",
+    "gas_prices_adjusted_for_inflation": "$4.17 "
+  },
+  {
+    "year": "1990",
+    "average_gasoline_prices": "1.217",
+    "average_annual_cpi_for_gasoline": "101.000",
+    "gas_prices_adjusted_for_inflation": "$4.19 "
+  },
+  {
+    "year": "1991",
+    "average_gasoline_prices": "1.196",
+    "average_annual_cpi_for_gasoline": "99.200",
+    "gas_prices_adjusted_for_inflation": "$4.19 "
+  },
+  {
+    "year": "1992",
+    "average_gasoline_prices": "1.190",
+    "average_annual_cpi_for_gasoline": "99.000",
+    "gas_prices_adjusted_for_inflation": "$4.18 "
+  },
+  {
+    "year": "1993",
+    "average_gasoline_prices": "1.173",
+    "average_annual_cpi_for_gasoline": "97.700",
+    "gas_prices_adjusted_for_inflation": "$4.17 "
+  },
+  {
+    "year": "1994",
+    "average_gasoline_prices": "1.174",
+    "average_annual_cpi_for_gasoline": "98.200",
+    "gas_prices_adjusted_for_inflation": "$4.16 "
+  },
+  {
+    "year": "1995",
+    "average_gasoline_prices": "1.205",
+    "average_annual_cpi_for_gasoline": "99.800",
+    "gas_prices_adjusted_for_inflation": "$4.20 "
+  },
+  {
+    "year": "1996",
+    "average_gasoline_prices": "1.288",
+    "average_annual_cpi_for_gasoline": "105.900",
+    "gas_prices_adjusted_for_inflation": "$4.23 "
+  },
+  {
+    "year": "1997",
+    "average_gasoline_prices": "1.291",
+    "average_annual_cpi_for_gasoline": "105.800",
+    "gas_prices_adjusted_for_inflation": "$4.24 "
+  },
+  {
+    "year": "1998",
+    "average_gasoline_prices": "1.115",
+    "average_annual_cpi_for_gasoline": "91.600",
+    "gas_prices_adjusted_for_inflation": "$4.23 "
+  },
+  {
+    "year": "1999",
+    "average_gasoline_prices": "1.221",
+    "average_annual_cpi_for_gasoline": "100.100",
+    "gas_prices_adjusted_for_inflation": "$4.24 "
+  },
+  {
+    "year": "2000",
+    "average_gasoline_prices": "1.563",
+    "average_annual_cpi_for_gasoline": "128.600",
+    "gas_prices_adjusted_for_inflation": "$4.23 "
+  },
+  {
+    "year": "2001",
+    "average_gasoline_prices": "1.531",
+    "average_annual_cpi_for_gasoline": "124.000",
+    "gas_prices_adjusted_for_inflation": "$4.29 "
+  },
+  {
+    "year": "2002",
+    "average_gasoline_prices": "1.441",
+    "average_annual_cpi_for_gasoline": "116.000",
+    "gas_prices_adjusted_for_inflation": "$4.32 "
+  },
+  {
+    "year": "2003",
+    "average_gasoline_prices": "1.638",
+    "average_annual_cpi_for_gasoline": "135.100",
+    "gas_prices_adjusted_for_inflation": "$4.22 "
+  },
+  {
+    "year": "2004",
+    "average_gasoline_prices": "1.923",
+    "average_annual_cpi_for_gasoline": "159.700",
+    "gas_prices_adjusted_for_inflation": "$4.19 "
+  },
+  {
+    "year": "2005",
+    "average_gasoline_prices": "2.338",
+    "average_annual_cpi_for_gasoline": "194.700",
+    "gas_prices_adjusted_for_inflation": "$4.18 "
+  },
+  {
+    "year": "2006",
+    "average_gasoline_prices": "2.635",
+    "average_annual_cpi_for_gasoline": "219.900",
+    "gas_prices_adjusted_for_inflation": "$4.17 "
+  },
+  {
+    "year": "2007",
+    "average_gasoline_prices": "2.849",
+    "average_annual_cpi_for_gasoline": "237.959",
+    "gas_prices_adjusted_for_inflation": "$4.16 "
+  },
+  {
+    "year": "2008",
+    "average_gasoline_prices": "3.317",
+    "average_annual_cpi_for_gasoline": "277.457",
+    "gas_prices_adjusted_for_inflation": "$4.16 "
+  },
+  {
+    "year": "2009",
+    "average_gasoline_prices": "2.401",
+    "average_annual_cpi_for_gasoline": "201.555",
+    "gas_prices_adjusted_for_inflation": "$4.14 "
+  },
+  {
+    "year": "2010",
+    "average_gasoline_prices": "2.836",
+    "average_annual_cpi_for_gasoline": "238.594",
+    "gas_prices_adjusted_for_inflation": "$4.13 "
+  },
+  {
+    "year": "2011",
+    "average_gasoline_prices": "3.577",
+    "average_annual_cpi_for_gasoline": "301.694",
+    "gas_prices_adjusted_for_inflation": "$4.12 "
+  },
+  {
+    "year": "2012",
+    "average_gasoline_prices": "3.695",
+    "average_annual_cpi_for_gasoline": "311.470",
+    "gas_prices_adjusted_for_inflation": "$4.13 "
+  },
+  {
+    "year": "2013",
+    "average_gasoline_prices": "3.584",
+    "average_annual_cpi_for_gasoline": "302.577",
+    "gas_prices_adjusted_for_inflation": "$4.12 "
+  },
+  {
+    "year": "2014",
+    "average_gasoline_prices": "3.425",
+    "average_annual_cpi_for_gasoline": "290.889",
+    "gas_prices_adjusted_for_inflation": "$4.09 "
+  },
+  {
+    "year": "2015",
+    "average_gasoline_prices": "2.510",
+    "average_annual_cpi_for_gasoline": "212.007",
+    "gas_prices_adjusted_for_inflation": "$4.12 "
+  },
+  {
+    "year": "2016",
+    "average_gasoline_prices": "2.204",
+    "average_annual_cpi_for_gasoline": "187.602",
+    "gas_prices_adjusted_for_inflation": "$4.08 "
+  },
+  {
+    "year": "2017",
+    "average_gasoline_prices": "2.469",
+    "average_annual_cpi_for_gasoline": "211.770",
+    "gas_prices_adjusted_for_inflation": "$4.05 "
+  },
+  {
+    "year": "2018",
+    "average_gasoline_prices": "2.794",
+    "average_annual_cpi_for_gasoline": "240.599",
+    "gas_prices_adjusted_for_inflation": "$4.04 "
+  },
+  {
+    "year": "2019",
+    "average_gasoline_prices": "2.698",
+    "average_annual_cpi_for_gasoline": "232.003",
+    "gas_prices_adjusted_for_inflation": "$4.04 "
+  },
+  {
+    "year": "2020",
+    "average_gasoline_prices": "2.242",
+    "average_annual_cpi_for_gasoline": "194.130",
+    "gas_prices_adjusted_for_inflation": "$4.02 "
+  },
+  {
+    "year": "2021",
+    "average_gasoline_prices": "3.133",
+    "average_annual_cpi_for_gasoline": "264.017",
+    "gas_prices_adjusted_for_inflation": "$4.13 "
+  },
+  {
+    "year": "2022",
+    "average_gasoline_prices": "4.192",
+    "average_annual_cpi_for_gasoline": "347.747",
+    "gas_prices_adjusted_for_inflation": "$4.19 "
+  }
+]

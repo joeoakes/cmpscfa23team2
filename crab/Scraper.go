@@ -3,7 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
+	"io/ioutil"
+	"log"
 	"math/rand"
 	"os"
 	"strings"
@@ -240,7 +243,70 @@ func Scrape(startingURL string, domainConfig DomainConfig, wg *sync.WaitGroup) {
 		fmt.Printf("Error saving data to JSON file: %v\n", err)
 	}
 }
+func airfair() {
+	content, err := ioutil.ReadFile("data.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	html := string(content)
 
+	var data []YearData
+
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	doc.Find("table tbody tr").Each(func(rowIndex int, rowHtml *goquery.Selection) {
+		if rowIndex == 0 { // Skip the header row
+			return
+		}
+
+		var yearData YearData
+		rowHtml.Find("td").Each(func(cellIndex int, cellHtml *goquery.Selection) {
+			switch cellIndex {
+			case 0:
+				yearData.Year = cellHtml.Text()
+			case 1:
+				yearData.Jan = cellHtml.Text()
+			case 2:
+				yearData.Feb = cellHtml.Text()
+			case 3:
+				yearData.Mar = cellHtml.Text()
+			case 4:
+				yearData.Apr = cellHtml.Text()
+			case 5:
+				yearData.May = cellHtml.Text()
+			case 6:
+				yearData.Jun = cellHtml.Text()
+			case 7:
+				yearData.July = cellHtml.Text()
+			case 8:
+				yearData.Aug = cellHtml.Text()
+			case 9:
+				yearData.Sept = cellHtml.Text()
+			case 10:
+				yearData.Oct = cellHtml.Text()
+			case 11:
+				yearData.Nov = cellHtml.Text()
+			case 12:
+				yearData.Dec = cellHtml.Text()
+			case 13:
+				yearData.Avg = cellHtml.Text()
+
+			}
+		})
+
+		data = append(data, yearData)
+	})
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(jsonData))
+}
 func testScrape(domainName string) {
 	domainConfig, exists := domainConfigurations[domainName]
 	if !exists {
@@ -250,11 +316,12 @@ func testScrape(domainName string) {
 
 	// Test URLs for the specified domain
 	testURLs := map[string][]string{
-		"airfare":          {"https://www.nerdwallet.com/article/travel/travel-price-tracker"},
+		"airfare":          {"https://www.usinflationcalculator.com/inflation/airfare-inflation/"},
 		"books":            {"http://books.toscrape.com/catalogue/category/books/fiction_10/index.html"},
 		"job-market":       {"https://www.example.com/job-market"},
 		"nascar-predictem": {"https://www.predictem.com/nascar/xfinity-500-race-preview-picks/"},
 		"car-depreciation": {"https://www.thinkinsure.ca/insurance-help-centre/car-deprecation.html"},
+
 	}
 
 	startingURLs := testURLs[domainName]
@@ -296,7 +363,7 @@ type ItemData struct {
 
 func main() {
 	//GetRandomUserAgent()
-	// Display available domain options to the usere
+	// Display available domain options to the user
 	fmt.Println("Available domains:")
 	for domainName := range domainConfigurations {
 		fmt.Printf("- %s\n", domainName)
@@ -316,4 +383,5 @@ func main() {
 
 	// Perform the scraping for the chosen domain
 	testScrape(domainName)
+
 }

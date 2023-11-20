@@ -79,6 +79,27 @@
           "timestamp": "Data retrieval timestamp"
         }
       }
+    },
+    {
+      "domain": "airfare",
+      "data": {
+        "title": "Job airfare Title",
+        "url": "URL of the job listing",
+        "description": "Detailed job description or summary",
+        "location": "Job location information",
+        "pricesbyyear": [
+          "Skill 1",
+          "Skill 2"
+        ],
+        "additional_info": {
+          "company": "Company Name",
+          "employment_type": "Full-time"
+        },
+        "metadata": {
+          "source": "Job listing website",
+          "timestamp": "Data retrieval timestamp"
+        }
+      }
     }
   ]
 }

@@ -1,7 +1,5 @@
 package main
 
-// The code needs to be changed this is only an overview or a template
-
 //import (
 //	"github.com/blevesearch/bleve" // A library for indexing and searching text
 //)

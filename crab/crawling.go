@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
 	"github.com/temoto/robotstxt"
 	"io/ioutil"
@@ -18,6 +19,29 @@ type URLData struct {
 	URL     string    // The URL to be crawled
 	Created time.Time // Timestamp of URL creation or retrieval
 	Links   []string
+}
+type YearData struct {
+	Year string `json:"year"`
+	Jan  string `json:"jan"`
+	Feb  string `json:"feb"`
+	Mar  string `json:"mar"`
+	Apr  string `json:"apr"`
+	May  string `json:"may"`
+	Jun  string `json:"jun"`
+	July string `json:"july"`
+	Aug  string `json:"aug"`
+	Sept string `json:"sept"`
+	Oct  string `json:"oct"`
+	Nov  string `json:"nov"`
+	Dec  string `json:"dec"`
+	Avg  string `json:"avg"`
+}
+
+type GasolineData struct {
+	Year                     string `json:"year"`
+	AverageGasolinePrices    string `json:"average_gasoline_prices"`
+	AverageAnnualCPIForGas   string `json:"average_annual_cpi_for_gasoline"`
+	GasPricesAdjustedForInfl string `json:"gas_prices_adjusted_for_inflation"`
 }
 
 // crawlURL is responsible for crawling a single URL.
@@ -167,6 +191,7 @@ func InitializeCrawling() {
 
 // getURLsToCrawl retrieves a list of URLs to be crawled.
 func getURLsToCrawl() []URLData {
+
 	return []URLData{
 		{URL: "https://www.kaggle.com/search?q=housing+prices"},
 		{URL: "http://books.toscrape.com/"},
@@ -176,6 +201,211 @@ func getURLsToCrawl() []URLData {
 	}
 }
 
+func airdatatest() {
+	urlll := "https://www.usinflationcalculator.com/inflation/airfare-inflation/"
+	res, err := http.Get(urlll)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
+	}
+
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var data []YearData
+
+	doc.Find("table tbody tr").Each(func(rowIndex int, rowHtml *goquery.Selection) {
+		if rowIndex == 0 {
+			return
+		}
+
+		var yearData YearData
+		rowHtml.Find("td").Each(func(cellIndex int, cellHtml *goquery.Selection) {
+			switch cellIndex {
+			case 0:
+				yearData.Year = cellHtml.Text()
+			case 1:
+				yearData.Jan = cellHtml.Text()
+			case 2:
+				yearData.Feb = cellHtml.Text()
+			case 3:
+				yearData.Mar = cellHtml.Text()
+			case 4:
+				yearData.Apr = cellHtml.Text()
+			case 5:
+				yearData.May = cellHtml.Text()
+			case 6:
+				yearData.Jun = cellHtml.Text()
+			case 7:
+				yearData.July = cellHtml.Text()
+			case 8:
+				yearData.Aug = cellHtml.Text()
+			case 9:
+				yearData.Sept = cellHtml.Text()
+			case 10:
+				yearData.Oct = cellHtml.Text()
+			case 11:
+				yearData.Nov = cellHtml.Text()
+			case 12:
+				yearData.Dec = cellHtml.Text()
+			case 13:
+				yearData.Avg = cellHtml.Text()
+
+			}
+		})
+
+		data = append(data, yearData)
+	})
+
+	jsonData, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = ioutil.WriteFile("airfare_data.json", jsonData, 0644)
+	if err != nil {
+		log.Fatalf("Failed to write JSON data to file: %s", err)
+	}
+
+	log.Println("Airfare data written to airfare_data.json")
+}
+
+func scrapeInflationData() {
+	urlll := "https://www.usinflationcalculator.com/inflation/current-inflation-rates/"
+	res, err := http.Get(urlll)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
+	}
+
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var data []YearData
+	doc.Find("table tbody tr").Each(func(rowIndex int, rowHtml *goquery.Selection) {
+		if rowIndex == 0 { // Skip the header row
+			return
+		}
+
+		var yearData YearData
+		rowHtml.Find("td").Each(func(cellIndex int, cellHtml *goquery.Selection) {
+			text := cellHtml.Text()
+			switch cellIndex {
+			case 0:
+				yearData.Year = cellHtml.Text()
+			case 1:
+				yearData.Jan = cellHtml.Text()
+			case 2:
+				yearData.Feb = cellHtml.Text()
+			case 3:
+				yearData.Mar = cellHtml.Text()
+			case 4:
+				yearData.Apr = cellHtml.Text()
+			case 5:
+				yearData.May = cellHtml.Text()
+			case 6:
+				yearData.Jun = cellHtml.Text()
+			case 7:
+				yearData.July = cellHtml.Text()
+			case 8:
+				yearData.Aug = cellHtml.Text()
+			case 9:
+				yearData.Sept = cellHtml.Text()
+			case 10:
+				yearData.Oct = cellHtml.Text()
+			case 11:
+				yearData.Nov = cellHtml.Text()
+			case 12:
+				yearData.Dec = cellHtml.Text()
+			case 13:
+				yearData.Avg = cellHtml.Text()
+				yearData.Avg = text
+			}
+		})
+		data = append(data, yearData)
+	})
+
+	jsonData, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = ioutil.WriteFile("inflation_data.json", jsonData, 0644)
+	if err != nil {
+		log.Fatalf("Failed to write JSON data to file: %s", err)
+	}
+
+	fmt.Println("Inflation data written to inflation_data.json")
+}
+
+func scrapeGasInflationData() {
+	urlll := "https://www.usinflationcalculator.com/gasoline-prices-adjusted-for-inflation/"
+	res, err := http.Get(urlll)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
+	}
+
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var data []GasolineData
+	doc.Find("table tbody tr").Each(func(rowIndex int, rowHtml *goquery.Selection) {
+		if rowIndex == 0 { // Skip the header row
+			return
+		}
+
+		var gasData GasolineData
+		rowHtml.Find("td").Each(func(cellIndex int, cellHtml *goquery.Selection) {
+			text := cellHtml.Text()
+			switch cellIndex {
+			case 0:
+				gasData.Year = text
+			case 1:
+				gasData.AverageGasolinePrices = text
+			case 2:
+				gasData.AverageAnnualCPIForGas = text
+			case 3:
+				gasData.GasPricesAdjustedForInfl = text
+			}
+		})
+		data = append(data, gasData)
+	})
+
+	jsonData, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = ioutil.WriteFile("gasoline_data.json", jsonData, 0644)
+	if err != nil {
+		log.Fatalf("Failed to write JSON data to file: %s", err)
+	}
+
+	fmt.Println("Gasoline data written to gasoline_data.json")
+}
+
 func main() {
 	InitializeCrawling()
+	airdatatest()
+	scrapeInflationData()
+	scrapeGasInflationData()
 }

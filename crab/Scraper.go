@@ -7,7 +7,6 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocolly/colly"
-	"github.com/gocolly/colly/extensions"
 	"sync"
 	"time"
 )
@@ -81,6 +80,9 @@ func insertData(db *sql.DB, data ItemData) error {
 // Scrape performs the scraping based on the provided configuration
 func Scrape(startingURL string, domainConfig DomainConfig, wg *sync.WaitGroup) {
 	defer wg.Done()
+	c := colly.NewCollector(
+		colly.UserAgent(GetRandomUserAgent()), // Set a random user agent
+	)
 
 	// Container for scraped data
 	var allData []ItemData
@@ -92,9 +94,6 @@ func Scrape(startingURL string, domainConfig DomainConfig, wg *sync.WaitGroup) {
 		return
 	}
 	defer db.Close()
-
-	c := colly.NewCollector()
-	extensions.RandomUserAgent(c)
 
 	// Collect the data for each book on the first page of each URL
 	c.OnHTML(domainConfig.ItemSelector, func(e *colly.HTMLElement) {
@@ -150,9 +149,9 @@ func selectDomain() string {
 func testScrape() {
 	// Assume these are your test URLs that you want to use for each domain
 	testURLs := map[string][]string{
-		"ecommerce":   {"http://example-ecommerce.com/deals"},
-		"real-estate": {"http://example-realestate.com/listings"},
-		"job-market":  {"http://example-jobmarket.com/opportunities"},
+		"ecommerce":   {"http://books.toscrape.com/catalogue/soumission_998/index.html"},
+		"real-estate": {"http://books.toscrape.com/catalogue/soumission_998/index.html"},
+		"job-market":  {"http://books.toscrape.com/catalogue/soumission_998/index.html"},
 	}
 
 	domainName := selectDomain()
@@ -224,13 +223,12 @@ type ItemData struct {
 }
 
 func main() {
-
 	testScrape()
 
 	startingURLs := []string{
-		"http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
-		"https://books.toscrape.com/catalogue/category/books/philosophy_7/index.html",
-		"https://books.toscrape.com/catalogue/category/books/philosophy_7/index.html",
+		"http://books.toscrape.com/catalogue/soumission_998/index.html",
+		"http://books.toscrape.com/catalogue/soumission_998/index.html",
+		"http://books.toscrape.com/catalogue/soumission_998/index.html",
 	}
 
 	domainName := "ecommerce" // This should be chosen based on user input, for example

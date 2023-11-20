@@ -24,7 +24,7 @@ type URLData struct {
 func crawlURL(urlData URLData, ch chan<- URLData, wg *sync.WaitGroup) {
 	defer wg.Done() // Ensure the WaitGroup counter is decremented on function exit
 	c := colly.NewCollector(
-		colly.UserAgent(getRandomUserAgent()), // Set a random user agent
+		colly.UserAgent(GetRandomUserAgent()), // Set a random user agent
 	)
 	// First, check if the URL is allowed by robots.txt rules
 	allowed := isURLAllowedByRobotsTXT(urlData.URL)
@@ -127,7 +127,7 @@ func threadedCrawl(urls []URLData, concurrentCrawlers int) {
 
 		go func(u URLData) {
 			c := colly.NewCollector(
-				colly.UserAgent(getRandomUserAgent()),
+				colly.UserAgent(GetRandomUserAgent()),
 			)
 			c.Limit(rateLimitRule) // Set the rate limit rule
 

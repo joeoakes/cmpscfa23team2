@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS users_roles_lookup (
 CREATE TABLE IF NOT EXISTS users (
                                      user_id CHAR(36) PRIMARY KEY, -- Unique identifier for the user
                                      user_name NVARCHAR(25), -- Name of the user
-                                     user_login NVARCHAR(10), -- login credentials for user
+                                     user_login NVARCHAR(36), -- login credentials for user
                                      user_role NVARCHAR(5), -- User's role
                                      user_password VARBINARY(255), -- Encrypted password
                                      active_or_not BOOLEAN DEFAULT TRUE, -- Flag indicating if the user is active or not
@@ -449,7 +449,7 @@ DELIMITER //
 -- CREATE
 CREATE PROCEDURE create_user(
     IN p_user_name NVARCHAR(25),
-    IN p_user_login NVARCHAR(10),
+    IN p_user_login NVARCHAR(36),
     IN p_user_role NVARCHAR(5),
     IN p_user_password VARBINARY(255),
     IN p_active_or_not BOOLEAN
@@ -517,7 +517,7 @@ DELIMITER //
 CREATE PROCEDURE update_user(
     IN p_user_id CHAR(36),
     IN p_user_name NVARCHAR(25),
-    IN p_user_login NVARCHAR(10),
+    IN p_user_login NVARCHAR(36),
     IN p_user_role NVARCHAR(5),
     IN p_user_password VARBINARY(255)
 )
@@ -893,7 +893,7 @@ DELIMITER ;
 -- SPROC for authenticating a user
 DELIMITER //
 CREATE PROCEDURE authenticate_user(
-    IN p_user_login NVARCHAR(10),
+    IN p_user_login NVARCHAR(36),
     IN p_user_password VARBINARY(255)
 )
 BEGIN
@@ -984,7 +984,7 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE user_registration(
     IN p_user_name NVARCHAR(25),
-    IN p_user_login NVARCHAR(10),
+    IN p_user_login NVARCHAR(36),
     IN p_user_role NVARCHAR(5),
     IN p_user_password VARBINARY(255),
     IN p_active_or_not BOOLEAN
@@ -1012,7 +1012,7 @@ DELIMITER ;
 -- A SPROC for user login
 DELIMITER //
 CREATE PROCEDURE user_login(
-    IN p_user_login NVARCHAR(10),
+    IN p_user_login NVARCHAR(36),
     IN p_user_password VARBINARY(255)
 )
 BEGIN

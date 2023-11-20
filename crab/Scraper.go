@@ -151,7 +151,7 @@ func testScrape() {
 	testURLs := map[string][]string{
 		"ecommerce":   {"http://books.toscrape.com/catalogue/soumission_998/index.html"},
 		"real-estate": {"http://books.toscrape.com/catalogue/soumission_998/index.html"},
-		"job-market":  {"http://books.toscrape.com/catalogue/soumission_998/index.html"},
+		"job-market":  {"https://www.bls.gov/"},
 	}
 
 	domainName := selectDomain()

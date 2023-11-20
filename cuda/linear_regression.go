@@ -6,51 +6,44 @@ import (
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"
-	"image"
 	"image/color"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 )
 
-func main() {
-	// we open the csv file from the disk
-	f, err := os.Open("/Users/Sara/GolandProjects/cmpscfa23team2/cuda/data2.csv")
+// readCSV reads data from a CSV file and returns a slice of records.
+func readCSV(filePath string) [][]string {
+	f, err := os.Open(filePath)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
 
-	// we create a new csv reader specifying
-	// the number of columns it has
-	salesData := csv.NewReader(f)
-	salesData.FieldsPerRecord = 21
-
-	// we read all the records
-	records, err := salesData.ReadAll()
+	reader := csv.NewReader(f)
+	records, err := reader.ReadAll()
 	if err != nil {
 		log.Fatal(err)
 	}
-	header := records[0]
-	// by slicing the records we skip the header
-	records = records[1:]
-
-	// we iterate over all the records
-	// and keep track of all the gathered values
-	// for each column
-	columnsValues := map[int]plotter.Values{}
 	for i, record := range records {
-		// we want one histogram per column,
-		// so we will iterate over all the columns we have
-		// and gather the date for each in a separate value set
-		// in columnsValues
-		// we are skipping the ID column and the Date,
-		// so we start on index 2
-		for c := 2; c < salesData.FieldsPerRecord; c++ {
+
+		if len(record) != 21 { // Expecting 3 columns: domain, x, y
+			log.Fatalf("Error in line %d: Expected 3 fields, got %d", i+1, len(record))
+		}
+		fmt.Printf("Line %d: %v\n", i+1, record)
+	}
+	return records
+}
+
+// processColumnValues processes the CSV records and returns a map of columns and their values.
+func processColumnValues(records [][]string, startColumn int) map[int]plotter.Values {
+	columnsValues := make(map[int]plotter.Values)
+	for i, record := range records {
+		for c := startColumn; c < len(record); c++ {
 			if _, found := columnsValues[c]; !found {
 				columnsValues[c] = make(plotter.Values, len(records))
 			}
-			// we parse each close value and add it to our set
 			floatVal, err := strconv.ParseFloat(record[c], 64)
 			if err != nil {
 				log.Fatal(err)
@@ -58,53 +51,133 @@ func main() {
 			columnsValues[c][i] = floatVal
 		}
 	}
+	return columnsValues
+}
 
-	// once we have all the data, we draw each graph
-	for c, values := range columnsValues {
-		// create a new plot
-		p := plot.New()
-		if err != nil {
-			log.Fatal(err)
-		}
-		p.Title.Text = fmt.Sprintf("Histogram of %s", header[c])
+// createHistogram creates and saves a histogram plot for the given values.
+func createHistogram(values plotter.Values, title string, filename string) {
+	p := plot.New()
+	p.Title.Text = title
 
-		// create a new normalized histogram
-		// and add it to the plot
-		h, err := plotter.NewHist(values, 16)
-		if err != nil {
-			log.Fatal(err)
-		}
-		h.Normalize(1)
-		p.Add(h)
-
-		// create a PNG file:
-		// Create a new blank image with width 200 and height 100
-		width := 400
-		height := 400
-		img := image.NewRGBA(image.Rect(0, 0, width, height))
-
-		// Fill the image with a blue color
-		blue := color.RGBA{0, 0, 255, 255}
-		for y := 0; y < height; y++ {
-			for x := 0; x < width; x++ {
-				img.Set(x, y, blue)
-			}
-		}
-
-		// Create a new PNG file
-		file, err := os.Create("test_hist.png")
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer file.Close()
-
-		// save the plot to a PNG file.
-		if err := p.Save(
-			10*vg.Centimeter,
-			10*vg.Centimeter,
-			"test_hist.png",
-		); err != nil {
-			log.Fatal(err)
-		}
+	h, err := plotter.NewHist(values, 16)
+	if err != nil {
+		log.Fatal(err)
 	}
+	h.Normalize(1)
+	p.Add(h)
+
+	if err := p.Save(10*vg.Centimeter, 10*vg.Centimeter, filename); err != nil {
+		log.Fatal(err)
+	}
+}
+
+// linearRegression calculates the coefficients for a simple linear regression model (y = ax + b).
+func linearRegression(x, y []float64) (a, b float64) {
+	var sumX, sumY, sumXY, sumX2 float64
+	n := float64(len(x))
+
+	for i := 0; i < len(x); i++ {
+		sumX += x[i]
+		sumY += y[i]
+		sumXY += x[i] * y[i]
+		sumX2 += x[i] * x[i]
+	}
+
+	a = (n*sumXY - sumX*sumY) / (n*sumX2 - sumX*sumX)
+	b = (sumY - a*sumX) / n
+
+	return a, b
+}
+
+// createScatterPlot creates and saves a scatter plot with the linear regression line.
+func createScatterPlot(x, y []float64, a, b float64, title, filename, xLabel, yLabel string) {
+	p := plot.New()
+
+	p.Title.Text = title
+	p.X.Label.Text = xLabel
+	p.Y.Label.Text = yLabel
+
+	pts := make(plotter.XYs, len(x))
+	for i := range x {
+		pts[i].X = x[i]
+		pts[i].Y = y[i]
+	}
+
+	scatter, err := plotter.NewScatter(pts)
+	if err != nil {
+		log.Fatal(err)
+	}
+	p.Add(scatter)
+
+	// Adding a line plot for the regression line
+	line := plotter.NewFunction(func(x float64) float64 {
+		return a*x + b
+	})
+	line.Color = color.RGBA{R: 255, G: 0, B: 0, A: 255} // Set the line color to red
+	p.Add(line)
+
+	// Save the plot to a PNG file.
+	if err := p.Save(6*vg.Inch, 4*vg.Inch, filename); err != nil {
+		log.Fatal(err)
+	}
+}
+func main() {
+	filePath := "cuda\\data2.csv"
+	records := readCSV(filePath)
+
+	// Domain to axis labels mapping
+	axisLabels := map[string][2]string{
+		"RealEstate": {"Square Footage", "Price (Thousands)"},
+		"Healthcare": {"Age (Years)", "Blood Pressure"},
+		"Weather":    {"Temperature (°C)", "Ice Cream Sales"},
+	}
+
+	// Group data by domain
+	domainData := make(map[string][][]string)
+	for _, record := range records[1:] { // Skipping header
+		domain := record[0]
+		domainData[domain] = append(domainData[domain], record[1:21]) // Taking only x and y
+	}
+
+	for domain, data := range domainData {
+		fmt.Printf("\nAnalyzing domain: %s\n", domain)
+
+		xValues := make([]float64, len(data))
+		yValues := make([]float64, len(data))
+
+		for i, record := range data {
+			xStr := strings.TrimSpace(record[0])
+			yStr := strings.TrimSpace(record[1])
+
+			x, err := strconv.ParseFloat(xStr, 64)
+			if err != nil {
+				log.Fatalf("Error parsing x value in domain %s: %v", domain, err)
+			}
+			y, err := strconv.ParseFloat(yStr, 64)
+			if err != nil {
+				log.Fatalf("Error parsing y value in domain %s: %v", domain, err)
+			}
+
+			xValues[i] = x
+			yValues[i] = y
+		}
+
+		// Calculate linear regression coefficients
+		a, b := linearRegression(xValues, yValues)
+		fmt.Printf("Linear Regression Model for %s: y = %.2fx + %.2f\n", domain, a, b)
+
+		// Retrieve axis labels for the domain
+		labels := axisLabels[domain]
+
+		// Create scatter plot with domain-specific axis labels
+		plotFileName := fmt.Sprintf("%s_scatter_plot.png", domain)
+		createScatterPlot(xValues, yValues, a, b, fmt.Sprintf("%s Linear Regression", domain), plotFileName, labels[0], labels[1])
+
+		// Example prediction
+		newX := 50.0       // Example new x value for prediction
+		newY := a*newX + b // Predict y based on the regression model
+		fmt.Printf("Prediction for %s: For x = %.2f, predicted y = %.2f\n\n", domain, newX, newY)
+	}
+
+	fmt.Println("Analysis complete.")
 }

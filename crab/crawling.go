@@ -13,61 +13,86 @@ import (
 	"time"
 )
 
+// URLData holds information about each URL to be crawled.
 type URLData struct {
-	URL     string
-	Created time.Time
+	URL     string    // The URL to be crawled
+	Created time.Time // Timestamp of URL creation or retrieval
+	Links   []string
 }
 
+// crawlURL is responsible for crawling a single URL.
 func crawlURL(urlData URLData, ch chan<- URLData, wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	// Check robots.txt before crawling
+	defer wg.Done() // Ensure the WaitGroup counter is decremented on function exit
+	c := colly.NewCollector(
+		colly.UserAgent(getRandomUserAgent()), // Set a random user agent
+	)
+	// First, check if the URL is allowed by robots.txt rules
 	allowed := isURLAllowedByRobotsTXT(urlData.URL)
 	if !allowed {
-		return
+		return // Skip crawling if not allowed
 	}
 
-	// Use colly library to fetch the content.
-	c := colly.NewCollector()
-
+	// Handler for errors during the crawl
 	c.OnError(func(r *colly.Response, err error) {
-		// Handle errors while fetching content (e.g., HTTP errors)
 		fmt.Printf("Error occurred while crawling %s: %s\n", urlData.URL, err)
 	})
 
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-		link := e.Attr("href")
-		// Process the link as needed.
-		fmt.Println("Found link:", link)
+		link := e.Request.AbsoluteURL(e.Attr("href"))
+		urlData.Links = append(urlData.Links, link)
 	})
 
+	// Handler for anchor tags found in HTML
+	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
+		link := e.Attr("href")
+		fmt.Println("Found link:", link)
+		// Here you can enqueue the link for further crawling or processing
+	})
+
+	// Handler for successful HTTP responses
 	c.OnResponse(func(r *colly.Response) {
 		if r.StatusCode == 200 {
-			// Process the response, extract data, and add to URLData.
-			ch <- urlData
-
-			// Print the crawled URL data.
+			// Successful crawl, process the response here
+			ch <- urlData // Send the URLData to the channel
 			fmt.Printf("Crawled URL: %s\n", urlData.URL)
 		} else {
-			// Handle non-200 status codes
+			// Handle cases where the status code is not 200
 			fmt.Printf("Non-200 status code while crawling %s: %d\n", urlData.URL, r.StatusCode)
 		}
 	})
 
+	// Start the crawl
 	c.Visit(urlData.URL)
+
+	ch <- urlData
 }
 
-func isURLAllowedByRobotsTXT(urlStr string) bool {
-	// Parse domain from URL
-	parsedURL, err := url.Parse(urlStr)
+func createSiteMap(urls []URLData) error {
+	siteMap := make(map[string][]string)
+	for _, u := range urls {
+		siteMap[u.URL] = u.Links
+	}
 
+	jsonData, err := json.Marshal(siteMap)
+	err = ioutil.WriteFile("siteMap.json", jsonData, 0644)
+	if err != nil {
+		log.Printf("Error writing sitemap to file: %v\n", err)
+		return err
+	}
+
+	log.Println("Sitemap created successfully.")
+	return nil
+}
+
+// isURLAllowedByRobotsTXT checks if the given URL is allowed by the site's robots.txt.
+func isURLAllowedByRobotsTXT(urlStr string) bool {
+	parsedURL, err := url.Parse(urlStr)
 	if err != nil {
 		log.Println("Error parsing URL:", err)
 		return false
 	}
-	domain := parsedURL.Host
 
-	// Correct URL for robots.txt
+	domain := parsedURL.Host
 	robotsURL := "http://" + domain + "/robots.txt"
 
 	resp, err := http.Get(robotsURL)
@@ -82,72 +107,75 @@ func isURLAllowedByRobotsTXT(urlStr string) bool {
 		return true
 	}
 
-	// Check if the URL is allowed
 	return data.TestAgent(urlStr, "GoEngine")
 }
 
+// threadedCrawl starts crawling the provided URLs concurrently.
 func threadedCrawl(urls []URLData, concurrentCrawlers int) {
-	var wg sync.WaitGroup               // WaitGroup to wait for all crawlers to finish
-	ch := make(chan URLData, len(urls)) // Channel to receive crawled URL data
+	var wg sync.WaitGroup
+	ch := make(chan URLData, len(urls))
+
+	rateLimitRule := &colly.LimitRule{
+		DomainGlob:  "*",             // Apply to all domains
+		Delay:       5 * time.Second, // Wait 5 seconds between requests
+		RandomDelay: 5 * time.Second, // Add up to 5 seconds of random delay
+	}
+
 	log.Println("Starting crawling...")
 	for _, urlData := range urls {
-		wg.Add(1) // Increment the WaitGroup counter
+		wg.Add(1)
 
-		// Call the crawlURL function as a goroutine
 		go func(u URLData) {
-			crawlURL(u, ch, &wg) // Call the crawlURL function as a goroutine
-		}(urlData) // Pass the URLData to the goroutine
+			c := colly.NewCollector(
+				colly.UserAgent(getRandomUserAgent()),
+			)
+			c.Limit(rateLimitRule) // Set the rate limit rule
+
+			crawlURL(u, ch, &wg)
+		}(urlData)
+
 		log.Println("Crawling URL:", urlData.URL)
-		// Check if the number of concurrent crawlers has reached the limit
 		if len(urls) >= concurrentCrawlers {
-			break // Limit the number of concurrent goroutines
+			break
 		}
 	}
+
 	log.Println("Waiting for crawlers to finish...")
-	// Close the channel when all crawlers are done
 	go func() {
 		wg.Wait()
 		close(ch)
+		log.Println("All goroutines finished, channel closed.")
 	}()
-	log.Println("Crawling finished!")
-	writeCrawledURLsToFile(urls)
+
+	var crawledURLs []URLData
+	for urlData := range ch {
+		crawledURLs = append(crawledURLs, urlData)
+	}
+	if err := createSiteMap(crawledURLs); err != nil {
+		log.Println("Error creating sitemap:", err)
+	}
 }
 
-func main() {
-	InitializeCrawling() // Function to initialize crawling
-
-}
-
+// InitializeCrawling sets up and starts the crawling process.
 func InitializeCrawling() {
-	// Fetch the list of URLs to crawl from the DB.
-	// Get the list of URLs to crawl.
 	log.Println("Fetching URLs to crawl...")
 	urlDataList := getURLsToCrawl()
 	log.Println("URLs to crawl:", urlDataList)
-	// Call the threadedCrawl function to crawl the URLs.
-	threadedCrawl(urlDataList, 10) // Use 10 concurrent crawlers.
+
+	threadedCrawl(urlDataList, 10)
 }
 
-// Function to fetch URLs dynamically.
+// getURLsToCrawl retrieves a list of URLs to be crawled.
 func getURLsToCrawl() []URLData {
-	// For testing, we are using 'http://books.toscrape.com/'
 	return []URLData{
-		{
-			URL: "http://books.toscrape.com/",
-		},
+		{URL: "https://www.kaggle.com/search?q=housing+prices"},
+		{URL: "http://books.toscrape.com/"},
+		{URL: "https://www.kaggle.com/search?q=stocks"},
+		{URL: "https://www.kaggle.com/search?q=stock+market"},
+		{URL: "https://www.kaggle.com/search?q=real+estate"},
 	}
 }
 
-func writeCrawledURLsToFile(urls []URLData) error {
-	urlStrings := make([]string, len(urls))
-	for i, u := range urls {
-		urlStrings[i] = u.URL
-	}
-
-	jsonData, err := json.Marshal(urlStrings)
-	if err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile("crawledUrls.json", jsonData, 0644)
+func main() {
+	InitializeCrawling()
 }

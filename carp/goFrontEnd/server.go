@@ -6,6 +6,7 @@ package main
 // C:\Users\Public\GoLandProjects\PredictAi\carp\goFrontEnd
 
 import (
+	"cmpscfa23team2/dal"
 	"html/template"
 	"log"
 	"net/http"
@@ -52,7 +53,9 @@ func setupRoutes(tmpl *template.Template) {
 	http.HandleFunc("/about", makeHandler(tmpl, "about"))
 	http.HandleFunc("/contributors", makeHandler(tmpl, "contributors"))
 	http.HandleFunc("/login", makeHandler(tmpl, "login"))
-	http.HandleFunc("/register", registerHandler(tmpl))
+	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
+		registerHandler(tmpl, w, r)
+	})
 	http.HandleFunc("/documentation", makeHandler(tmpl, "documentation"))
 	http.HandleFunc("/dashboard", requireAdmin(makeHandler(tmpl, "dashboard")))
 	http.HandleFunc("/settings", requireAdmin(makeHandler(tmpl, "settings")))
@@ -78,17 +81,59 @@ func makeHandler(tmpl *template.Template, content string) http.HandlerFunc {
 	}
 }
 
-func registerHandler(tmpl *template.Template) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		data := PageData{
-			Title:   "Register",
-			Content: "register",
-			// ErrorMessage can be set based on the context or left empty
-		}
-		err := tmpl.ExecuteTemplate(w, "layout.gohtml", data)
+func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+
+	switch r.Method {
+	case "GET":
+		// Display the registration form
+		err := tmpl.ExecuteTemplate(w, "register", RegistrationPageData{Title: "register"})
 		if err != nil {
 			log.Printf("Error executing template: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		}
+
+	case "POST":
+
+		// Parse form values
+		if err := r.ParseForm(); err != nil {
+			http.Error(w, "Error parsing form", http.StatusBadRequest)
+			return
+		}
+
+		// Extract form data
+		username := r.FormValue("username")
+		email := r.FormValue("email")
+		password := r.FormValue("password")
+		confirmPassword := r.FormValue("confirmPassword")
+
+		// Check if passwords match
+		if password != confirmPassword {
+			tmpl.ExecuteTemplate(w, "register", RegistrationPageData{
+				Title:        "Register",
+				ErrorMessage: "Passwords do not match",
+			})
+			return
+		}
+
+		// Set default values for role and active status
+		defaultRole := "USR" // Modify as necessary
+		active := true       // Set to false if you require email verification, etc.
+
+		// Call DAL function to register user
+		_, err := dal.RegisterUser(username, email, defaultRole, password, active)
+		if err != nil {
+			tmpl.ExecuteTemplate(w, "register", RegistrationPageData{
+				Title:        "Register",
+				ErrorMessage: "Registration failed: " + err.Error(),
+			})
+			return
+		}
+
+		// Redirect on successful registration
+		http.Redirect(w, r, "/login", http.StatusFound)
+
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }

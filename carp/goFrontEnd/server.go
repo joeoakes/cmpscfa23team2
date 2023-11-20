@@ -117,8 +117,8 @@ func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Req
 		}
 
 		// Set default values for role and active status
-		defaultRole := "user" // Modify as necessary
-		active := true        // Set to false if you require email verification, etc.
+		defaultRole := "USR" // Modify as necessary
+		active := true       // Set to false if you require email verification, etc.
 
 		// Call DAL function to register user
 		_, err := dal.RegisterUser(username, email, defaultRole, password, active)

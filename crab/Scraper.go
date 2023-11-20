@@ -1,20 +1,59 @@
 package main
 
-// which table is the info being saved?
-
 import (
-	"database/sql"
+	"encoding/json"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocolly/colly"
+	"os"
 	"sync"
 	"time"
 )
+
+//// GetRandomUserAgent is accessible because it starts with a capital letter
+//func GetRandomUserAgent() string {
+//	userAgents := []string{
+//		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
+//		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15",
+//		"Mozilla/5.0 (iPad; CPU OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+//		"Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.58 Mobile Safari/537.36",
+//		"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36",
+//		"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:97.0) Gecko/20100101 Firefox/97.0",
+//		"Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko",
+//		"Mozilla/5.0 (iPhone; CPU iPhone OS 13_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1",
+//		"Opera/9.80 (Windows NT 6.0) Presto/2.12.388 Version/12.14",
+//		"Mozilla/5.0 (Windows NT 6.1; WOW64; rv:54.0) Gecko/20100101 Firefox/74.0",
+//		"Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:87.0) Gecko/20100101 Firefox/87.0",
+//		"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0",
+//		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/536.6",
+//		"Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Mobile/15E148 Safari/604.1",
+//		"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0",
+//		"Mozilla/5.0 (X11; Linux x86_64; rv:90.0) Gecko/20100101 Firefox/90.0",
+//		"Mozilla/5.0 (Android 11; Mobile; LG-M255; rv:90.0) Gecko/90.0 Firefox/90.0",
+//		"Mozilla/5.0 (iPad; CPU OS 14_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1",
+//		"Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
+//		"Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:91.0) Gecko/20100101 Firefox/91.0",
+//		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36",
+//		"Mozilla/5.0 (iPhone; CPU iPhone OS 14_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/90.0.4430.212 Mobile/15E148 Safari/604.1",
+//		"Mozilla/5.0 (Windows NT 10.0; Trident/7.0; Touch; rv:11.0) like Gecko",
+//		"Mozilla/5.0 (X11; CrOS x86_64 13729.56.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.95 Safari/537.36",
+//		"Mozilla/5.0 (Windows NT 10.0; Win64; x64; Trident/7.0; rv:11.0) like Gecko",
+//		"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36",
+//		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.2 Safari/605.1.15",
+//		"Mozilla/5.0 (X11; Linux x86_64; rv:92.0) Gecko/20100101 Firefox/92.0",
+//		"Mozilla/5.0 (Android 10; Tablet; rv:68.0) Gecko/68.0 Firefox/68.0",
+//		"Opera/9.80 (Windows NT 6.1; WOW64) Presto/2.12.388 Version/12.17",
+//		"Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
+//	}
+//	rand.Seed(int64(uint64(time.Now().UnixNano())))
+//	index := rand.Intn(len(userAgents))
+//	return userAgents[index]
+//}
 
 // ScraperConfig holds the configuration for the scraper
 type ScraperConfig struct {
 	StartingURLs []string
 }
+
 type DomainConfig struct {
 	Name                string
 	ItemSelector        string
@@ -26,21 +65,21 @@ type DomainConfig struct {
 }
 
 var domainConfigurations = map[string]DomainConfig{
-	"ecommerce": {
-		Name:                "ecommerce",
-		ItemSelector:        "div.product",
-		TitleSelector:       "h2.product-title a",
-		URLSelector:         "h2.product-title a",
-		DescriptionSelector: "div.product-description",
-		PriceSelector:       "span.product-price",
+	"airfare": {
+		Name:                "airfare",
+		ItemSelector:        "div.article-content",      // Adjust this selector based on the structure of the page
+		TitleSelector:       "h1",                       // Adjust this selector based on the structure of the page
+		URLSelector:         "meta[property='og:url']",  // Adjust this selector based on the structure of the page
+		DescriptionSelector: "meta[name='description']", // Adjust this selector based on the structure of the page
+		PriceSelector:       "span.airfare-price",       // Adjust this selector based on the structure of the page
 	},
-	"real-estate": {
-		Name:                "real-estate",
-		ItemSelector:        "article.property-listing",
-		TitleSelector:       "h2.property-title",
-		URLSelector:         "a.property-link",
-		DescriptionSelector: "div.property-description",
-		PriceSelector:       "div.property-price",
+	"books": {
+		Name:                "books",
+		ItemSelector:        "article.product_pod",
+		TitleSelector:       "h3 a",
+		URLSelector:         "h3 a",
+		DescriptionSelector: "p.description", // Selector assumed, replace with the actual selector
+		PriceSelector:       "div p.price_color",
 	},
 	"job-market": {
 		Name:                "job-market",
@@ -59,17 +98,14 @@ func NewScraperConfig(startingURLs []string) ScraperConfig {
 	}
 }
 
-func insertData(db *sql.DB, data ItemData) error {
-	// Prepare the SQL statement for insertion
-	// TABLE NEEDS TO BE CREATED
-	stmt, err := db.Prepare("INSERT INTO scrapedData (domain, title, url, description, price, source, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)")
+func insertData(data ItemData, filename string) error {
+	// Save data to JSON file
+	jsonData, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		return err
 	}
-	defer stmt.Close()
 
-	// Execute the prepared statement with data from the ItemData struct
-	_, err = stmt.Exec(data.Domain, data.Data.Title, data.Data.URL, data.Data.Description, data.Data.Price, data.Data.Metadata.Source, data.Data.Metadata.Timestamp)
+	err = os.WriteFile(filename, jsonData, 0644)
 	if err != nil {
 		return err
 	}
@@ -81,46 +117,29 @@ func insertData(db *sql.DB, data ItemData) error {
 func Scrape(startingURL string, domainConfig DomainConfig, wg *sync.WaitGroup) {
 	defer wg.Done()
 	c := colly.NewCollector(
-		colly.UserAgent(GetRandomUserAgent()), // Set a random user agent
+		colly.UserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"),
 	)
 
 	// Container for scraped data
-	var allData []ItemData
+	var allData []GenericData
 
-	// Open the database connection
-	db, err := sql.Open("mysql", "root:Pane1901.@tcp(localhost:3306)/mysql")
-	if err != nil {
-		fmt.Printf("Error opening database connection: %v\n", err)
-		return
-	}
-	defer db.Close()
-
-	// Collect the data for each book on the first page of each URL
+	// Collect the data for each item on the first page of each URL
 	c.OnHTML(domainConfig.ItemSelector, func(e *colly.HTMLElement) {
 		itemURL := e.ChildAttr(domainConfig.URLSelector, "href")
 		itemURL = e.Request.AbsoluteURL(itemURL)
 
-		currentItem := ItemData{
-			Domain: domainConfig.Name,
-			Data: GenericData{
-				Title:       e.ChildText(domainConfig.TitleSelector),
-				URL:         itemURL,
-				Description: e.ChildText(domainConfig.DescriptionSelector),
-				Price:       e.ChildText(domainConfig.PriceSelector),
-				Metadata: Metadata{
-					Source:    e.Request.URL.String(),
-					Timestamp: time.Now().Format(time.RFC3339),
-				},
+		currentItem := GenericData{
+			Title:       e.ChildText(domainConfig.TitleSelector),
+			URL:         itemURL,
+			Description: e.ChildText(domainConfig.DescriptionSelector),
+			Price:       e.ChildText(domainConfig.PriceSelector),
+			Metadata: Metadata{
+				Source:    e.Request.URL.String(),
+				Timestamp: time.Now().Format(time.RFC3339),
 			},
 		}
 
 		allData = append(allData, currentItem)
-
-		// Insert data into the database
-		err := insertData(db, currentItem)
-		if err != nil {
-			fmt.Printf("Error inserting data into database: %v\n", err)
-		}
 	})
 
 	// Visit the URL with retry logic
@@ -136,34 +155,33 @@ func Scrape(startingURL string, domainConfig DomainConfig, wg *sync.WaitGroup) {
 		}
 	}
 
-	// Sleep to prevent rate-limiting issues
-	time.Sleep(time.Second * 5)
-}
-
-func selectDomain() string {
-	var domainName string
-	fmt.Println("Please enter the domain you'd like to scrape: (ecommerce, real-estate, job-market)")
-	fmt.Scanln(&domainName)
-	return domainName
-}
-func testScrape() {
-	// Assume these are your test URLs that you want to use for each domain
-	testURLs := map[string][]string{
-		"ecommerce":   {"https://www.trackingdifferences.com/ETF/ISIN/"},
-		"real-estate": {"http://books.toscrape.com/catalogue/soumission_998/index.html"},
-		"job-market":  {"https://www.bls.gov/"},
+	// Save data to JSON file
+	filename := fmt.Sprintf("%s_data.json", domainConfig.Name)
+	err := insertData(ItemData{
+		Domain: domainConfig.Name,
+		Data:   allData,
+	}, filename)
+	if err != nil {
+		fmt.Printf("Error saving data to JSON file: %v\n", err)
 	}
+}
 
-	domainName := selectDomain()
+func testScrape(domainName string) {
 	domainConfig, exists := domainConfigurations[domainName]
 	if !exists {
 		fmt.Printf("Invalid domain name provided: %s\n", domainName)
 		return
 	}
 
+	// Test URLs for the specified domain
+	testURLs := map[string][]string{
+		"airfare":    {"https://www.nerdwallet.com/article/travel/travel-price-tracker"},
+		"books":      {"http://books.toscrape.com/catalogue/category/books/fiction_10/index.html"},
+		"job-market": {"https://www.example.com/job-market"},
+	}
+
 	startingURLs := testURLs[domainName]
 	var wg sync.WaitGroup
-	resultChan := make(chan []ItemData, len(startingURLs))
 
 	// Launch a goroutine for each URL
 	for _, url := range startingURLs {
@@ -172,25 +190,9 @@ func testScrape() {
 	}
 
 	// Wait for all goroutines to finish
-	go func() {
-		wg.Wait()
-		close(resultChan)
-	}()
+	wg.Wait()
 
-	// Collect results
-	var allResults [][]ItemData
-	for result := range resultChan {
-		allResults = append(allResults, result)
-	}
-
-	// Here you can process the results as needed
-	for _, results := range allResults {
-		for _, item := range results {
-			fmt.Printf("Scraped item: %+v\n", item)
-		}
-	}
-
-	fmt.Println("Testing completed and data has been scraped")
+	fmt.Printf("Scraping for domain %s completed and data has been saved to JSON files\n", domainName)
 }
 
 type Metadata struct {
@@ -199,86 +201,38 @@ type Metadata struct {
 }
 
 type GenericData struct {
-	Title          string            `json:"title"`
-	URL            string            `json:"url"`
-	Description    string            `json:"description"` // This could be the book synopsis if available
-	Price          string            `json:"price"`
-	Location       string            `json:"location,omitempty"`        // Omitted if not applicable
-	Features       []string          `json:"features,omitempty"`        // Omitted if not applicable
-	Reviews        []Review          `json:"reviews,omitempty"`         // Omitted if not applicable
-	Images         []string          `json:"images,omitempty"`          // Omitted if not applicable
-	AdditionalInfo map[string]string `json:"additional_info,omitempty"` // Flexible for any additional data
-	Metadata       Metadata          `json:"metadata"`
-}
-
-type Review struct {
-	User    string `json:"user"`
-	Rating  int    `json:"rating"`
-	Comment string `json:"comment"`
+	Title       string   `json:"title"`
+	URL         string   `json:"url"`
+	Description string   `json:"description"`
+	Price       string   `json:"price"`
+	Metadata    Metadata `json:"metadata"`
 }
 
 type ItemData struct {
-	Domain string      `json:"domain"`
-	Data   GenericData `json:"data"`
+	Domain string        `json:"domain"`
+	Data   []GenericData `json:"data"`
 }
 
 func main() {
-	testScrape()
-
-	startingURLs := []string{
-		"http://books.toscrape.com/catalogue/soumission_998/index.html",
-		"http://books.toscrape.com/catalogue/soumission_998/index.html",
-		"http://books.toscrape.com/catalogue/soumission_998/index.html",
+	//GetRandomUserAgent()
+	// Display available domain options to the usere
+	fmt.Println("Available domains:")
+	for domainName := range domainConfigurations {
+		fmt.Printf("- %s\n", domainName)
 	}
 
-	domainName := "ecommerce" // This should be chosen based on user input, for example
-	domainConfig, exists := domainConfigurations[domainName]
+	// Ask the user to choose a domain
+	var domainName string
+	fmt.Print("Enter the domain you want to scrape: ")
+	fmt.Scanln(&domainName)
+
+	// Check if the chosen domain is valid
+	_, exists := domainConfigurations[domainName]
 	if !exists {
 		fmt.Printf("Invalid domain name provided: %s\n", domainName)
 		return
 	}
 
-	var wg sync.WaitGroup
-	resultChan := make(chan []ItemData, len(startingURLs))
-
-	// Launch a goroutine for each URL
-	for _, url := range startingURLs {
-		wg.Add(1)
-		go Scrape(url, domainConfig, &wg)
-	}
-
-	// Wait for all goroutines to finish
-	go func() {
-		wg.Wait()
-		close(resultChan)
-	}()
-
-	fmt.Println("Scraping completed and data has been saved to the database")
-
-	//
-	//// Collect results from channels
-	//var allData []ItemData
-	//for result := range resultChan {
-	//	allData = append(allData, result...)
-	//}
-	//
-	//// Wrap the data
-	//wrappedData := map[string][]ItemData{
-	//	"items": allData,
-	//}
-	//
-	//// Marshal the wrapped data into JSON
-	//jsonData, err := json.MarshalIndent(wrappedData, "", "  ")
-	//if err != nil {
-	//	fmt.Println("Error marshalling data to JSON:", err)
-	//	return
-	//}
-	//
-	//// Write the JSON data to a file
-	//err = ioutil.WriteFile("scrapedData.json", jsonData, 0644)
-	//if err != nil {
-	//	fmt.Println("Error writing JSON to file:", err)
-	//}
-	//
-	//fmt.Println("Scraping completed and data has been saved to scrapedData.json")
+	// Perform the scraping for the chosen domain
+	testScrape(domainName)
 }

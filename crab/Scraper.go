@@ -215,7 +215,7 @@ type ItemData struct {
 
 func main() {
 	//GetRandomUserAgent()
-	// Display available domain options to the user
+	// Display available domain options to the usere
 	fmt.Println("Available domains:")
 	for domainName := range domainConfigurations {
 		fmt.Printf("- %s\n", domainName)

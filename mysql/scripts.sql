@@ -105,6 +105,16 @@ CREATE TABLE IF NOT EXISTS urls (
 -- END //
 -- DELIMITER;
 
+CREATE TABLE scrapedData (
+                             id INT AUTO_INCREMENT PRIMARY KEY,
+                             domain VARCHAR(255),
+                             title VARCHAR(255),
+                             url VARCHAR(500),
+                             description TEXT,
+                             price VARCHAR(100),
+                             source VARCHAR(255),
+                             timestamp DATETIME
+);
 
 -- Table for TaskManager
 CREATE TABLE IF NOT EXISTS tasks (

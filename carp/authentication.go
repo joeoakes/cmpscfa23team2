@@ -37,9 +37,6 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Optionally, invalidate the token or perform other logout-related tasks
-	// ...
-
 	w.Write([]byte("Logout successful"))
 }
 

@@ -7,7 +7,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"log"
-	"os"
 )
 
 // This code defines a Go struct named "JSON_Data_Connect" with fields for username, password, hostname,
@@ -41,8 +40,7 @@ func readJSONConfig(filename string) (JSON_Data_Connect, error) {
 
 // It initializes a database connection using configuration data from a JSON file and logs any errors encountered during the process.
 func InitDB() error {
-	// I am not sure why this wasn't running with the ../config.json - needs to be addressed
-	config, err := readJSONConfig("C:\\Users\\Public\\GoLandProjects\\PredictAi\\config.json") //"../config.json")
+	config, err := readJSONConfig("C:\\Users\\User\\GolandProjects\\cmpscfa23team2(fork)\\config.json") //"../config.json")
 	if err != nil {
 		log.Printf("Error initializing DB from config: %s", err)
 		return err
@@ -78,21 +76,12 @@ func CloseDb() {
 	}
 }
 func main() {
-
-	// Print the current working directory
-	cwd, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("Error getting current working directory: %s", err)
-	}
-	log.Printf("Current working directory: %s", cwd)
-
 	// Initialize the database connection
-	err = InitDB()
+	err := InitDB()
 	if err != nil {
 		log.Fatalf("Failed to initialize the database: %s", err)
 	}
 	defer CloseDb()
-
 	// dal_carp.go Functions Testing
 	// Test: CreateUser
 	userID, err := CreateUser("John Doe", "jdoe", "STD", "password123", true)

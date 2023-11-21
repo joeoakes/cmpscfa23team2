@@ -608,56 +608,61 @@ func airdatatest() {
 			return
 		}
 
-		var airfareData AirfareData
-		airfareData.Domain = "airfare"
-		airfareData.URL = scrapeurl
-		airfareData.Data.Title = "Airfare Inflation Data"
-		airfareData.Data.Location = "United States"
-		airfareData.Data.Features = []string{"Month", "Inflation Rate"}
-
-		// Initialize AdditionalInfo with the Country field
-		airfareData.Data.AdditionalInfo.Country = "USA"
-		// Initialize MonthsData as an empty slice, which will be populated later
-		airfareData.Data.AdditionalInfo.MonthsData = []MonthData{}
-
-		airfareData.Data.Metadata.Source = scrapeurl
-		airfareData.Data.Metadata.Timestamp = time.Now().Format(time.RFC3339)
 		var months = []string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
-		var monthsData []MonthData
-		rowHtml.Find("td").Each(func(cellIndex int, cellHtml *goquery.Selection) {
-			cellText := cellHtml.Text()
-			if cellIndex == 0 {
-				airfareData.Data.Year = cellText
-			} else {
-				// Use the months slice to get the actual month name
-				monthData := MonthData{
-					Month: months[cellIndex], // -1 because array indexing starts at 0
-					Rate:  cellText,
+
+		doc.Find("table tbody tr").Each(func(rowIndex int, rowHtml *goquery.Selection) {
+			if rowIndex == 0 {
+				return
+			}
+
+			var airfareData AirfareData
+			airfareData.Domain = "airfare"
+			airfareData.URL = scrapeurl
+			airfareData.Data.Title = "Airfare Inflation Data"
+			airfareData.Data.Location = "United States"
+			airfareData.Data.Features = []string{"Month", "Inflation Rate"}
+
+			// Initialize AdditionalInfo with the Country field
+			airfareData.Data.AdditionalInfo.Country = "USA"
+			// Initialize MonthsData as an empty slice, which will be populated later
+			airfareData.Data.AdditionalInfo.MonthsData = []MonthData{}
+
+			airfareData.Data.Metadata.Source = scrapeurl
+			airfareData.Data.Metadata.Timestamp = time.Now().Format(time.RFC3339)
+			airfareData.Data.AdditionalInfo.MonthsData = make([]MonthData, 0)
+
+			rowHtml.Find("td").Each(func(cellIndex int, cellHtml *goquery.Selection) {
+				cellText := cellHtml.Text()
+				if cellIndex == 0 {
+					airfareData.Data.Year = cellText
+				} else if cellIndex >= 1 && cellIndex <= 12 { // Check for valid month indices
+					monthData := MonthData{
+						Month: months[cellIndex-1],
+						Rate:  cellText,
+					}
+					airfareData.Data.AdditionalInfo.MonthsData = append(airfareData.Data.AdditionalInfo.MonthsData, monthData)
 				}
-				airfareData.Data.AdditionalInfo.MonthsData = append(airfareData.Data.AdditionalInfo.MonthsData, monthData)
+			})
+
+			jsonData, err := json.MarshalIndent(airfareData, "", "  ")
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			if _, err := file.Write(jsonData); err != nil {
+				log.Fatalf("Failed to write JSON data to file: %s", err)
+			}
+			if rowIndex < doc.Find("table tbody tr").Length()-1 {
+				// Add a comma after the JSON object, except for the last one
+				file.WriteString(",\n")
+			} else {
+				// Just add a newline at the end of the last JSON object
+				file.WriteString("\n")
 			}
 		})
 
-		airfareData.Data.AdditionalInfo.MonthsData = monthsData
-
-		jsonData, err := json.MarshalIndent(airfareData, "", "  ")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if _, err := file.Write(jsonData); err != nil {
-			log.Fatalf("Failed to write JSON data to file: %s", err)
-		}
-		if rowIndex < doc.Find("table tbody tr").Length()-1 {
-			// Add a comma after the JSON object, except for the last one
-			file.WriteString(",\n")
-		} else {
-			// Just add a newline at the end of the last JSON object
-			file.WriteString("\n")
-		}
+		log.Println("Airfare data written to airfare_data.json")
 	})
-
-	log.Println("Airfare data written to airfare_data.json")
 }
 
 //end airfare scraper ==================================================================================================

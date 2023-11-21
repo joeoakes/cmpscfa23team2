@@ -2,9 +2,9 @@
   "items": [
     {
       "domain": "e-commerce",
+      "url": "URL of the item or listing",
       "data": {
         "title": "Item or Listing Title",
-        "url": "URL of the item or listing",
         "description": "Detailed description or summary",
         "price": "Price or cost if applicable",
         "location": "Location information if applicable",
@@ -35,9 +35,9 @@
     },
     {
       "domain": "real-estate",
+      "url": "URL of the property listing",
       "data": {
         "title": "Property Listing Title",
-        "url": "URL of the property listing",
         "description": "Detailed property description or summary",
         "price": "Listed price or cost",
         "location": "Property location information",
@@ -61,9 +61,9 @@
     },
     {
       "domain": "job-market",
+      "url": "URL of the job listing",
       "data": {
         "title": "Job Position Title",
-        "url": "URL of the job listing",
         "description": "Detailed job description or summary",
         "location": "Job location information",
         "features": [

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
@@ -9,47 +9,44 @@ import (
 	"image/color"
 	"log"
 	"os"
-	"strconv"
-	"strings"
 )
 
-// readCSV reads data from a CSV file and returns a slice of records.
-func readCSV(filePath string) [][]string {
-	f, err := os.Open(filePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-
-	reader := csv.NewReader(f)
-	records, err := reader.ReadAll()
-	if err != nil {
-		log.Fatal(err)
-	}
-	for i, record := range records {
-
-		if len(record) != 21 { // Expecting 3 columns: domain, x, y
-			log.Fatalf("Error in line %d: Expected 3 fields, got %d", i+1, len(record))
-		}
-		fmt.Printf("Line %d: %v\n", i+1, record)
-	}
-	return records
+// JSONData represents the structure of your entire JSON data
+type JSONData struct {
+	Items []Item `json:"items"`
 }
 
-// processColumnValues processes the CSV records and returns a map of columns and their values.
-func processColumnValues(records [][]string, startColumn int) map[int]plotter.Values {
+// Item represents the structure of your JSON data
+type Item struct {
+	Domain string `json:"domain"`
+	X      float64
+	Y      float64
+}
+
+// readJSON reads data from a JSON file and returns a slice of records.
+func readJSON(filePath string) []Item {
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	var jsonData JSONData
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&jsonData)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return jsonData.Items
+}
+
+// processColumnValues processes the JSON records and returns a map of columns and their values.
+func processColumnValues(items []Item) map[int]plotter.Values {
 	columnsValues := make(map[int]plotter.Values)
-	for i, record := range records {
-		for c := startColumn; c < len(record); c++ {
-			if _, found := columnsValues[c]; !found {
-				columnsValues[c] = make(plotter.Values, len(records))
-			}
-			floatVal, err := strconv.ParseFloat(record[c], 64)
-			if err != nil {
-				log.Fatal(err)
-			}
-			columnsValues[c][i] = floatVal
-		}
+	for i, item := range items {
+		columnsValues[0] = append(columnsValues[0], float64(i+1))
+		columnsValues[1] = append(columnsValues[1], item.X)
+		columnsValues[2] = append(columnsValues[2], item.Y)
 	}
 	return columnsValues
 }
@@ -122,8 +119,8 @@ func createScatterPlot(x, y []float64, a, b float64, title, filename, xLabel, yL
 	}
 }
 func main() {
-	filePath := "cuda\\data2.csv"
-	records := readCSV(filePath)
+	filePath := "crab/template.json" // Update with your actual data file path and file type
+	items := readJSON(filePath)
 
 	// Domain to axis labels mapping
 	axisLabels := map[string][2]string{
@@ -133,10 +130,10 @@ func main() {
 	}
 
 	// Group data by domain
-	domainData := make(map[string][][]string)
-	for _, record := range records[1:] { // Skipping header
-		domain := record[0]
-		domainData[domain] = append(domainData[domain], record[1:21]) // Taking only x and y
+	domainData := make(map[string][]Item)
+	for _, item := range items {
+		domain := item.Domain
+		domainData[domain] = append(domainData[domain], item)
 	}
 
 	for domain, data := range domainData {
@@ -145,18 +142,9 @@ func main() {
 		xValues := make([]float64, len(data))
 		yValues := make([]float64, len(data))
 
-		for i, record := range data {
-			xStr := strings.TrimSpace(record[0])
-			yStr := strings.TrimSpace(record[1])
-
-			x, err := strconv.ParseFloat(xStr, 64)
-			if err != nil {
-				log.Fatalf("Error parsing x value in domain %s: %v", domain, err)
-			}
-			y, err := strconv.ParseFloat(yStr, 64)
-			if err != nil {
-				log.Fatalf("Error parsing y value in domain %s: %v", domain, err)
-			}
+		for i, item := range data {
+			x := item.X
+			y := item.Y
 
 			xValues[i] = x
 			yValues[i] = y

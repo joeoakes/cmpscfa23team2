@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
@@ -556,8 +557,8 @@ func testScrape(domainName string) {
 // new scrapers =========================================================================================================
 // begin airfare scraper =================================================================================================
 func airdatatest() {
-	urlll := "https://www.usinflationcalculator.com/inflation/airfare-inflation/"
-	res, err := http.Get(urlll)
+	scrapeurl := "https://www.usinflationcalculator.com/inflation/airfare-inflation/"
+	res, err := http.Get(scrapeurl)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -634,8 +635,8 @@ func airdatatest() {
 
 // begin inflation scraper ==============================================================================================
 func scrapeInflationData() {
-	urlll := "https://www.usinflationcalculator.com/inflation/current-inflation-rates/"
-	res, err := http.Get(urlll)
+	scrapeurl := "https://www.usinflationcalculator.com/inflation/current-inflation-rates/"
+	res, err := http.Get(scrapeurl)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -711,8 +712,8 @@ func scrapeInflationData() {
 
 // begin gasoline scraper =================================================================================================
 func scrapeGasInflationData() {
-	urlll := "https://www.usinflationcalculator.com/gasoline-prices-adjusted-for-inflation/"
-	res, err := http.Get(urlll)
+	scrapeurl := "https://www.usinflationcalculator.com/gasoline-prices-adjusted-for-inflation/"
+	res, err := http.Get(scrapeurl)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -767,8 +768,8 @@ func scrapeGasInflationData() {
 
 // begin housing scraper =================================================================================================
 func scrapeHousingData() {
-	urlll := "https://www.kaggle.com/datasets/ahmedshahriarsakib/usa-real-estate-dataset"
-	res, err := http.Get(urlll)
+	scrapeurl := "https://www.kaggle.com/datasets/ahmedshahriarsakib/usa-real-estate-dataset"
+	res, err := http.Get(scrapeurl)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -828,6 +829,64 @@ func scrapeHousingData() {
 
 //end housing scraper ===================================================================================================
 
+//end scrapers ==========================================================================================================
+
+// begin readcsv =========================================================================================================
+func readCSV(filePath string) ([]PropertyData, error) {
+	// Open the CSV file
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	log.Println("Successfully opened CSV file.")
+	// Create a CSV reader from the file
+	reader := csv.NewReader(file)
+	reader.Comma = ',' // Set the delimiter to comma
+	reader.TrimLeadingSpace = true
+	log.Println("Reading CSV file...")
+	// Read all the records at once
+	records, err := reader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(records) == 0 {
+		return []PropertyData{}, nil
+	}
+	log.Println("Successfully read", len(records), "records from CSV file.")
+	// Process records after the header row
+	properties := make([]PropertyData, 0, len(records)-1)
+	for i, record := range records {
+		if i == 0 {
+			continue // Skip the header row
+		}
+
+		if len(record) != 10 {
+			return nil, fmt.Errorf("unexpected number of fields at row %d: got %d, want 10", i+1, len(record))
+		}
+
+		// Create a PropertyData struct for each record
+		property := PropertyData{
+			Status:    record[0],
+			Bedrooms:  record[1],
+			Bathrooms: record[2],
+			AcreLot:   record[3],
+			City:      record[4],
+			State:     record[5],
+			ZipCode:   record[6],
+			HouseSize: record[7],
+			SoldDate:  record[8],
+			Price:     record[9],
+		}
+		properties = append(properties, property)
+	}
+	log.Println("Successfully read", len(properties), "properties from CSV file.")
+	return properties, nil
+}
+
+//end readcsv ===========================================================================================================
+
 // begin main ===========================================================================================================
 func main() {
 
@@ -860,6 +919,18 @@ func main() {
 	// Perform the scraping for the chosen domain
 	testScrape(domainName)
 
+	//csvread
+	filePath := "crab/realtor-data.zip.csv"
+	properties, err := readCSV(filePath)
+	if err != nil {
+		fmt.Printf("Error reading CSV file: %s\n", err)
+		return
+	}
+
+	// Print the PropertyData for demonstration purposes
+	for _, property := range properties {
+		fmt.Printf("%+v\n", property)
+	}
 }
 
 //end main =============================================================================================================

@@ -46,15 +46,25 @@ func AuthenticateUser(username string, password string) (string, error) {
 }
 
 // This code generates a JWT token with a user ID and expiration time, using HMAC-SHA256 for signing.
-func GenerateToken(userID, userRole string) (string, error) {
+func GenerateToken(userID string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"uid":  userID,
-		"role": userRole,
-		"exp":  time.Now().Add(time.Hour * 1).Unix(), // 1 hour expiration
+		"uid": userID,
+		"exp": time.Now().Add(time.Hour * 1).Unix(), // 1 hour expiration
 	})
 
 	return token.SignedString([]byte(SECRET_KEY))
 }
+
+// This code generates a JWT token with a user ID and expiration time, using HMAC-SHA256 for signing.
+//func GenerateToken(userID, userRole string) (string, error) {
+//	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+//		"uid":  userID,
+//		"role": userRole,
+//		"exp":  time.Now().Add(time.Hour * 1).Unix(), // 1 hour expiration
+//	})
+//
+//	return token.SignedString([]byte(SECRET_KEY))
+//}
 
 // This code defines a function that validates a JSON Web Token (JWT) by parsing it
 // verifying its signature using a secret key,

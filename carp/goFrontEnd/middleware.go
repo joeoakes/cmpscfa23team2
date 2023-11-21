@@ -219,51 +219,52 @@ Form Submission Handling: Write JavaScript to handle the form submission asynchr
 //})
 
 // Updated requireAdmin middleware to use DAL function
+//func requireAdmin(next http.HandlerFunc) http.HandlerFunc {
+//	return func(w http.ResponseWriter, r *http.Request) {
+//		// Extract token from the Authorization header
+//		header := r.Header.Get("Authorization")
+//		if header == "" {
+//			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+//			return
+//		}
+//
+//		// Extract token from "Bearer <token>"
+//		splitToken := strings.Split(header, "Bearer ")
+//		if len(splitToken) != 2 {
+//			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+//			return
+//		}
+//
+//		tokenString := strings.TrimSpace(splitToken[1])
+//
+//		// Validate the token using the DAL function
+//		valid, err := dal.ValidateToken(tokenString)
+//		if err != nil || !valid {
+//			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+//			return
+//		}
+//
+//		next.ServeHTTP(w, r)
+//	}
+//}
+
+// Old method to test the dashboard.
+// Authentication Middleware to check if the user is logged in and has admin role
 func requireAdmin(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Extract token from the Authorization header
-		header := r.Header.Get("Authorization")
-		if header == "" {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		// Placeholder for actual authentication and role check
+		// You should replace this with a call to your DAL methods to check for a valid admin session/token
+		// For example: isAdmin, err := dal.IsUserAdmin(session.UserID)
+		isAdmin := true // For demonstration purposes, assign false to see the difference
+
+		if !isAdmin {
+			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
-
-		// Extract token from "Bearer <token>"
-		splitToken := strings.Split(header, "Bearer ")
-		if len(splitToken) != 2 {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-
-		tokenString := strings.TrimSpace(splitToken[1])
-
-		// Validate the token using the DAL function
-		valid, err := dal.ValidateToken(tokenString)
-		if err != nil || !valid {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-
 		next.ServeHTTP(w, r)
 	}
 }
 
-//Old method to test the dashboard.
-// Authentication Middleware to check if the user is logged in and has admin role
-//func requireAdmin(next http.HandlerFunc) http.HandlerFunc {
-//	return func(w http.ResponseWriter, r *http.Request) {
-//		// Placeholder for actual authentication and role check
-//		// You should replace this with a call to your DAL methods to check for a valid admin session/token
-//		// For example: isAdmin, err := dal.IsUserAdmin(session.UserID)
-//		isAdmin := true // For demonstration purposes, assign false to see the difference
-//
-//		if !isAdmin {
-//			http.Error(w, "Forbidden", http.StatusForbidden)
-//			return
-//		}
-//		next.ServeHTTP(w, r)
-//	}
-//}
 //http.HandleFunc("/start-crawler", func(w http.ResponseWriter, r *http.Request) {
 //	if r.Method != "POST" {
 //		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

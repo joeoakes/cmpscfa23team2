@@ -26,6 +26,30 @@ type URLData struct {
 	Links   []string  // URLs found on this page
 }
 
+type MonthData struct {
+	Month string `json:"month"`
+	Rate  string `json:"rate"`
+}
+
+type AirfareData struct {
+	Domain string `json:"domain"`
+	URL    string `json:"url"`
+	Data   struct {
+		Title          string   `json:"title"`
+		Year           string   `json:"year"`
+		Location       string   `json:"location"`
+		Features       []string `json:"features"`
+		AdditionalInfo struct {
+			Country    string      `json:"country"`
+			MonthsData []MonthData `json:"months_data"`
+		} `json:"additional_info"`
+		Metadata struct {
+			Source    string `json:"source"`
+			Timestamp string `json:"timestamp"`
+		} `json:"metadata"`
+	} `json:"data"`
+}
+
 type YearData struct {
 	Year string `json:"year"`
 	Jan  string `json:"jan"`
@@ -573,60 +597,65 @@ func airdatatest() {
 		log.Fatal(err)
 	}
 
-	var data []YearData
+	file, err := os.OpenFile("airfare_data.json", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatalf("Failed to open JSON file: %s", err)
+	}
+	defer file.Close()
 
 	doc.Find("table tbody tr").Each(func(rowIndex int, rowHtml *goquery.Selection) {
 		if rowIndex == 0 {
 			return
 		}
 
-		var yearData YearData
-		rowHtml.Find("td").Each(func(cellIndex int, cellHtml *goquery.Selection) {
-			switch cellIndex {
-			case 0:
-				yearData.Year = cellHtml.Text()
-			case 1:
-				yearData.Jan = cellHtml.Text()
-			case 2:
-				yearData.Feb = cellHtml.Text()
-			case 3:
-				yearData.Mar = cellHtml.Text()
-			case 4:
-				yearData.Apr = cellHtml.Text()
-			case 5:
-				yearData.May = cellHtml.Text()
-			case 6:
-				yearData.Jun = cellHtml.Text()
-			case 7:
-				yearData.July = cellHtml.Text()
-			case 8:
-				yearData.Aug = cellHtml.Text()
-			case 9:
-				yearData.Sept = cellHtml.Text()
-			case 10:
-				yearData.Oct = cellHtml.Text()
-			case 11:
-				yearData.Nov = cellHtml.Text()
-			case 12:
-				yearData.Dec = cellHtml.Text()
-			case 13:
-				yearData.Avg = cellHtml.Text()
+		var airfareData AirfareData
+		airfareData.Domain = "airfare"
+		airfareData.URL = scrapeurl
+		airfareData.Data.Title = "Airfare Inflation Data"
+		airfareData.Data.Location = "United States"
+		airfareData.Data.Features = []string{"Month", "Inflation Rate"}
 
+		// Initialize AdditionalInfo with the Country field
+		airfareData.Data.AdditionalInfo.Country = "USA"
+		// Initialize MonthsData as an empty slice, which will be populated later
+		airfareData.Data.AdditionalInfo.MonthsData = []MonthData{}
+
+		airfareData.Data.Metadata.Source = scrapeurl
+		airfareData.Data.Metadata.Timestamp = time.Now().Format(time.RFC3339)
+		var months = []string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+		var monthsData []MonthData
+		rowHtml.Find("td").Each(func(cellIndex int, cellHtml *goquery.Selection) {
+			cellText := cellHtml.Text()
+			if cellIndex == 0 {
+				airfareData.Data.Year = cellText
+			} else {
+				// Use the months slice to get the actual month name
+				monthData := MonthData{
+					Month: months[cellIndex], // -1 because array indexing starts at 0
+					Rate:  cellText,
+				}
+				airfareData.Data.AdditionalInfo.MonthsData = append(airfareData.Data.AdditionalInfo.MonthsData, monthData)
 			}
 		})
 
-		data = append(data, yearData)
+		airfareData.Data.AdditionalInfo.MonthsData = monthsData
+
+		jsonData, err := json.MarshalIndent(airfareData, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if _, err := file.Write(jsonData); err != nil {
+			log.Fatalf("Failed to write JSON data to file: %s", err)
+		}
+		if rowIndex < doc.Find("table tbody tr").Length()-1 {
+			// Add a comma after the JSON object, except for the last one
+			file.WriteString(",\n")
+		} else {
+			// Just add a newline at the end of the last JSON object
+			file.WriteString("\n")
+		}
 	})
-
-	jsonData, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = ioutil.WriteFile("airfare_data.json", jsonData, 0644)
-	if err != nil {
-		log.Fatalf("Failed to write JSON data to file: %s", err)
-	}
 
 	log.Println("Airfare data written to airfare_data.json")
 }
@@ -891,46 +920,46 @@ func readCSV(filePath string) ([]PropertyData, error) {
 func main() {
 
 	//begin crawler
-	InitializeCrawling()
+
 	airdatatest()
-	scrapeInflationData()
-	scrapeGasInflationData()
-	scrapeHousingData()
+	//scrapeInflationData()
+	//scrapeGasInflationData()
+	//scrapeHousingData()
 	//end crawler
 
 	//begin scraper
-	fmt.Println("Available domains:")
-	for domainName := range domainConfigurations {
-		fmt.Printf("- %s\n", domainName)
-	}
-
-	// Ask the user to choose a domain
-	var domainName string
-	fmt.Print("Enter the domain you want to scrape: ")
-	fmt.Scanln(&domainName)
-
-	// Check if the chosen domain is valid
-	_, exists := domainConfigurations[domainName]
-	if !exists {
-		fmt.Printf("Invalid domain name provided: %s\n", domainName)
-		return
-	}
-
-	// Perform the scraping for the chosen domain
-	testScrape(domainName)
-
-	//csvread
-	filePath := "crab/csv"
-	properties, err := readCSV(filePath)
-	if err != nil {
-		fmt.Printf("Error reading CSV file: %s\n", err)
-		return
-	}
-
-	// Print the PropertyData for demonstration purposes
-	for _, property := range properties {
-		fmt.Printf("%+v\n", property)
-	}
+	//fmt.Println("Available domains:")
+	//for domainName := range domainConfigurations {
+	//	fmt.Printf("- %s\n", domainName)
+	//}
+	//
+	//// Ask the user to choose a domain
+	//var domainName string
+	//fmt.Print("Enter the domain you want to scrape: ")
+	//fmt.Scanln(&domainName)
+	//
+	//// Check if the chosen domain is valid
+	//_, exists := domainConfigurations[domainName]
+	//if !exists {
+	//	fmt.Printf("Invalid domain name provided: %s\n", domainName)
+	//	return
+	//}
+	//
+	//// Perform the scraping for the chosen domain
+	//testScrape(domainName)
+	//
+	////csvread
+	//filePath := "crab/csv"
+	//properties, err := readCSV(filePath)
+	//if err != nil {
+	//	fmt.Printf("Error reading CSV file: %s\n", err)
+	//	return
+	//}
+	//
+	//// Print the PropertyData for demonstration purposes
+	//for _, property := range properties {
+	//	fmt.Printf("%+v\n", property)
+	//}
 }
 
 //end main =============================================================================================================

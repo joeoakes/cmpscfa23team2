@@ -920,7 +920,7 @@ func main() {
 	testScrape(domainName)
 
 	//csvread
-	filePath := "crab/realtor-data.zip.csv"
+	filePath := "crab/csv"
 	properties, err := readCSV(filePath)
 	if err != nil {
 		fmt.Printf("Error reading CSV file: %s\n", err)

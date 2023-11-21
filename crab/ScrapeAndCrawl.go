@@ -17,6 +17,7 @@ import (
 	"time"
 )
 
+// begin structs ========================================================================================================
 // Data Structs
 type URLData struct {
 	URL     string    // The URL to be crawled
@@ -100,6 +101,10 @@ type ItemData struct {
 	Data   []GenericData `json:"data"`
 }
 
+//end structs ==========================================================================================================
+
+//begin user agents ====================================================================================================
+
 // GetRandomUserAgent is accessible because it starts with a capital letter
 func GetRandomUserAgent() string {
 	userAgents := []string{
@@ -140,11 +145,18 @@ func GetRandomUserAgent() string {
 	return userAgents[index]
 }
 
+//end user agents ======================================================================================================
+
+// begin crawler vars =========================================================================================================
 var (
 	urlQueue = make(chan string, 1000)
 	visited  = make(map[string]bool)
-	dataChan = make(chan URLData, 1000)
+	//dataChan = make(chan URLData, 1000)//uncomment this use case appears
 )
+
+//end crawler vars =====================================================================================================
+
+//begin domain configurations ==========================================================================================
 
 var domainConfigurations = map[string]DomainConfig{
 	"airfare": {
@@ -192,28 +204,215 @@ var domainConfigurations = map[string]DomainConfig{
 	},
 }
 
-// NewScraperConfig creates a new ScraperConfig with default values
-func NewScraperConfig(startingURLs []string) ScraperConfig {
-	return ScraperConfig{
-		StartingURLs: startingURLs,
+//end domain configurations ============================================================================================
+
+//currently unused =====================================================================================================
+//
+//// NewScraperConfig creates a new ScraperConfig with default values
+//func NewScraperConfig(startingURLs []string) ScraperConfig {
+//	return ScraperConfig{
+//		StartingURLs: startingURLs,
+//	}
+//}
+//======================================================================================================================
+
+//begin crawler ========================================================================================================
+
+// begin intialize crawling =============================================================================================
+//
+//	InitializeCrawling sets up and starts the crawling process.
+func InitializeCrawling() {
+	log.Println("Fetching URLs to crawl...")
+	urlDataList := getURLsToCrawl()
+	log.Println("URLs to crawl:", urlDataList)
+	threadedCrawl(urlDataList, 10)
+}
+
+//end intialize crawling ===============================================================================================
+
+// begin crawl url ======================================================================================================
+// getURLsToCrawl retrieves a list of URLs to be crawled.
+func getURLsToCrawl() []URLData {
+	return []URLData{
+		{URL: "https://www.kaggle.com/search?q=housing+prices"},
+		{URL: "http://books.toscrape.com/"},
+		{URL: "https://www.kaggle.com/search?q=stocks"},
+		{URL: "https://www.kaggle.com/search?q=stock+market"},
+		{URL: "https://www.kaggle.com/search?q=real+estate"},
 	}
 }
 
+//end crawl url ========================================================================================================
+
+// begin insert data ====================================================================================================
 func insertData(data ItemData, filename string) error {
 	// Save data to JSON file
 	jsonData, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		return err
 	}
-
 	err = os.WriteFile(filename, jsonData, 0644)
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
+//end insert data ======================================================================================================
+
+// begin crawlurl ======================================================================================================
+// crawlURL is responsible for crawling a single URL.
+func crawlURL(urlData URLData, ch chan<- URLData, wg *sync.WaitGroup) {
+	defer wg.Done() // Ensure the WaitGroup counter is decremented on function exit
+	c := colly.NewCollector(
+		colly.UserAgent(GetRandomUserAgent()), // Set a random user agent
+	)
+	// First, check if the URL is allowed by robots.txt rules
+	allowed := isURLAllowedByRobotsTXT(urlData.URL)
+	if !allowed {
+		return // Skip crawling if not allowed
+	}
+
+	// Handler for errors during the crawl
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Printf("Error occurred while crawling %s: %s\n", urlData.URL, err)
+	})
+
+	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
+		link := e.Request.AbsoluteURL(e.Attr("href"))
+		if !visited[link] && isURLAllowedByRobotsTXT(link) {
+			urlData.Links = append(urlData.Links, link)
+			urlQueue <- link
+		}
+	})
+
+	// Handler for successful HTTP responses
+	c.OnResponse(func(r *colly.Response) {
+		if r.StatusCode == 200 {
+			// Successful crawl, process the response here
+			ch <- urlData // Send the URLData to the channel
+			fmt.Printf("Crawled URL: %s\n", urlData.URL)
+		} else {
+			// Handle cases where the status code is not 200
+			fmt.Printf("Non-200 status code while crawling %s: %d\n", urlData.URL, r.StatusCode)
+		}
+	})
+
+	// Start the crawl
+	c.Visit(urlData.URL)
+
+	ch <- urlData
+}
+
+//end crawlurl ========================================================================================================
+
+// begin create sitemap =================================================================================================
+func createSiteMap(urls []URLData) error {
+	siteMap := make(map[string][]string)
+	for _, u := range urls {
+		siteMap[u.URL] = u.Links
+	}
+
+	jsonData, err := json.Marshal(siteMap)
+	err = ioutil.WriteFile("siteMap.json", jsonData, 0644)
+	if err != nil {
+		log.Printf("Error writing sitemap to file: %v\n", err)
+		return err
+	}
+
+	log.Println("Sitemap created successfully.")
+	return nil
+}
+
+//end create sitemap ===================================================================================================
+
+// begin robot.txt ======================================================================================================
+// isURLAllowedByRobotsTXT checks if the given URL is allowed by the site's robots.txt.
+func isURLAllowedByRobotsTXT(urlStr string) bool {
+	parsedURL, err := url.Parse(urlStr)
+	if err != nil {
+		log.Println("Error parsing URL:", err)
+		return false
+	}
+
+	if parsedURL.Host == "" {
+		log.Println("Invalid URL, no host found:", urlStr)
+		return false
+	}
+
+	robotsURL := "http://" + parsedURL.Host + "/robots.txt"
+
+	resp, err := http.Get(robotsURL)
+	if err != nil {
+		log.Println("Error fetching robots.txt:", err)
+		return true
+	}
+
+	data, err := robotstxt.FromResponse(resp)
+	if err != nil {
+		log.Println("Error parsing robots.txt:", err)
+		return true
+	}
+
+	return data.TestAgent(urlStr, "GoEngine")
+}
+
+//end robot.txt ========================================================================================================
+
+// begin threaded crawl =================================================================================================
+// threadedCrawl starts crawling the provided URLs concurrently.
+func threadedCrawl(urls []URLData, concurrentCrawlers int) {
+	var wg sync.WaitGroup
+	ch := make(chan URLData, len(urls))
+
+	rateLimitRule := &colly.LimitRule{
+		DomainGlob:  "*",             // Apply to all domains
+		Delay:       5 * time.Second, // Wait 5 seconds between requests
+		RandomDelay: 5 * time.Second, // Add up to 5 seconds of random delay
+	}
+
+	log.Println("Starting crawling...")
+	for _, urlData := range urls {
+		wg.Add(1)
+
+		go func(u URLData) {
+			c := colly.NewCollector(
+				colly.UserAgent(GetRandomUserAgent()),
+			)
+			c.Limit(rateLimitRule) // Set the rate limit rule
+
+			crawlURL(u, ch, &wg)
+		}(urlData)
+
+		log.Println("Crawling URL:", urlData.URL)
+		if len(urls) >= concurrentCrawlers {
+			break
+		}
+	}
+
+	log.Println("Waiting for crawlers to finish...")
+	go func() {
+		wg.Wait()
+		close(ch)
+		log.Println("All goroutines finished, channel closed.")
+	}()
+
+	var crawledURLs []URLData
+	for urlData := range ch {
+		crawledURLs = append(crawledURLs, urlData)
+	}
+	if err := createSiteMap(crawledURLs); err != nil {
+		log.Println("Error creating sitemap:", err)
+	}
+}
+
+//end threaded crawl ===================================================================================================
+
+//end crawler ==========================================================================================================
+
+//begin scraper ========================================================================================================
+
+// begin scrape =========================================================================================================
 // Scrape performs the scraping based on the provided configuration
 func Scrape(startingURL string, domainConfig DomainConfig, wg *sync.WaitGroup) {
 	defer wg.Done()
@@ -317,6 +516,10 @@ func Scrape(startingURL string, domainConfig DomainConfig, wg *sync.WaitGroup) {
 		fmt.Printf("Error saving data to JSON file: %v\n", err)
 	}
 }
+
+//end scrape ===========================================================================================================
+
+// begin test scrape ====================================================================================================
 func testScrape(domainName string) {
 	domainConfig, exists := domainConfigurations[domainName]
 	if !exists {
@@ -348,213 +551,10 @@ func testScrape(domainName string) {
 	fmt.Printf("Scraping for domain %s completed and data has been saved to JSON files\n", domainName)
 }
 
-// crawlURL is responsible for crawling a single URL.
-func crawlURL(urlData URLData, ch chan<- URLData, wg *sync.WaitGroup) {
-	defer wg.Done() // Ensure the WaitGroup counter is decremented on function exit
-	c := colly.NewCollector(
-		colly.UserAgent(GetRandomUserAgent()), // Set a random user agent
-	)
-	// First, check if the URL is allowed by robots.txt rules
-	allowed := isURLAllowedByRobotsTXT(urlData.URL)
-	if !allowed {
-		return // Skip crawling if not allowed
-	}
+//end test scrape ======================================================================================================
 
-	// Handler for errors during the crawl
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Printf("Error occurred while crawling %s: %s\n", urlData.URL, err)
-	})
-
-	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-		link := e.Request.AbsoluteURL(e.Attr("href"))
-		if !visited[link] && isURLAllowedByRobotsTXT(link) {
-			urlData.Links = append(urlData.Links, link)
-			urlQueue <- link
-		}
-	})
-
-	// Handler for successful HTTP responses
-	c.OnResponse(func(r *colly.Response) {
-		if r.StatusCode == 200 {
-			// Successful crawl, process the response here
-			ch <- urlData // Send the URLData to the channel
-			fmt.Printf("Crawled URL: %s\n", urlData.URL)
-		} else {
-			// Handle cases where the status code is not 200
-			fmt.Printf("Non-200 status code while crawling %s: %d\n", urlData.URL, r.StatusCode)
-		}
-	})
-
-	// Start the crawl
-	c.Visit(urlData.URL)
-
-	ch <- urlData
-}
-
-func createSiteMap(urls []URLData) error {
-	siteMap := make(map[string][]string)
-	for _, u := range urls {
-		siteMap[u.URL] = u.Links
-	}
-
-	jsonData, err := json.Marshal(siteMap)
-	err = ioutil.WriteFile("siteMap.json", jsonData, 0644)
-	if err != nil {
-		log.Printf("Error writing sitemap to file: %v\n", err)
-		return err
-	}
-
-	log.Println("Sitemap created successfully.")
-	return nil
-}
-
-// isURLAllowedByRobotsTXT checks if the given URL is allowed by the site's robots.txt.
-func isURLAllowedByRobotsTXT(urlStr string) bool {
-	parsedURL, err := url.Parse(urlStr)
-	if err != nil {
-		log.Println("Error parsing URL:", err)
-		return false
-	}
-
-	if parsedURL.Host == "" {
-		log.Println("Invalid URL, no host found:", urlStr)
-		return false
-	}
-
-	robotsURL := "http://" + parsedURL.Host + "/robots.txt"
-
-	resp, err := http.Get(robotsURL)
-	if err != nil {
-		log.Println("Error fetching robots.txt:", err)
-		return true
-	}
-
-	data, err := robotstxt.FromResponse(resp)
-	if err != nil {
-		log.Println("Error parsing robots.txt:", err)
-		return true
-	}
-
-	return data.TestAgent(urlStr, "GoEngine")
-}
-
-// threadedCrawl starts crawling the provided URLs concurrently.
-func threadedCrawl(urls []URLData, concurrentCrawlers int) {
-	var wg sync.WaitGroup
-	ch := make(chan URLData, len(urls))
-
-	rateLimitRule := &colly.LimitRule{
-		DomainGlob:  "*",             // Apply to all domains
-		Delay:       5 * time.Second, // Wait 5 seconds between requests
-		RandomDelay: 5 * time.Second, // Add up to 5 seconds of random delay
-	}
-
-	log.Println("Starting crawling...")
-	for _, urlData := range urls {
-		wg.Add(1)
-
-		go func(u URLData) {
-			c := colly.NewCollector(
-				colly.UserAgent(GetRandomUserAgent()),
-			)
-			c.Limit(rateLimitRule) // Set the rate limit rule
-
-			crawlURL(u, ch, &wg)
-		}(urlData)
-
-		log.Println("Crawling URL:", urlData.URL)
-		if len(urls) >= concurrentCrawlers {
-			break
-		}
-	}
-
-	log.Println("Waiting for crawlers to finish...")
-	go func() {
-		wg.Wait()
-		close(ch)
-		log.Println("All goroutines finished, channel closed.")
-	}()
-
-	var crawledURLs []URLData
-	for urlData := range ch {
-		crawledURLs = append(crawledURLs, urlData)
-	}
-	if err := createSiteMap(crawledURLs); err != nil {
-		log.Println("Error creating sitemap:", err)
-	}
-}
-
-// InitializeCrawling sets up and starts the crawling process.
-func InitializeCrawling() {
-	log.Println("Fetching URLs to crawl...")
-	urlDataList := getURLsToCrawl()
-	log.Println("URLs to crawl:", urlDataList)
-
-	threadedCrawl(urlDataList, 10)
-}
-
-// getURLsToCrawl retrieves a list of URLs to be crawled.
-func getURLsToCrawl() []URLData {
-
-	return []URLData{
-		{URL: "https://www.kaggle.com/search?q=housing+prices"},
-		{URL: "http://books.toscrape.com/"},
-		{URL: "https://www.kaggle.com/search?q=stocks"},
-		{URL: "https://www.kaggle.com/search?q=stock+market"},
-		{URL: "https://www.kaggle.com/search?q=real+estate"},
-	}
-}
-
-//func bfsCrawlTest(startURLs []string, concurrentCrawlers int) {
-//	var wg sync.WaitGroup
-//
-//	// Initialize the queue with start URLs and mark as visited
-//	for _, url := range startURLs {
-//		urlQueue <- url
-//		visited[url] = true
-//	}
-//
-//	// Start crawling using BFS
-//	for i := 0; i < concurrentCrawlers; i++ {
-//		wg.Add(1)
-//		go func() {
-//			for url := range urlQueue {
-//				if visited[url] {
-//					continue
-//				}
-//				visited[url] = true
-//				crawlURL(URLData{URL: url}, dataChan, &wg)
-//			}
-//		}()
-//	}
-//
-//	// Close the dataChan when all crawls are complete
-//	go func() {
-//		wg.Wait()
-//		close(dataChan)
-//	}()
-//
-//	// Process the data collected
-//	crawledData := make([]URLData, 0)
-//	for data := range dataChan {
-//		crawledData = append(crawledData, data)
-//		// Additional processing can be done here
-//	}
-//
-//	// Convert crawled data to JSON and save to file
-//	jsonData, err := json.MarshalIndent(crawledData, "", "  ")
-//	if err != nil {
-//		log.Fatal("Error marshalling data:", err)
-//	}
-//	err = ioutil.WriteFile("crawled_data.json", jsonData, 0644)
-//	if err != nil {
-//		log.Fatal("Error writing to file:", err)
-//	}
-//
-//	// Confirm data has been saved
-//	fmt.Println("Crawled data written to crawled_data.json")
-//}
-
+// new scrapers =========================================================================================================
+// begin airfare scraper =================================================================================================
 func airdatatest() {
 	urlll := "https://www.usinflationcalculator.com/inflation/airfare-inflation/"
 	res, err := http.Get(urlll)
@@ -630,6 +630,9 @@ func airdatatest() {
 	log.Println("Airfare data written to airfare_data.json")
 }
 
+//end airfare scraper ==================================================================================================
+
+// begin inflation scraper ==============================================================================================
 func scrapeInflationData() {
 	urlll := "https://www.usinflationcalculator.com/inflation/current-inflation-rates/"
 	res, err := http.Get(urlll)
@@ -704,6 +707,9 @@ func scrapeInflationData() {
 	fmt.Println("Inflation data written to inflation_data.json")
 }
 
+//end inflation scraper ================================================================================================
+
+// begin gasoline scraper =================================================================================================
 func scrapeGasInflationData() {
 	urlll := "https://www.usinflationcalculator.com/gasoline-prices-adjusted-for-inflation/"
 	res, err := http.Get(urlll)
@@ -757,6 +763,9 @@ func scrapeGasInflationData() {
 	fmt.Println("Gasoline data written to gasoline_data.json")
 }
 
+//end gasoline scraper =================================================================================================
+
+// begin housing scraper =================================================================================================
 func scrapeHousingData() {
 	urlll := "https://www.kaggle.com/datasets/ahmedshahriarsakib/usa-real-estate-dataset"
 	res, err := http.Get(urlll)
@@ -817,21 +826,13 @@ func scrapeHousingData() {
 	fmt.Println("Property data written to property_data.json")
 }
 
+//end housing scraper ===================================================================================================
+
+// begin main ===========================================================================================================
 func main() {
 
 	//begin crawler
 	InitializeCrawling()
-	//
-	//	//startURLs := []string{
-	//	//	"https://www.kaggle.com/search?q=housing+prices",
-	//	//	"http://books.toscrape.com/",
-	//	//	"https://www.kaggle.com/search?q=stocks",
-	//	//	"https://www.kaggle.com/search?q=stock+market",
-	//	//	"https://www.kaggle.com/search?q=real+estate",
-	//	//	"https://www.madronavl.com/launchable/public-data-sources-real-estate",
-	//	//	"https://www.census.gov/programs-surveys/housing.html", "https://data.world/datasets/real-estate",
-	//	//}
-	//	//bfsCrawlTest(startURLs, 10)
 	airdatatest()
 	scrapeInflationData()
 	scrapeGasInflationData()
@@ -839,8 +840,6 @@ func main() {
 	//end crawler
 
 	//begin scraper
-
-	//GetRandomUserAgent()
 	fmt.Println("Available domains:")
 	for domainName := range domainConfigurations {
 		fmt.Printf("- %s\n", domainName)
@@ -862,3 +861,69 @@ func main() {
 	testScrape(domainName)
 
 }
+
+//end main =============================================================================================================
+
+//bfscrawler test =====================================================================================================
+//func bfsCrawlTest(startURLs []string, concurrentCrawlers int) {
+//	var wg sync.WaitGroup
+//
+//	// Initialize the queue with start URLs and mark as visited
+//	for _, url := range startURLs {
+//		urlQueue <- url
+//		visited[url] = true
+//	}
+//
+//	// Start crawling using BFS
+//	for i := 0; i < concurrentCrawlers; i++ {
+//		wg.Add(1)
+//		go func() {
+//			for url := range urlQueue {
+//				if visited[url] {
+//					continue
+//				}
+//				visited[url] = true
+//				crawlURL(URLData{URL: url}, dataChan, &wg)
+//			}
+//		}()
+//	}
+//
+//	// Close the dataChan when all crawls are complete
+//	go func() {
+//		wg.Wait()
+//		close(dataChan)
+//	}()
+//
+//	// Process the data collected
+//	crawledData := make([]URLData, 0)
+//	for data := range dataChan {
+//		crawledData = append(crawledData, data)
+//		// Additional processing can be done here
+//	}
+//
+//	// Convert crawled data to JSON and save to file
+//	jsonData, err := json.MarshalIndent(crawledData, "", "  ")
+//	if err != nil {
+//		log.Fatal("Error marshalling data:", err)
+//	}
+//	err = ioutil.WriteFile("crawled_data.json", jsonData, 0644)
+//	if err != nil {
+//		log.Fatal("Error writing to file:", err)
+//	}
+//
+//	// Confirm data has been saved
+//	fmt.Println("Crawled data written to crawled_data.json")
+//}
+//end bfscrawler test =================================================================================================
+
+//add to main if reusing bfs
+//	//startURLs := []string{
+//	//	"https://www.kaggle.com/search?q=housing+prices",
+//	//	"http://books.toscrape.com/",
+//	//	"https://www.kaggle.com/search?q=stocks",
+//	//	"https://www.kaggle.com/search?q=stock+market",
+//	//	"https://www.kaggle.com/search?q=real+estate",
+//	//	"https://www.madronavl.com/launchable/public-data-sources-real-estate",
+//	//	"https://www.census.gov/programs-surveys/housing.html", "https://data.world/datasets/real-estate",
+//	//}
+//	//bfsCrawlTest(startURLs, 10)

@@ -1,4 +1,4 @@
-package ML_test
+package main
 
 //
 //func main1() {

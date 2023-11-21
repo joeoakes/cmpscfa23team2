@@ -123,7 +123,7 @@ func countSubstring(slice []string, substring string) int {
 	return count
 }
 
-func main() {
+func main1() {
 	// reading data from JSON file
 	file, err := ioutil.ReadFile("crab/template.json")
 	if err != nil {

@@ -248,6 +248,22 @@ func requireAdmin(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+//Old method to test the dashboard.
+// Authentication Middleware to check if the user is logged in and has admin role
+//func requireAdmin(next http.HandlerFunc) http.HandlerFunc {
+//	return func(w http.ResponseWriter, r *http.Request) {
+//		// Placeholder for actual authentication and role check
+//		// You should replace this with a call to your DAL methods to check for a valid admin session/token
+//		// For example: isAdmin, err := dal.IsUserAdmin(session.UserID)
+//		isAdmin := true // For demonstration purposes, assign false to see the difference
+//
+//		if !isAdmin {
+//			http.Error(w, "Forbidden", http.StatusForbidden)
+//			return
+//		}
+//		next.ServeHTTP(w, r)
+//	}
+//}
 //http.HandleFunc("/start-crawler", func(w http.ResponseWriter, r *http.Request) {
 //	if r.Method != "POST" {
 //		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

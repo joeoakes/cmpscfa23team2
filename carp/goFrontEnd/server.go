@@ -21,6 +21,11 @@ type PageData struct {
 }
 
 func main() {
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Current directory:", dir)
 	setupServer()
 }
 
@@ -31,7 +36,7 @@ func setupServer() {
 	}
 	log.Println("Current directory:", dir)
 
-	files, err := filepath.Glob("templates/*.gohtml")
+	files, err := filepath.Glob(filepath.Join(dir, "templates/*.gohtml"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -56,6 +61,7 @@ func setupRoutes(tmpl *template.Template) {
 	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		registerHandler(tmpl, w, r)
 	})
+	//http.HandleFunc("/register", makeHandler(tmpl, "register"))
 	http.HandleFunc("/documentation", makeHandler(tmpl, "documentation"))
 	http.HandleFunc("/dashboard", requireAdmin(makeHandler(tmpl, "dashboard")))
 	http.HandleFunc("/settings", requireAdmin(makeHandler(tmpl, "settings")))

@@ -68,24 +68,49 @@
     <!-- JavaScript for Redirection (link to homepage) -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Find the login button by its id
-            var loginButton = document.getElementById('loginButton');
+            // Find the login form by its id
+            var loginForm = document.querySelector('form');
 
-            // Add a click event listener to the login button
-            loginButton.addEventListener('click', function (event) {
+            // Add a submit event listener to the login form
+            loginForm.addEventListener('submit', function (event) {
                 // Prevent the default form submission behavior
                 event.preventDefault();
 
-                // Redirect the user to the home page ("/")
-                window.location.href = '/';
+                // Get the email and password values
+                var email = document.getElementById('email').value;
+                var password = document.getElementById('password').value;
+
+                // Make an asynchronous request to the login API
+                fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'username=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password),
+                })
+                    .then(response => {
+                        console.log('Response status:', response.status);
+
+                        if (!response.ok) {
+                            // Handle authentication error
+                            throw new Error('Invalid credentials');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Authentication successful. Data:', data);
+
+                        // Redirect the user to the home page on successful authentication
+                        window.location.href = '/path/to/redirected-page';
+                    })
+                    .catch(error => {
+                        // Handle and display the authentication error
+                        console.error('Authentication error:', error);
+                        alert('Authentication failed: ' + error.message);
+                    });
             });
         });
     </script>
 
 
 {{ end }}
-
-
-<!-- Logout Button -->
-    {{/*    <button onclick="logout()" class="btn btn-secondary">Logout</button>*/}}
-    <!-- More admin functionalities can be added here -->

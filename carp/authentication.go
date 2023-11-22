@@ -2,6 +2,8 @@ package carp
 
 import (
 	"cmpscfa23team2/dal"
+	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -11,17 +13,36 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 
-	// Call the DAL authentication function to authenticate the user
+	// Call the DAL authentication function
 	token, err := dal.AuthenticateUser(username, password)
 	if err != nil {
+		// Log the authentication error
+		log.Printf("Authentication error: %v", err)
+
 		// Handle authentication error
-		http.Error(w, "Authentication failed", http.StatusUnauthorized)
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(`{"error": "Invalid credentials"}`))
 		return
 	}
 
-	// Set the token in the response header or send it as a JSON response, as needed
-	w.Header().Set("Authorization", "Bearer "+token)
-	w.Write([]byte("Login successful"))
+	// Log the token
+	log.Printf("Token: %v", token)
+
+	// Respond with a success message in JSON format
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(`{"message": "Authentication successful"}`))
+	return
+}
+
+// writeJSONResponse writes a JSON response with the provided data.
+func writeJSONResponse(w http.ResponseWriter, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		log.Printf("Error encoding JSON response: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
 }
 
 // LogoutHandler handles the user logout process.
@@ -39,15 +60,3 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Write([]byte("Logout successful"))
 }
-
-// Changes Made:
-// 1. Created a package named "carp" to encapsulate login and logout functionality.
-// 2. Utilized the DAL package for user authentication and logout operations.
-// 3. Added comments to describe the purpose and functionality of each function.
-// 4. Implemented error handling for authentication and logout processes.
-// 5. Set the JWT token in the response header upon successful user authentication.
-// 6. Included optional steps for token invalidation or other logout-related tasks.
-// 7. Incorporated consistent naming conventions for functions and variables.
-// 8. Ensured that appropriate HTTP status codes are used for error responses.
-// 9. Left placeholders for retrieving user ID based on the authentication mechanism.
-// 10. Encapsulated the login and logout functionalities within the "carp" package.

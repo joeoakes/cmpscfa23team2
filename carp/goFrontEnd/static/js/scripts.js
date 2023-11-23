@@ -17,7 +17,6 @@ $(document).ready(function() {
       contentType: 'application/json',
       data: JSON.stringify({ username: username, password: password }),
       success: function(response) {
-        // Assuming the response contains a token
         onLoginSuccess(response.token);
       },
       error: function(xhr, status, error) {
@@ -38,13 +37,47 @@ $(document).ready(function() {
   $('#logoutBtn').click(function() {
     logout();
   });
+
+  // Handle AI Prediction Form submission
+  $('#aiPredictionForm').submit(function(event) {
+    event.preventDefault();
+
+    console.log("Form submission handler called");
+
+    var query = $('#querySelect').val();
+    var domain = $('#domainSelect').val();
+
+    console.log("Selected Query: " + query + ", Domain: " + domain);
+
+    var results = {
+      'query1': {
+        'finance': 'Result for Query 1 and Finance',
+        'healthcare': 'Result for Query 1 and Healthcare',
+        'technology': 'Result for Query 1 and Technology'
+      },
+      'query2': {
+        'finance': 'Result for Query 2 and Finance',
+        'healthcare': 'Result for Query 2 and Healthcare',
+        'technology': 'Result for Query 2 and Technology'
+      },
+      'query3': {
+        'finance': 'Result for Query 3 and Finance',
+        'healthcare': 'Result for Query 3 and Healthcare',
+        'technology': 'Result for Query 3 and Technology'
+      }
+      // Add more combinations as needed
+    };
+
+    var resultText = results[query][domain] || 'No result found';
+    $('#predictionResult').text(resultText);
+
+    console.log("Result Text: " + resultText);
+  });
 });
 
 // Function to handle settings actions
 function performAction(module, action) {
   console.log(module + ' action:', action);
-  // Implement AJAX calls or other functionality based on the action
-  // Example AJAX call:
   $.ajax({
     url: '/settings/' + module + '/' + action.toLowerCase(),
     type: 'POST',
@@ -62,12 +95,10 @@ function onLoginSuccess(token) {
   console.log('Login successful, token:', token);
   $('#loginModal').modal('hide');
   localStorage.setItem('token', token);
-  // Redirect to dashboard or update UI
 }
 
 // Function to logout
 function logout() {
   localStorage.removeItem('token');
-  // Redirect to the home page or update UI
   window.location.href = '/';
 }

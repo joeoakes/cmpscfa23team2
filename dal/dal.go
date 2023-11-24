@@ -7,6 +7,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"log"
+	"os"
+	"path/filepath"
 )
 
 // This code defines a Go struct named "JSON_Data_Connect" with fields for username, password, hostname,
@@ -40,7 +42,16 @@ func readJSONConfig(filename string) (JSON_Data_Connect, error) {
 
 // It initializes a database connection using configuration data from a JSON file and logs any errors encountered during the process.
 func InitDB() error {
-	config, err := readJSONConfig("C:\\Users\\User\\GolandProjects\\cmpscfa23team2(fork)\\config.json") //"../config.json")
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Printf("Error getting current working directory: %s", err)
+		return err
+	}
+
+	// Construct the path to the config file
+	path := filepath.Join(cwd, "/../../mysql/config.json")
+
+	config, err := readJSONConfig(path)
 	if err != nil {
 		log.Printf("Error initializing DB from config: %s", err)
 		return err

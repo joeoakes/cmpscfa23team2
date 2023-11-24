@@ -66,51 +66,51 @@
     </section>
 
     <!-- JavaScript for Redirection (link to homepage) -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Find the login form by its id
-            var loginForm = document.querySelector('form');
+{{/*    <script>*/}}
+{{/*        document.addEventListener('DOMContentLoaded', function () {*/}}
+{{/*            // Find the login form by its id*/}}
+{{/*            var loginForm = document.querySelector('form');*/}}
 
-            // Add a submit event listener to the login form
-            loginForm.addEventListener('submit', function (event) {
-                // Prevent the default form submission behavior
-                event.preventDefault();
+{{/*            // Add a submit event listener to the login form*/}}
+{{/*            loginForm.addEventListener('submit', function (event) {*/}}
+{{/*                // Prevent the default form submission behavior*/}}
+{{/*                event.preventDefault();*/}}
 
-                // Get the email and password values
-                var email = document.getElementById('email').value;
-                var password = document.getElementById('password').value;
+{{/*                // Get the email and password values*/}}
+{{/*                var email = document.getElementById('email').value;*/}}
+{{/*                var password = document.getElementById('password').value;*/}}
 
-                // Make an asynchronous request to the login API
-                fetch('/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'username=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password),
-                })
-                    .then(response => {
-                        console.log('Response status:', response.status);
+{{/*                // Make an asynchronous request to the login API*/}}
+{{/*                fetch('/login', {*/}}
+{{/*                    method: 'POST',*/}}
+{{/*                    headers: {*/}}
+{{/*                        'Content-Type': 'application/x-www-form-urlencoded',*/}}
+{{/*                    },*/}}
+{{/*                    body: 'username=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password),*/}}
+{{/*                })*/}}
+{{/*                    .then(response => {*/}}
+{{/*                        console.log('Response status:', response.status);*/}}
 
-                        if (!response.ok) {
-                            // Handle authentication error
-                            throw new Error('Invalid credentials');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Authentication successful. Data:', data);
+{{/*                        if (!response.ok) {*/}}
+{{/*                            // Handle authentication error*/}}
+{{/*                            throw new Error('Invalid credentials');*/}}
+{{/*                        }*/}}
+{{/*                        return response.json();*/}}
+{{/*                    })*/}}
+{{/*                    .then(data => {*/}}
+{{/*                        console.log('Authentication successful. Data:', data);*/}}
 
-                        // Redirect the user to the home page on successful authentication
-                        window.location.href = '/path/to/redirected-page';
-                    })
-                    .catch(error => {
-                        // Handle and display the authentication error
-                        console.error('Authentication error:', error);
-                        alert('Authentication failed: ' + error.message);
-                    });
-            });
-        });
-    </script>
+{{/*                        // Redirect the user to the home page on successful authentication*/}}
+{{/*                        window.location.href = '/index.gohtml';*/}}
+{{/*                    })*/}}
+{{/*                    .catch(error => {*/}}
+{{/*                        // Handle and display the authentication error*/}}
+{{/*                        console.error('Authentication error:', error);*/}}
+{{/*                        alert('Authentication failed: ' + error.message);*/}}
+{{/*                    });*/}}
+{{/*            });*/}}
+{{/*        });*/}}
+{{/*    </script>*/}}
 
 
 {{ end }}

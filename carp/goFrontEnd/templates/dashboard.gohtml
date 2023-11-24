@@ -1,4 +1,52 @@
 {{ define "dashboard"}}
+    <style>
+        .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
+            color: #fff;
+            background-color: #007bff;
+        }
+        .tab-content {
+            margin-top: 20px;
+        }
+        .btn-settings {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            margin-right: 10px;
+        }
+    </style>
+    <div class="container mt-4">
+        <h2>System Settings</h2>
+        <ul class="nav nav-pills" id="settingsTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="crab-tab" data-toggle="pill" href="#crab" role="tab" aria-controls="crab" aria-selected="true">CRAB</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="cuda-tab" data-toggle="pill" href="#cuda" role="tab" aria-controls="cuda" aria-selected="false">CUDA</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="carp-tab" data-toggle="pill" href="#carp" role="tab" aria-controls="carp" aria-selected="false">CARP</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="settingsTabsContent">
+            <div class="tab-pane fade show active" id="crab" role="tabpanel" aria-labelledby="crab-tab">
+                <!-- CRAB Settings -->
+                <button class="btn btn-primary btn-settings">Start Crawler</button>
+                <button class="btn btn-secondary btn-settings">Stop Crawler</button>
+                <button class="btn btn-info btn-settings">View Logs</button>
+            </div>
+            <div class="tab-pane fade" id="cuda" role="tabpanel" aria-labelledby="cuda-tab">
+                <!-- CUDA Settings -->
+                <button class="btn btn-primary btn-settings">Initialize Swarm</button>
+                <button class="btn btn-secondary btn-settings">Distribute Tasks</button>
+                <button class="btn btn-info btn-settings">Monitor Performance</button>
+            </div>
+            <div class="tab-pane fade" id="carp" role="tabpanel" aria-labelledby="carp-tab">
+                <!-- CARP Settings -->
+                <button class="btn btn-primary btn-settings">Manage Subscriptions</button>
+                <button class="btn btn-secondary btn-settings">Update Distribution Lists</button>
+                <button class="btn btn-info btn-settings">Analyze Traffic</button>
+            </div>
+        </div>
+    </div>
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
     <style>
         .card {
@@ -259,54 +307,6 @@
                         </table>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <style>
-        .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
-            color: #fff;
-            background-color: #007bff;
-        }
-        .tab-content {
-            margin-top: 20px;
-        }
-        .btn-settings {
-            font-size: 0.8rem;
-            padding: 0.25rem 0.5rem;
-            margin-right: 10px;
-        }
-    </style>
-    <div class="container mt-4">
-        <h2>System Settings</h2>
-        <ul class="nav nav-pills" id="settingsTabs" role="tablist">
-            <li class="nav-item">
-                <a class="nav-link active" id="crab-tab" data-toggle="pill" href="#crab" role="tab" aria-controls="crab" aria-selected="true">CRAB</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="cuda-tab" data-toggle="pill" href="#cuda" role="tab" aria-controls="cuda" aria-selected="false">CUDA</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="carp-tab" data-toggle="pill" href="#carp" role="tab" aria-controls="carp" aria-selected="false">CARP</a>
-            </li>
-        </ul>
-        <div class="tab-content" id="settingsTabsContent">
-            <div class="tab-pane fade show active" id="crab" role="tabpanel" aria-labelledby="crab-tab">
-                <!-- CRAB Settings -->
-                <button class="btn btn-primary btn-settings">Start Crawler</button>
-                <button class="btn btn-secondary btn-settings">Stop Crawler</button>
-                <button class="btn btn-info btn-settings">View Logs</button>
-            </div>
-            <div class="tab-pane fade" id="cuda" role="tabpanel" aria-labelledby="cuda-tab">
-                <!-- CUDA Settings -->
-                <button class="btn btn-primary btn-settings">Initialize Swarm</button>
-                <button class="btn btn-secondary btn-settings">Distribute Tasks</button>
-                <button class="btn btn-info btn-settings">Monitor Performance</button>
-            </div>
-            <div class="tab-pane fade" id="carp" role="tabpanel" aria-labelledby="carp-tab">
-                <!-- CARP Settings -->
-                <button class="btn btn-primary btn-settings">Manage Subscriptions</button>
-                <button class="btn btn-secondary btn-settings">Update Distribution Lists</button>
-                <button class="btn btn-info btn-settings">Analyze Traffic</button>
             </div>
         </div>
     </div>

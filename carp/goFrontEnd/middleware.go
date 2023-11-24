@@ -1,10 +1,5 @@
 package main
 
-// Need to complete and connect this file with DAL
-// Need to make the index, login, register functional through DAL
-// Play with the requireAdmin
-// Connect home page with CUDA and DAL
-
 import (
 	"cmpscfa23team2/dal"
 	"errors"
@@ -15,10 +10,13 @@ import (
 	"strings"
 )
 
-type AuthPageData struct {
+type AuthData struct {
 	Title      string
 	Action     string
 	ShowLogout bool
+	Username   string
+	Success    bool
+	Error      string
 }
 
 type RegistrationPageData struct {
@@ -26,16 +24,14 @@ type RegistrationPageData struct {
 	ErrorMessage string
 }
 
-// DAL needs to be imported and implemented
-
 func serveTemplate(content string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		emptyData := &PageData{} // Create a pointer to PageData
+		emptyData := &AuthData{} // Change to AuthData
 		renderTemplate(w, "layout.gohtml", emptyData)
 	}
 }
 
-func renderTemplate(w http.ResponseWriter, tmpl string, data *PageData) {
+func renderTemplate(w http.ResponseWriter, tmpl string, data *AuthData) {
 	t, err := template.ParseFiles("path/to/" + tmpl)
 	if err != nil {
 		log.Printf("Error parsing template: %v", err)
@@ -43,7 +39,7 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data *PageData) {
 		return
 	}
 	if data == nil {
-		data = &PageData{} // Set default values or handle nil appropriately
+		data = &AuthData{}
 	}
 	err = t.Execute(w, data)
 	if err != nil {
@@ -52,73 +48,59 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data *PageData) {
 	}
 }
 
-// Updated loginHandler to use DAL authentication
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		// Render the login page
-		renderTemplate(w, "path/to/login.gohtml", nil)
+		data := AuthData{Action: "login"}
+		renderTemplate(w, "path/to/login.gohtml", &data)
 	} else if r.Method == "POST" {
-		// Process the login form
 		r.ParseForm()
 		username := r.FormValue("username")
 		password := r.FormValue("password")
 
+		log.Printf("Request Headers: %v", r.Header)
+
 		// Call the DAL authentication function
 		token, err := dal.AuthenticateUser(username, password)
 		if err != nil {
+			// Log the authentication error
+			log.Printf("Authentication error: %v", err)
+
 			// Handle authentication error
-			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(`{"error": "Invalid credentials"}`))
 			return
 		}
 
-		// Set the token in the response header
-		w.Header().Set("Authorization", "Bearer "+token)
-		w.Write([]byte("Login successful"))
+		// Log the token
+		log.Printf("Token: %v", token)
+
+		// Respond with a success message in JSON format
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"message": "Authentication successful"}`))
+
+		log.Printf("Response Headers: %v", w.Header())
+		return
 	}
 }
 
-// DAL imports should be added based on the actual structure of your DAL package
-// import "path/to/dal"
-
-func authenticateUser(username, password string) (string, error) {
-	authenticated, err := dal.AuthenticateUser(username, password)
-	if err != nil {
-		// Handle the error, log, or return an appropriate response
-		return "", err
+func requireAdmin(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		isAdmin := true
+		if !isAdmin {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+		next.ServeHTTP(w, r)
 	}
-	return authenticated, nil
 }
 
-// Function to get the role of a user
-func getUserRole(username string) string {
-	role, err := dal.GetUserRole(username)
-	if err != nil {
-		// Handle the error, log, or return a default role
-		return "user"
-	}
-	return role
-}
-
-// Function to get the authenticated user's username
-func getAuthenticatedUser(r *http.Request) string {
-	username, ok := r.Context().Value("username").(string)
-	if !ok {
-		// Handle the case where the username is not found in the context
-		return ""
-	}
-	return username
-}
-
-// Updated logoutHandler to use DAL logout function
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	// Extract user ID from the token
 	userID, err := extractUserIDFromToken(r)
 	if err != nil {
 		http.Error(w, "Logout failed", http.StatusInternalServerError)
 		return
 	}
 
-	// Call the DAL logout function
 	err = dal.LogoutUser(userID)
 	if err != nil {
 		http.Error(w, "Logout failed", http.StatusInternalServerError)
@@ -128,15 +110,12 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Logout successful"))
 }
 
-// Function to extract user ID from the JWT token
 func extractUserIDFromToken(r *http.Request) (string, error) {
-	// Extract token from the Authorization header
 	header := r.Header.Get("Authorization")
 	if header == "" {
 		return "", errors.New("Authorization header not found")
 	}
 
-	// Extract token from "Bearer <token>"
 	splitToken := strings.Split(header, "Bearer ")
 	if len(splitToken) != 2 {
 		return "", errors.New("Invalid Authorization header format")
@@ -144,7 +123,6 @@ func extractUserIDFromToken(r *http.Request) (string, error) {
 
 	tokenString := strings.TrimSpace(splitToken[1])
 
-	// Parse the token to extract user ID
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte(dal.SECRET_KEY), nil
 	})
@@ -157,7 +135,7 @@ func extractUserIDFromToken(r *http.Request) (string, error) {
 		return "", errors.New("Failed to parse token claims")
 	}
 
-	userID, ok := claims["uid"].(string)
+	userID, ok := claims["sub"].(string)
 	if !ok {
 		return "", errors.New("User ID not found in token claims")
 	}
@@ -250,20 +228,20 @@ Form Submission Handling: Write JavaScript to handle the form submission asynchr
 
 // Old method to test the dashboard.
 // Authentication Middleware to check if the user is logged in and has admin role
-func requireAdmin(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// Placeholder for actual authentication and role check
-		// You should replace this with a call to your DAL methods to check for a valid admin session/token
-		// For example: isAdmin, err := dal.IsUserAdmin(session.UserID)
-		isAdmin := true // For demonstration purposes, assign false to see the difference
-
-		if !isAdmin {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			return
-		}
-		next.ServeHTTP(w, r)
-	}
-}
+//func requireAdmin(next http.HandlerFunc) http.HandlerFunc {
+//	return func(w http.ResponseWriter, r *http.Request) {
+//		// Placeholder for actual authentication and role check
+//		// You should replace this with a call to your DAL methods to check for a valid admin session/token
+//		// For example: isAdmin, err := dal.IsUserAdmin(session.UserID)
+//		isAdmin := true // For demonstration purposes, assign false to see the difference
+//
+//		if !isAdmin {
+//			http.Error(w, "Forbidden", http.StatusForbidden)
+//			return
+//		}
+//		next.ServeHTTP(w, r)
+//	}
+//}
 
 //http.HandleFunc("/start-crawler", func(w http.ResponseWriter, r *http.Request) {
 //	if r.Method != "POST" {
@@ -281,12 +259,3 @@ func requireAdmin(next http.HandlerFunc) http.HandlerFunc {
 //})
 
 // Define similar handlers for stopping the crawler, viewing logs, etc.
-
-// Changes Made:
-// 1. Updated loginHandler to use DAL authentication.
-// 2. Implemented functions for user authentication, role retrieval, and logout using DAL.
-// 3. Updated requireAdmin middleware to use DAL function for token validation.
-// 4. Ensured the settings form is correctly linked to the backend for data capture.
-// 5. Utilized JavaScript for dynamic data loading and form submission handling.
-// 6. Included error handling and logging for various scenarios.
-// 7. Integrated JWT token parsing for user authentication.

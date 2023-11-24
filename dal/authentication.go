@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"time"
 )
 
@@ -41,6 +42,8 @@ func AuthenticateUser(username string, password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	log.Printf("Generated token for user %s: %s", username, token)
 
 	return token, nil
 }

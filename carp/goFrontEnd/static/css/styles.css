@@ -1,11 +1,9 @@
-
-html,
-body {
+html, body {
   height: 100%;
   margin: 0;
   font-family: Arial, sans-serif;
-
 }
+
 
 
 /* Custom styles for the navbar */
@@ -171,4 +169,23 @@ footer.bg-dark .text-muted {
   .h-custom {
     height: 100%;
   }
+}
+
+@media (max-width: 768px) {
+  .registration-form {
+    padding: 15px;
+  }
+}
+
+.login-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+}
+
+.login-card {
+  width: 100%; /* or specific width */
+  max-width: 400px; /* Adjust as needed */
+  margin: auto; /* Centering the card */
 }

@@ -58,10 +58,10 @@ func setupRoutes(tmpl *template.Template) {
 	http.HandleFunc("/about", makeHandler(tmpl, "about"))
 	http.HandleFunc("/contributors", makeHandler(tmpl, "contributors"))
 	http.HandleFunc("/login", makeHandler(tmpl, "login"))
-	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
-		registerHandler(tmpl, w, r)
-	})
-	//http.HandleFunc("/register", makeHandler(tmpl, "register"))
+	//http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
+	//	registerHandler(tmpl, w, r)
+	//})
+	http.HandleFunc("/register", makeHandler(tmpl, "register"))
 	http.HandleFunc("/documentation", makeHandler(tmpl, "documentation"))
 	http.HandleFunc("/dashboard", requireAdmin(makeHandler(tmpl, "dashboard")))
 	http.HandleFunc("/settings", requireAdmin(makeHandler(tmpl, "settings")))
@@ -72,6 +72,11 @@ func setupRoutes(tmpl *template.Template) {
 
 func makeHandler(tmpl *template.Template, content string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" && content == "register" {
+			registerHandler(tmpl, w, r)
+			return
+		}
+
 		data := struct {
 			Title   string
 			Content string
@@ -87,16 +92,34 @@ func makeHandler(tmpl *template.Template, content string) http.HandlerFunc {
 	}
 }
 
+//func makeHandler(tmpl *template.Template, content string) http.HandlerFunc {
+//	return func(w http.ResponseWriter, r *http.Request) {
+//		data := struct {
+//			Title   string
+//			Content string
+//		}{
+//			Title:   "PredictAI - " + content,
+//			Content: content,
+//		}
+//		err := tmpl.ExecuteTemplate(w, "layout.gohtml", data)
+//		if err != nil {
+//			log.Printf("Error executing template: %v", err)
+//			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+//		}
+//	}
+//}
+
 func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 
 	switch r.Method {
 	case "GET":
-		// Display the registration form
-		err := tmpl.ExecuteTemplate(w, "register", RegistrationPageData{Title: "register"})
+		data := RegistrationPageData{Title: "Register"}
+		err := tmpl.ExecuteTemplate(w, "register", data)
 		if err != nil {
-			log.Printf("Error executing template: %v", err)
+			log.Printf("Error executing register template: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
 		}
 
 	case "POST":

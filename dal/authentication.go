@@ -5,6 +5,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -22,25 +23,69 @@ func ComparePassword(hashedPassword []byte, password string) error {
 	return bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
 }
 
-// The code defines a function that authenticates a user by querying a database with a username and password, comparing the hashed password with the provided one, and generating a token for the user, returning the token or an error.
+// The code defines a function that authenticates a user by querying a database with a username and password,
+// comparing the hashed password with the provided one, and generating a token for the user,
+// returning the token or an error.
+//
+//	func AuthenticateUser(username string, password string) (string, error) {
+//		var userID string
+//		var hashedPassword []byte
+//		var token string
+//
+//		err := DB.QueryRow("CALL authenticate_user(?, ?)", username, password).Scan(&userID, &hashedPassword)
+//		if err != nil {
+//			return "", err
+//		}
+//
+//		err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
+//		if err != nil {
+//			return "", err
+//		}
+//
+//		token, err = GenerateToken(userID)
+//		if err != nil {
+//			return "", err
+//		}
+//
+//		log.Printf("Generated token for user %s: %s", username, token)
+//
+//		return token, nil
+//	}
 func AuthenticateUser(username string, password string) (string, error) {
 	var userID string
-	var hashedPassword []byte
-	var token string
+	var hashedPasswordStr string
 
-	err := DB.QueryRow("CALL authenticate_user(?, ?)", username, password).Scan(&userID, &hashedPassword)
+	err := DB.QueryRow("CALL authenticate_user(?)", username).Scan(&userID, &hashedPasswordStr)
 	if err != nil {
+		log.Printf("Error in DB Query: %v", err)
 		return "", err
+	}
+
+	hashedPassword := []byte(hashedPasswordStr) // Convert back to []byte
+
+	if userID == "" {
+		return "", fmt.Errorf("user not found")
+	}
+
+	// Verify that the hashed password has the correct bcrypt format
+	if !strings.HasPrefix(hashedPasswordStr, "$2a$") {
+		return "", fmt.Errorf("invalid bcrypt hash format")
 	}
 
 	err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
 	if err != nil {
+		log.Printf("Password comparison failed: %v", err)
 		return "", err
 	}
 
-	token, err = GenerateToken(userID)
+	token, err := GenerateToken(userID)
 	if err != nil {
+		log.Printf("Error generating token: %v", err)
 		return "", err
+	}
+
+	if token == "" {
+		return "", fmt.Errorf("generated token is empty")
 	}
 
 	log.Printf("Generated token for user %s: %s", username, token)

@@ -3,6 +3,8 @@ module cmpscfa23team2
 go 1.21.1
 
 require (
+	github.com/PuerkitoBio/goquery v1.8.1
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/gocolly/colly v1.2.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
@@ -15,7 +17,6 @@ require (
 
 require (
 	git.sr.ht/~sbinet/gg v0.5.0 // indirect
-	github.com/PuerkitoBio/goquery v1.8.1 // indirect
 	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/antchfx/htmlquery v1.3.0 // indirect
@@ -23,7 +24,6 @@ require (
 	github.com/antchfx/xpath v1.2.4 // indirect
 	github.com/campoy/embedmd v1.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/go-fonts/liberation v0.3.1 // indirect
 	github.com/go-latex/latex v0.0.0-20230307184459-12ec69307ad9 // indirect
 	github.com/go-pdf/fpdf v0.8.0 // indirect

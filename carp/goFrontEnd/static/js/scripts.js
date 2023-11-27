@@ -1,4 +1,36 @@
+// Mapping of domains to queries
+const domainToQueries = {
+  "E-commerce": ["E-commerce Query 1", "E-commerce Query 2", "E-commerce Query 3"],
+  RealEstate: ["Real Estate Query 1", "Real Estate Query 2", "Real Estate Query 3"],
+  JobMarket: ["Job Market Query 1", "Job Market Query 2", "Job Market Query 3"],
+  // Add other domains and queries as necessary
+};
+
+// Cache the selectors for domain and query dropdowns
+const $domainSelect = $('#domainSelect');
+const $querySelect = $('#querySelect');
+
 $(document).ready(function() {
+  // Function to update the query select based on the selected domain
+  function updateQuerySelect() {
+    const selectedDomain = $domainSelect.val();
+    const queries = domainToQueries[selectedDomain] || [];
+
+    $querySelect.empty();
+    $.each(queries, function(index, query) {
+      $querySelect.append($('<option>', {
+        value: query,
+        text: query
+      }));
+    });
+  }
+
+  // Initialize the query selection based on the initial domain selection
+  updateQuerySelect();
+
+  // Update the query dropdown when the domain selection changes
+  $domainSelect.change(updateQuerySelect);
+
   // When the 'Learn More' button is clicked, show the login modal
   $('#learnMoreBtn').click(function() {
     $('#loginModal').modal('show');
@@ -42,42 +74,17 @@ $(document).ready(function() {
   $('#aiPredictionForm').submit(function(event) {
     event.preventDefault();
 
-    console.log("Form submission handler called");
-
     var query = $('#querySelect').val();
     var domain = $('#domainSelect').val();
 
+    // Here you should add the AJAX call to your backend prediction endpoint
     console.log("Selected Query: " + query + ", Domain: " + domain);
-
-    var results = {
-      'query1': {
-        'finance': 'Result for Query 1 and Finance',
-        'healthcare': 'Result for Query 1 and Healthcare',
-        'technology': 'Result for Query 1 and Technology'
-      },
-      'query2': {
-        'finance': 'Result for Query 2 and Finance',
-        'healthcare': 'Result for Query 2 and Healthcare',
-        'technology': 'Result for Query 2 and Technology'
-      },
-      'query3': {
-        'finance': 'Result for Query 3 and Finance',
-        'healthcare': 'Result for Query 3 and Healthcare',
-        'technology': 'Result for Query 3 and Technology'
-      }
-      // Add more combinations as needed
-    };
-
-    var resultText = results[query][domain] || 'No result found';
-    $('#predictionResult').text(resultText);
-
-    console.log("Result Text: " + resultText);
+    $('#predictionResult').text("Simulation of the prediction result.");
   });
 });
 
 // Function to handle settings actions
 function performAction(module, action) {
-  console.log(module + ' action:', action);
   $.ajax({
     url: '/settings/' + module + '/' + action.toLowerCase(),
     type: 'POST',
@@ -92,7 +99,6 @@ function performAction(module, action) {
 
 // Function to run on login success
 function onLoginSuccess(token) {
-  console.log('Login successful, token:', token);
   $('#loginModal').modal('hide');
   localStorage.setItem('token', token);
 }

@@ -144,21 +144,15 @@ func main() {
 		newY = append(newY, yVal)
 	}
 
-	// // Output the prediction for a new x value
-	// newX := indices      // Example new x value for prediction
-	// newY := a*newX + b // Predict y based on the regression model
+	// Output the prediction for a new x value
+	// Example new x value for prediction
+	// Predict y based on the regression model
 	fmt.Println("New X Values:")
 	for _, xVal := range newX {
 		fmt.Printf("%.2f ", xVal)
 	}
-	fmt.Println("\nPredicted Y Values:")
+	fmt.Println("\nPredicted Values:")
 	for _, yVal := range newY {
 		fmt.Printf("%.2f ", yVal)
 	}
-	// // Print the output
-	// fmt.Printf("X Value: %.2f\n", newX)
-	// fmt.Printf("Y Value: %.2f\n", newY)
-	// fmt.Printf("Prediction: %.2f\n", newY)
-
-	// fmt.Println("\nAnalysis complete.")
 }

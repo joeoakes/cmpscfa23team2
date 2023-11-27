@@ -888,28 +888,43 @@ DELIMITER ;
 -- SECTION: Authentication SPROCS:
 -- ================================================
 
-
-
 -- SPROC for authenticating a user
 DELIMITER //
 CREATE PROCEDURE authenticate_user(
-    IN p_user_login NVARCHAR(36),
-    IN p_user_password VARBINARY(255)
+    IN p_user_login NVARCHAR(36)
 )
 BEGIN
     DECLARE v_user_id CHAR(36);
-    DECLARE v_authenticated BOOLEAN;
+    DECLARE v_hashed_password LONGTEXT; -- Changed to LONGTEXT
 
-    -- Check if the login and hashed password match any user
-    SELECT user_id INTO v_user_id FROM users
-    WHERE user_login = p_user_login AND user_password = p_user_password;
+    SELECT user_id, user_password INTO v_user_id, v_hashed_password FROM users
+    WHERE user_login = p_user_login;
 
-    -- Determine if the user is authenticated
-    SET v_authenticated = (v_user_id IS NOT NULL);
-
-    SELECT v_authenticated, v_user_id;
+    SELECT v_user_id, v_hashed_password;
 END //
 DELIMITER ;
+
+
+# Old method
+# DELIMITER //
+# CREATE PROCEDURE authenticate_user(
+#     IN p_user_login NVARCHAR(36),
+#     IN p_user_password VARBINARY(255)
+# )
+# BEGIN
+#     DECLARE v_user_id CHAR(36);
+#     DECLARE v_authenticated BOOLEAN;
+#
+#     -- Check if the login and hashed password match any user
+#     SELECT user_id INTO v_user_id FROM users
+#     WHERE user_login = p_user_login AND user_password = p_user_password;
+#
+#     -- Determine if the user is authenticated
+#     SET v_authenticated = (v_user_id IS NOT NULL);
+#
+#     SELECT v_authenticated, v_user_id;
+# END //
+# DELIMITER ;
 
 DELIMITER //
 -- Procedure to create a new session for a user
@@ -980,6 +995,7 @@ BEGIN
     WHERE user_id = p_user_id;
 END //
 DELIMITER ;
+
 -- A SPROC for user registration
 DELIMITER //
 CREATE PROCEDURE user_registration(
@@ -1038,7 +1054,9 @@ INSERT INTO users (user_id, user_name, user_login, user_role, user_password, act
 VALUES
     (UUID(), 'Joesph Oakes', 'jxo19', 'ADM', 'admin123', TRUE, CURRENT_TIMESTAMP()),
     (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', 'dev789', TRUE, CURRENT_TIMESTAMP()),
-    (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', 'std447', TRUE, CURRENT_TIMESTAMP());
+    (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', 'std447', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Test', 'test_user', 'USR', 'hashed_password_here', TRUE, CURRENT_TIMESTAMP());
+
 
 -- Inserting sample URLs into the URLs table
 INSERT INTO urls (id, url, tags)

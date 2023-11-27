@@ -48,40 +48,40 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data *AuthData) {
 	}
 }
 
-func loginHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		data := AuthData{Action: "login"}
-		renderTemplate(w, "path/to/login.gohtml", &data)
-	} else if r.Method == "POST" {
-		r.ParseForm()
-		username := r.FormValue("username")
-		password := r.FormValue("password")
-
-		log.Printf("Request Headers: %v", r.Header)
-
-		// Call the DAL authentication function
-		token, err := dal.AuthenticateUser(username, password)
-		if err != nil {
-			// Log the authentication error
-			log.Printf("Authentication error: %v", err)
-
-			// Handle authentication error
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte(`{"error": "Invalid credentials"}`))
-			return
-		}
-
-		// Log the token
-		log.Printf("Token: %v", token)
-
-		// Respond with a success message in JSON format
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"message": "Authentication successful"}`))
-
-		log.Printf("Response Headers: %v", w.Header())
-		return
-	}
-}
+//func loginHandler(w http.ResponseWriter, r *http.Request) {
+//	if r.Method == "GET" {
+//		data := AuthData{Action: "login"}
+//		renderTemplate(w, "path/to/login.gohtml", &data)
+//	} else if r.Method == "POST" {
+//		r.ParseForm()
+//		username := r.FormValue("username")
+//		password := r.FormValue("password")
+//
+//		log.Printf("Request Headers: %v", r.Header)
+//
+//		// Call the DAL authentication function
+//		token, err := dal.AuthenticateUser(username, password)
+//		if err != nil {
+//			// Log the authentication error
+//			log.Printf("Authentication error: %v", err)
+//
+//			// Handle authentication error
+//			w.WriteHeader(http.StatusUnauthorized)
+//			w.Write([]byte(`{"error": "Invalid credentials"}`))
+//			return
+//		}
+//
+//		// Log the token
+//		log.Printf("Token: %v", token)
+//
+//		// Respond with a success message in JSON format
+//		w.Header().Set("Content-Type", "application/json")
+//		w.Write([]byte(`{"message": "Authentication successful"}`))
+//
+//		log.Printf("Response Headers: %v", w.Header())
+//		return
+//	}
+//}
 
 func requireAdmin(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

@@ -1,7 +1,7 @@
 package dal_test
 
 import (
-	dal "cmpscfa23team2/DAL"
+	dal "cmpscfa23team2/dal"
 	"github.com/google/uuid"
 	"os"
 	"reflect"

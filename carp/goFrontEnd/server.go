@@ -58,9 +58,6 @@ func setupRoutes(tmpl *template.Template) {
 	http.HandleFunc("/about", makeHandler(tmpl, "about"))
 	http.HandleFunc("/contributors", makeHandler(tmpl, "contributors"))
 	http.HandleFunc("/login", makeHandler(tmpl, "login"))
-	//http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
-	//	registerHandler(tmpl, w, r)
-	//})
 	http.HandleFunc("/register", makeHandler(tmpl, "register"))
 	http.HandleFunc("/documentation", makeHandler(tmpl, "documentation"))
 	http.HandleFunc("/dashboard", requireAdmin(makeHandler(tmpl, "dashboard")))
@@ -74,6 +71,11 @@ func makeHandler(tmpl *template.Template, content string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" && content == "register" {
 			registerHandler(tmpl, w, r)
+			return
+		}
+
+		if r.Method == "POST" && content == "login" {
+			loginHandler(tmpl, w, r)
 			return
 		}
 
@@ -108,6 +110,51 @@ func makeHandler(tmpl *template.Template, content string) http.HandlerFunc {
 //		}
 //	}
 //}
+
+func loginHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+
+	switch r.Method {
+	case "GET":
+		renderLoginTemplate(tmpl, w, "")
+
+	case "POST":
+		email := r.FormValue("email")
+		password := r.FormValue("password")
+
+		token, err := dal.AuthenticateUser(email, password)
+		if err != nil {
+			renderLoginTemplate(tmpl, w, "Invalid email or password")
+			return
+		}
+
+		// Set the authentication token in a cookie
+		http.SetCookie(w, &http.Cookie{
+			Name:     "auth_token",
+			Value:    token,
+			Path:     "/",
+			HttpOnly: true,
+		})
+
+		// Redirect to the dashboard or home page
+		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func renderLoginTemplate(tmpl *template.Template, w http.ResponseWriter, errorMessage string) {
+	data := PageData{
+		Title:        "Login",
+		ErrorMessage: errorMessage,
+	}
+	err := tmpl.ExecuteTemplate(w, "login", data)
+	if err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
 
 func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")

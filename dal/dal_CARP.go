@@ -51,7 +51,8 @@ func DeleteUser(userID string) error {
 
 }
 
-// This code defines a function that retrieves a user from a database using a stored procedure based on a given user login, and returns the user's information or an error.
+// This code defines a function that retrieves a user from a database using a stored procedure based on a given user login,
+// and returns the user's information or an error.
 func GetUserByLogin(userLogin string) (*User, error) {
 	var u User
 	row := DB.QueryRow("CALL get_user_by_login(?)", userLogin)

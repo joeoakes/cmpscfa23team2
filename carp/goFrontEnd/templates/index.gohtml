@@ -15,24 +15,21 @@
           <div class="card-body">
             <h3 class="card-title text-center mb-3">AI Prediction Engine</h3>
             <form id="aiPredictionForm">
-              <!-- Query Selection -->
-              <div class="form-group mb-3">
-                <label for="querySelect">Choose a Query:</label>
-                <select class="form-control" id="querySelect">
-                  <option value="query1">Query Option 1</option>
-                  <option value="query2">Query Option 2</option>
-                  <option value="query3">Query Option 3</option>
-                  <!-- Additional query options -->
-                </select>
-              </div>
               <!-- Domain Selection -->
               <div class="form-group mb-3">
                 <label for="domainSelect">Select Domain:</label>
                 <select class="form-control" id="domainSelect">
-                  <option value="finance">Finance</option>
-                  <option value="healthcare">Healthcare</option>
-                  <option value="technology">Technology</option>
+                  <option value="E-commerce">E-commerce (Price Prediction)</option>
+                  <option value="RealEstate">Real Estate (Market Value Prediction)</option>
+                  <option value="JobMarket">Job Market (Industry Trend Analysis)</option>
                   <!-- Additional domain options -->
+                </select>
+              </div>
+              <!-- Query Selection -->
+              <div class="form-group mb-3">
+                <label for="querySelect">Choose a Query:</label>
+                <select class="form-control" id="querySelect">
+                  <!-- Query options will be dynamically inserted here -->
                 </select>
               </div>
               <button type="submit" class="btn btn-primary w-100">Analyze</button>

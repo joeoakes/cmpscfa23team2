@@ -352,7 +352,7 @@ func createSiteMap(urls []URLData) error {
 
 // begin robot.txt ======================================================================================================
 // isURLAllowedByRobotsTXT checks if the given URL is allowed by the site's robots.txt.
-func isURLAllowedByRobotsTXT(urlStr string) bool {
+func isURLAllowedByRobotsTXT2(urlStr string) bool {
 	parsedURL, err := url.Parse(urlStr)
 	if err != nil {
 		log.Println("Error parsing URL:", err)

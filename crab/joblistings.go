@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-func GetRandomUserAgent2() string {
+func GetRandomUserAgent() string {
 	userAgents := []string{
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15",
@@ -53,7 +53,7 @@ func GetRandomUserAgent2() string {
 	index := rand.Intn(len(userAgents))
 	return userAgents[index]
 }
-func isURLAllowedByRobotsTXT2(urlStr string) bool {
+func isURLAllowedByRobotsTXT(urlStr string) bool {
 	parsedURL, err := url.Parse(urlStr)
 	if err != nil {
 		log.Println("Error parsing URL:", err)
@@ -336,88 +336,7 @@ func ScrapeGoogleJobs(urls []string) GoogleJobData {
 	return jobData
 }
 
-func ScrapeGoogleJobs2(urls []string) GoogleJobData {
-	var jobData GoogleJobData
-	jobData.Domain = "Google"
-	jobData.Metadata.Timestamp = time.Now().Format(time.RFC3339)
-
-	c := colly.NewCollector(
-		colly.UserAgent(GetRandomUserAgent()),
-	)
-
-	var foundListings bool
-
-	for _, url := range urls {
-		if !isURLAllowedByRobotsTXT(url) {
-			log.Printf("Scraping blocked by robots.txt: %s\n", url)
-			continue
-		}
-
-		jobData.URL = url
-		jobData.Metadata.Source = url
-
-		page := 0
-		var stop bool
-
-		for !stop {
-			pageURL := fmt.Sprintf("%s&page=%d", url, page)
-			c.OnRequest(func(r *colly.Request) {
-				foundListings = false
-			})
-
-			c.OnHTML("div.sMn82b", func(e *colly.HTMLElement) {
-				foundListings = true
-				qualificationsText := e.ChildText("div.KwJkGe")
-				lines := strings.Split(qualificationsText, "\n")
-				if len(lines) > 1 && strings.Contains(lines[0], "Minimum qualifications") {
-					lines = lines[1:] // Skip the first line
-				}
-				finalQualifications := strings.Join(lines, " ")
-
-				locationText := strings.TrimSpace(e.ChildText("span.pwO9Dc.vo5qdf"))
-				locationText = strings.Replace(locationText, "Google | ", "", 1) // Remove "Google |" from location
-
-				// Revised logic for handling "+ more" issue
-				locationParts := strings.Split(locationText, "; ")
-				filteredLocationParts := []string{}
-				for _, part := range locationParts {
-					if strings.Contains(part, "+") && len(filteredLocationParts) > 0 {
-						// Replace the last part if it contains "+" with the current part
-						filteredLocationParts[len(filteredLocationParts)-1] = part
-					} else {
-						filteredLocationParts = append(filteredLocationParts, part)
-					}
-				}
-				locationText = strings.Join(filteredLocationParts, "; ")
-
-				job := JobListing{
-					Title:          strings.TrimSpace(e.ChildText("h2.p1N2lc")),
-					Location:       locationText,
-					Company:        "Google",
-					ApplyURL:       "https://www.google.com/about/careers/applications/" + e.ChildAttr("a", "href"),
-					Qualifications: strings.TrimSpace(finalQualifications),
-				}
-
-				jobData.Data = append(jobData.Data, job)
-			})
-
-			c.OnScraped(func(r *colly.Response) {
-				if !foundListings {
-					log.Printf("No more listings found, stopping at page: %d\n", page)
-					stop = true
-				}
-			})
-
-			c.Visit(pageURL)
-
-			page++
-		}
-	}
-
-	return jobData
-}
-
-func main2() {
+func main() {
 	urls := []string{
 		"https://www.google.com/about/careers/applications/jobs/results/?location=USA",
 		// Add more URLs as needed

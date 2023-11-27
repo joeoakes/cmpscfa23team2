@@ -661,3 +661,66 @@
 2023/11/26 16:17:42 Database initialized and connected successfully.
 2023/11/26 16:17:42 User created with ID: 3c413ecd-8ca1-11ee-b6e0-4c796ed97681
 2023/11/26 16:17:42 Database connection closed successfully!
+2023/11/27 17:32:13 Successfully read and parsed config file.
+2023/11/27 17:32:13 Database initialized and connected successfully.
+2023/11/27 17:32:13 User created with ID: cfea85e6-8d74-11ee-b6e0-4c796ed97681
+2023/11/27 17:32:14 Database connection closed successfully!
+2023/11/27 17:33:06 Successfully read and parsed config file.
+2023/11/27 17:33:06 Database initialized and connected successfully.
+2023/11/27 17:33:06 User created with ID: ef083886-8d74-11ee-b6e0-4c796ed97681
+2023/11/27 17:33:06 Error in DB Query: sql: Scan error on column index 0, name "v_user_id": converting NULL to string is unsupported
+2023/11/27 17:33:06 Database connection closed successfully!
+2023/11/27 17:33:47 Successfully read and parsed config file.
+2023/11/27 17:33:47 Database initialized and connected successfully.
+2023/11/27 17:33:47 User created with ID: 07f8c897-8d75-11ee-b6e0-4c796ed97681
+2023/11/27 17:33:47 Error in DB Query: sql: Scan error on column index 0, name "v_user_id": converting NULL to string is unsupported
+2023/11/27 17:33:47 Database connection closed successfully!
+2023/11/27 17:42:04 Successfully read and parsed config file.
+2023/11/27 17:42:04 Database initialized and connected successfully.
+2023/11/27 17:42:04 User created with ID: 301061a8-8d76-11ee-b6e0-4c796ed97681
+2023/11/27 17:42:04 Error in DB Query: sql: Scan error on column index 0, name "v_user_id": converting NULL to string is unsupported
+2023/11/27 17:42:04 Database connection closed successfully!
+2023/11/27 17:42:36 Successfully read and parsed config file.
+2023/11/27 17:42:36 Database initialized and connected successfully.
+2023/11/27 17:42:36 User created with ID: 43211e28-8d76-11ee-b6e0-4c796ed97681
+2023/11/27 17:42:36 Error in DB Query: Error 1172 (42000): Result consisted of more than one row
+2023/11/27 17:42:36 Database connection closed successfully!
+2023/11/27 17:44:11 Successfully read and parsed config file.
+2023/11/27 17:44:11 Database initialized and connected successfully.
+2023/11/27 17:44:12 User created with ID: 7bef6ac5-8d76-11ee-b6e0-4c796ed97681
+2023/11/27 17:44:12 Password comparison failed: crypto/bcrypt: hashedPassword is not the hash of the given password
+2023/11/27 17:44:12 Database connection closed successfully!
+2023/11/27 17:44:48 Successfully read and parsed config file.
+2023/11/27 17:44:48 Database initialized and connected successfully.
+2023/11/27 17:44:49 Password comparison failed: crypto/bcrypt: hashedPassword is not the hash of the given password
+2023/11/27 17:44:49 Database connection closed successfully!
+2023/11/27 17:45:15 Successfully read and parsed config file.
+2023/11/27 17:45:15 Database initialized and connected successfully.
+2023/11/27 17:45:15 Password comparison failed: crypto/bcrypt: hashedPassword is not the hash of the given password
+2023/11/27 17:45:15 Database connection closed successfully!
+2023/11/27 17:46:40 Successfully read and parsed config file.
+2023/11/27 17:46:40 Database initialized and connected successfully.
+2023/11/27 17:46:40 Password comparison failed: crypto/bcrypt: hashedPassword is not the hash of the given password
+2023/11/27 17:46:40 Database connection closed successfully!
+2023/11/27 17:48:38 Successfully read and parsed config file.
+2023/11/27 17:48:38 Database initialized and connected successfully.
+2023/11/27 17:48:38 Database connection closed successfully!
+2023/11/27 17:48:43 Successfully read and parsed config file.
+2023/11/27 17:48:43 Database initialized and connected successfully.
+2023/11/27 17:48:43 Database connection closed successfully!
+2023/11/27 17:48:46 Successfully read and parsed config file.
+2023/11/27 17:48:46 Database initialized and connected successfully.
+2023/11/27 17:48:46 Database connection closed successfully!
+2023/11/27 17:51:16 Successfully read and parsed config file.
+2023/11/27 17:51:16 Database initialized and connected successfully.
+2023/11/27 17:51:16 Password comparison failed: crypto/bcrypt: hashedPassword is not the hash of the given password
+2023/11/27 17:51:16 Database connection closed successfully!
+2023/11/27 17:53:52 Successfully read and parsed config file.
+2023/11/27 17:53:52 Database initialized and connected successfully.
+2023/11/27 17:53:52 User created with ID: d629eb37-8d77-11ee-b6e0-4c796ed97681
+2023/11/27 17:53:52 Generated token for user hansi@hansi.com: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDExMjkyMzIsInVpZCI6ImI2N2E0NDcwLThkNzYtMTFlZS1iNmUwLTRjNzk2ZWQ5NzY4MSJ9.zsYR18DuFe5838d01oLuf8-IJmQgBb6j6-d4eLwe1gc
+2023/11/27 17:53:52 Database connection closed successfully!
+2023/11/27 17:55:15 Successfully read and parsed config file.
+2023/11/27 17:55:15 Database initialized and connected successfully.
+2023/11/27 17:55:15 Generated token for user hansi@hansi.com: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDExMjkzMTUsInVpZCI6ImI2N2E0NDcwLThkNzYtMTFlZS1iNmUwLTRjNzk2ZWQ5NzY4MSJ9.8WQ55D66A2UyJqOuph1qoSxkQEtxHrNjwE9pooSr4eU
+2023/11/27 17:55:15 Database connection closed successfully!

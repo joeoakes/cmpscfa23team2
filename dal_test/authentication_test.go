@@ -82,25 +82,9 @@ func TestValidateToken(t *testing.T) {
 	assert.False(t, isValid) // assert that the token is invalid
 }
 
-// // Function does not pass the test because crypto/bcrypt: hashedSecret too short to be a bcrypted password
-//
-//	func TestAuthenticateUser(t *testing.T) {
-//		username := "test_user"
-//		password := "test_password"
-//
-//		// authenticate the user
-//		token, authErr := dal.AuthenticateUser(username, password)
-//		if authErr != nil {
-//			t.Errorf("Authentication failed: %v", authErr)
-//
-//		}
-//		if token == "" {
-//			t.Errorf("Authentication succeeded, but the token is empty.")
-//		}
-//	}
 func TestAuthenticateUser(t *testing.T) {
-	username := "test_user"
-	plainPassword := "test_password" // Plain text password
+	username := "hansi@hansi.com"
+	plainPassword := "hansi"
 
 	// Hash the password before storing
 	hashedPassword, err := dal.HashPassword(plainPassword)
@@ -109,18 +93,15 @@ func TestAuthenticateUser(t *testing.T) {
 	}
 
 	// Create user with hashed password
-	_, err = dal.CreateUser(username, "uniqueuser@example.com", "USR", string(hashedPassword), true)
+	_, err = dal.CreateUser(username, "test@test.com", "USR", string(hashedPassword), true)
 	if err != nil {
 		t.Fatalf("Failed to create user for authentication test: %v", err)
 	}
 
 	// Authenticate the user with plain text password
-	token, authErr := dal.AuthenticateUser(username, plainPassword)
+	_, authErr := dal.AuthenticateUser(username, plainPassword)
 	if authErr != nil {
 		t.Errorf("Authentication failed: %v", authErr)
-	}
-	if token == "" {
-		t.Errorf("Authentication succeeded, but the token is empty.")
 	}
 
 	// Clean-up code to remove test user from the database

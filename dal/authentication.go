@@ -55,29 +55,33 @@ func AuthenticateUser(username string, password string) (string, error) {
 	var userID string
 	var hashedPasswordStr string
 
+	// Retrieve hashed password from the database
 	err := DB.QueryRow("CALL authenticate_user(?)", username).Scan(&userID, &hashedPasswordStr)
 	if err != nil {
 		log.Printf("Error in DB Query: %v", err)
 		return "", err
 	}
 
-	hashedPassword := []byte(hashedPasswordStr) // Convert back to []byte
-
 	if userID == "" {
 		return "", fmt.Errorf("user not found")
 	}
+
+	// Convert the hashed password string to a byte slice
+	hashedPassword := []byte(hashedPasswordStr)
 
 	// Verify that the hashed password has the correct bcrypt format
 	if !strings.HasPrefix(hashedPasswordStr, "$2a$") {
 		return "", fmt.Errorf("invalid bcrypt hash format")
 	}
 
+	// Compare the hashed password with the provided password
 	err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
 	if err != nil {
 		log.Printf("Password comparison failed: %v", err)
 		return "", err
 	}
 
+	// Generate a token
 	token, err := GenerateToken(userID)
 	if err != nil {
 		log.Printf("Error generating token: %v", err)

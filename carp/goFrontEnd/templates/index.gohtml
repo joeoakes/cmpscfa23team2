@@ -1,44 +1,61 @@
 {{ define "home" }}
   <div class="container mt-5">
-    <div class="jumbotron">
-      <h1 class="display-4">
-        <a class="navbar-brand" href="/">
-          <img src="static/Assets/logo.png" alt="PredictAI Logo" style="height: 100px" />
-          PredictAI
-        </a>
-      </h1>
-      <p class="lead">The Future of Predictive Analytics 📈</p>
-      <hr class="my-4" />
-      <p>
-        Join us as we explore the frontiers of data analysis and machine learning.
-      </p>
-      <button id="learnMoreBtn" class="btn btn-primary btn-lg">
-        Learn More 📘
-      </button>
+    <div class="text-center mb-4" style="box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); border-radius: 10px; background: linear-gradient(145deg, #ffffff, #e6e6e6); border: none; padding: 15px;">
+      <h2 class="mb-3" style="color: #28a745;">The Future of Predictive Analytics 📈</h2>
+      <p class="lead">Explore the frontiers of data analysis and machine learning with us.</p>
+      <a href="documentation">
+        <button id="learnMoreBtn" class="btn btn-success btn-lg">Discover More 📘</button>
+      </a>
     </div>
 
-    <!-- AI Engine Input Form -->
-    <div class="ai-engine-input">
-      <h2>AI Prediction Engine</h2>
-      <form id="aiPredictionForm">
-        <div class="form-group">
-          <label for="userQuery">Enter your query:</label>
-          <input type="text" class="form-control" id="userQuery" placeholder="Type your query here...">
+    <!-- AI Engine Interactive Section -->
+    <div class="row mb-3 justify-content-center">
+      <div class="col-lg-12">
+        <div class="card" style="box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); border-radius: 10px; background: linear-gradient(145deg, #ffffff, #e6e6e6); border: none; padding: 15px;">
+          <div class="card-body">
+            <h3 class="card-title text-center mb-3">AI Prediction Engine</h3>
+            <form id="aiPredictionForm">
+              <!-- Domain Selection -->
+              <div class="form-group mb-3">
+                <label for="domainSelect">Select Domain:</label>
+                <select class="form-control" id="domainSelect">
+                  <option value="E-commerce">E-commerce (Price Prediction)</option>
+                  <option value="RealEstate">Real Estate (Market Value Prediction)</option>
+                  <option value="JobMarket">Job Market (Industry Trend Analysis)</option>
+                  <!-- Additional domain options -->
+                </select>
+              </div>
+              <!-- Query Selection -->
+              <div class="form-group mb-3">
+                <label for="querySelect">Choose a Query:</label>
+                <select class="form-control" id="querySelect">
+                  <!-- Query options will be dynamically inserted here -->
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary w-100">Analyze</button>
+            </form>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="domainSelect">Select domain:</label>
-          <select class="form-control" id="domainSelect">
-            <option value="finance">Finance</option>
-            <option value="healthcare">Healthcare</option>
-            <option value="technology">Technology</option>
-            <!-- Add more domain options as needed -->
-          </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Get Prediction</button>
-      </form>
+      </div>
     </div>
 
-    <!-- Algorithm Selection -->
+    <!-- Enhanced Results Section -->
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card" style="box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); border-radius: 10px; background: linear-gradient(145deg, #ffffff, #e6e6e6); border: none; padding: 15px;">
+          <div class="card-body text-center">
+            <h3 class="card-title mb-3">Results</h3>
+            <div id="engineOutput" class="rounded p-3 custom-results-style">
+              <p id="predictionResult" class="m-0">Your prediction results will appear here in detail, utilizing the full width and height of this section for maximum visibility and impact.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{{ end }}
+
+<!-- Algorithm Selection -->
 {{/*    <div class="form-group mb-3">*/}}
 {{/*      <label for="algorithmSelect" class="font-weight-bold">Choose an algorithm:</label>*/}}
 {{/*      <select class="form-control" id="algorithmSelect">*/}}
@@ -48,12 +65,3 @@
 {{/*        <!-- Add more algorithms as needed -->*/}}
 {{/*      </select>*/}}
 {{/*    </div>*/}}
-
-    <!-- Placeholder for Engine Output -->
-    <div id="engineOutput" class="mt-4">
-      <h3>Engine Output:</h3>
-      <p id="predictionResult">Your prediction results will appear here.</p>
-    </div>
-
-  </div>
-{{ end }}

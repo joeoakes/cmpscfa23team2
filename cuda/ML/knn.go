@@ -10,22 +10,17 @@ import (
 	"time"
 )
 
-// WeatherData Hard coded weather data
-type WeatherData struct {
-	Location    string
-	Date        string
-	Temperature float64
-}
 type Item struct {
 	Domain string `json:"domain"`
 	Data   struct {
-		Title       string   `json:"title"`
-		URL         string   `json:"url"`
-		Description string   `json:"description"`
-		Price       string   `json:"price"`
-		Location    string   `json:"location"`
-		Features    []string `json:"features"`
-		Reviews     []struct {
+		Title       string `json:"title"`
+		URL         string `json:"url"`
+		Description string `json:"description"`
+		Price       string `json:"price"`
+		Location    string `json:"location"`
+
+		Features []string `json:"features"`
+		Reviews  []struct {
 			User    string `json:"user"`
 			Rating  int    `json:"rating"`
 			Comment string `json:"comment"`
@@ -47,6 +42,11 @@ type Point struct {
 
 // EuclideanDistance computes the Euclidean distance between two points
 func EuclideanDistance(a, b Point) float64 {
+	// error handling for trying to access an element of a slice that doesn't exist
+	if len(a.Features) != len(b.Features) {
+		fmt.Println("Error: Features lengths mismatch")
+		return 0.0
+	}
 	sum := 0.0
 	for i := range a.Features {
 		diff := a.Features[i] - b.Features[i]
@@ -65,6 +65,12 @@ type ByDistance struct {
 func (a ByDistance) Len() int      { return len(a.Points) }
 func (a ByDistance) Swap(i, j int) { a.Points[i], a.Points[j] = a.Points[j], a.Points[i] }
 func (a ByDistance) Less(i, j int) bool {
+	// additional error checking
+	if a.DistFunc == nil {
+		fmt.Println("Error: DistFunc is nil")
+		return false
+	}
+
 	return a.DistFunc(a.Target, a.Points[i]) < a.DistFunc(a.Target, a.Points[j])
 }
 
@@ -94,10 +100,14 @@ func KNN(k int, data []Point, target Point) string {
 	return predictedLabel
 }
 
+// NumFeatures creating a fixed length for feature slices so there is no mismatch in EuclideanDistance
+const NumFeatures = 10
+
 func ConvertItemsToPoints(items []Item) []Point {
 	var data []Point
 	for _, item := range items {
 		var features []float64
+
 		switch item.Domain {
 		case "e-commerce":
 			features = []float64{float64(len(item.Data.Description)), float64(len(item.Data.Features))}
@@ -105,8 +115,14 @@ func ConvertItemsToPoints(items []Item) []Point {
 			features = []float64{float64(len(item.Data.Description)), float64(countSubstring(item.Data.Features, "Bedrooms"))}
 		case "job-market":
 			features = []float64{float64(len(item.Data.Description)), float64(len(item.Data.Features))}
-
 		}
+
+		// pad or truncate features to ensure fixed length
+		for len(features) < NumFeatures {
+			features = append(features, 0.0)
+		}
+		features = features[:NumFeatures]
+
 		label := item.Domain
 		data = append(data, Point{Features: features, Label: label})
 
@@ -123,7 +139,7 @@ func countSubstring(slice []string, substring string) int {
 	return count
 }
 
-func main1() {
+func main() {
 	// reading data from JSON file
 	file, err := ioutil.ReadFile("crab/template.json")
 	if err != nil {

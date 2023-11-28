@@ -189,3 +189,16 @@ footer.bg-dark .text-muted {
   max-width: 400px; /* Adjust as needed */
   margin: auto; /* Centering the card */
 }
+
+#image-description {
+  margin-bottom: 15px; /* Space between the description and image */
+  padding: 10px;
+  background-color: rgba(0, 123, 255, 0.1); /* Light blue background */
+  border-left: 4px solid #007bff; /* Blue accent border */
+  color: #007bff; /* Text color */
+  font-weight: 500; /* Semi-bold font */
+  text-align: left;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  font-size: 0.9rem; /* Font size */
+}

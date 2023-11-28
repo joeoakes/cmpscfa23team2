@@ -1,4 +1,4 @@
-package dal
+package main
 
 import (
 	"encoding/json"

@@ -165,7 +165,12 @@ def __scrape_indeed_page(job_url):
 
         job_title = __extract_element_text(wait, By.XPATH, '//h1[contains(@class, "jobsearch-JobInfoHeader-title")]', "Title Not Found")
         company = __extract_element_text(wait, By.CLASS_NAME, "css-1saizt3.e1wnkr790", "Company Not Found")
+        # First try to extract location with the first selector
         location = __extract_element_text(wait, By.CLASS_NAME, "css-9yl11a.eu4oa1w0", "Location Not Found")
+
+        # If not found, try the second selector
+        if location == "Location Not Found":
+            location = __extract_element_text(wait, By.CLASS_NAME, "css-ks9svk.eu4oa1w0", "Location Not Found")
         salary = __extract_element_text(wait, By.CLASS_NAME, "css-2iqe2o.eu4oa1w0", "Not Available")
         description = __extract_job_description(wait)
 
@@ -199,7 +204,7 @@ def __scrape_domain(driver, domain, location):
         job_url_element = job_card.find_element(By.XPATH, './/a[@data-jk]')
         job_urls.append(job_url_element.get_attribute('href'))
 
-    with Pool(10) as p:  # Adjust the number of processes as needed
+    with Pool(30) as p:  # Adjust the number of processes as needed
         job_listings = p.map(__scrape_indeed_page, job_urls)
 
     scraped_data = {

@@ -103,12 +103,12 @@ func preprocessText(text string) ([]string, error) {
 		return nil, err
 	}
 
-	wordRegexp := regexp.MustCompile(`\b\w+\b`) // Match word characters
+	wordRegexp := regexp.MustCompile(`\b[a-zA-Z]{2,}\b`) // Match words with 2 or more letters
 	var processedWords []string
 
 	for _, token := range doc.Tokens() {
 		word := strings.ToLower(token.Text)
-		if wordRegexp.MatchString(word) && !isStopWord(word) && len(word) > 1 { // Filter out single characters
+		if wordRegexp.MatchString(word) && !isStopWord(word) {
 			processedWords = append(processedWords, word)
 		}
 	}
@@ -232,8 +232,9 @@ func LoadDataFromJSON(filename string, dataChan chan<- []GenericTextData, errCha
 			Category:    jsonData.Domain,
 		})
 	}
+	fmt.Println("Loading data from:", filename) // Debugging statement
+	dataChan <- data                            // Send the data to the channel
 
-	dataChan <- data // Send the data to the channel
 }
 
 // LoadDataFromMultipleJSONFiles loads data from multiple JSON files.
@@ -256,6 +257,7 @@ func LoadDataFromMultipleJSONFiles(filenames []string) ([]GenericTextData, error
 	}
 	close(dataChan)
 	close(errChan)
+	fmt.Println("Data loading complete. Number of entries loaded:", len(combinedData)) // Debugging statement
 
 	return combinedData, nil
 }
@@ -315,6 +317,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Debugging: Print the size of the combined data
+	fmt.Println("Total data size before shuffle and split:", len(combinedData))
+
 	// Shuffle and split data
 	// Creating a new random source for reproducible sequences
 	src := rand.NewSource(time.Now().UnixNano())
@@ -322,8 +327,11 @@ func main() {
 
 	// Shuffle and split data using the new random source
 	rnd.Shuffle(len(combinedData), func(i, j int) { combinedData[i], combinedData[j] = combinedData[j], combinedData[i] })
-	trainDataSize := int(float64(len(combinedData)) * 0.8)
+	trainDataSize := int(float64(len(combinedData)) * 0.7)
 	trainData := combinedData[:trainDataSize]
+
+	// Debugging: Print the size of the training data
+	fmt.Println("Training data size after split:", len(trainData))
 
 	// Train classifier
 	classifier := NewNaiveBayesClassifier()
@@ -341,26 +349,28 @@ func main() {
 
 	// Test the classifier with dynamically generated skills
 	for _, skill := range topSkills {
-		testSkills := []string{skill}
-		sortedCategories := classifier.PredictWithProbabilities(testSkills)
+		if _, isStopWord := stopWords[skill]; !isStopWord {
+			testSkills := []string{skill}
+			sortedCategories := classifier.PredictWithProbabilities(testSkills)
 
-		for _, categoryProb := range sortedCategories {
-			fmt.Printf("Job titles relevant to '%s' skill in the '%s' category:\n", skill, categoryProb.Category)
-			titleCount := make(map[string]int)
+			for _, categoryProb := range sortedCategories {
+				fmt.Printf("Job titles relevant to '%s' skill in the '%s' category:\n", skill, categoryProb.Category)
+				count := 0
 
-			for _, job := range combinedData {
-				if job.Category == categoryProb.Category && job.Title != nil {
-					title := *job.Title
-					if titleCount[title] == 0 {
-						fmt.Printf("Title: %s\n", title)
-						titleCount[title]++
-						if len(titleCount) >= 3 { // Limit to top 3 unique job titles
-							break
+				for _, job := range combinedData {
+					if job.Category == categoryProb.Category && job.Title != nil {
+						title := *job.Title
+						if strings.Contains(strings.ToLower(*job.Description), skill) {
+							fmt.Printf("Title: %s\n", title)
+							count++
+							if count >= 3 { // Limit to top 3 unique job titles
+								break
+							}
 						}
 					}
 				}
+				fmt.Println()
 			}
-			fmt.Println()
 		}
 	}
 

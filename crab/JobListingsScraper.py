@@ -1,18 +1,26 @@
 import os
-from urllib.robotparser import RobotFileParser
-import et as et
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import json
 import random
 import datetime
+from urllib.robotparser import RobotFileParser
+
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.edge.options import Options as EdgeOptions
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.edge.service import Service as EdgeService
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
 from bs4 import BeautifulSoup
 from lxml import etree as et
-from selenium import webdriver
-from selenium.common import NoSuchElementException
+
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.options import Options
 import time
 
 
@@ -153,7 +161,6 @@ def __get_dom(driver):
     return dom
 
 
-
 def __scrape_indeed(driver, query, location):
     try:
         print("Starting to scrape jobs...")
@@ -183,20 +190,21 @@ def __scrape_indeed(driver, query, location):
                 next_button = driver.find_element(By.XPATH, '//a[@data-testid="pagination-page-next"]')
                 next_button.click()
                 page_counter += 1
-                if page_counter >= 5:
+                if page_counter >= 3:
                     break
             except Exception:
                 break
 
         for job_url in job_urls:
             driver.get(job_url)
-            wait = WebDriverWait(driver, 1)
+            wait = WebDriverWait(driver, 3)
 
-            job_title = __extract_element_text(wait, By.XPATH, '//h1[contains(@class, "jobsearch-JobInfoHeader-title")]',
+            job_title = __extract_element_text(wait, By.XPATH,
+                                               '//h1[contains(@class, "jobsearch-JobInfoHeader-title")]',
                                                "Title Not Found")
             company = __extract_element_text(wait, By.CLASS_NAME, "css-1saizt3.e1wnkr790", "Company Not Found")
             location = __extract_element_text(wait, By.CLASS_NAME, "css-9yl11a.eu4oa1w0", "Location Not Found")
-            salary = __extract_element_text(wait, By.CLASS_NAME, "css-2iqe2o.eu4oa1w0", "Not Available")
+            salary = __extract_element_text(wait, By.CLASS_NAME, "css-2iqe2o.eu4oa1w0", "Salary Not Available")
             description = __extract_job_description(wait)
 
             job_listing = JobListing(
@@ -229,12 +237,14 @@ def __scrape_indeed(driver, query, location):
     finally:
         driver.quit()
 
+
 def __extract_element_text(wait, by, locator, default_text):
     try:
         element = wait.until(EC.presence_of_element_located((by, locator)))
         return element.text
     except Exception:
         return default_text
+
 
 def __extract_job_description(wait):
     try:
@@ -246,10 +256,41 @@ def __extract_job_description(wait):
     except Exception:
         return "Not Available"
 
-def scrape(job_search_keyword='', location_search_keyword='', glassdoor_start_url='', scrape_option=0) -> None:
-    options = Options()
-    options.add_argument("-headless")
-    driver = webdriver.Firefox(options=options)
+
+def detect_browser_driver():
+    """
+    Detects the installed browser on the system and returns the corresponding Selenium WebDriver in headless mode.
+    """
+    user_agent = get_random_user_agent()
+
+
+    try:
+        firefox_options = FirefoxOptions()
+        firefox_options.add_argument("--headless")
+        firefox_options.set_preference("general.useragent.override", user_agent)
+        return webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()), options=firefox_options)
+    except:
+        pass
+    try:
+        edge_options = EdgeOptions()
+        edge_options.add_argument("--headless")
+        edge_options.add_argument(f'user-agent={user_agent}')
+        edge_options.add_argument('window-size=1920x1080')
+        return webdriver.Edge(service=EdgeService(EdgeChromiumDriverManager().install()), options=edge_options)
+    except:
+        pass
+    try:
+        chrome_options = ChromeOptions()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument(f'user-agent={user_agent}')
+        chrome_options.add_argument('window-size=1920x1080')
+        return webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
+    except:
+        raise Exception("No supported browser found on the system.")
+
+
+def scrape(job_search_keyword='', location_search_keyword='', scrape_option=0) -> None:
+    driver = detect_browser_driver()
 
     if not os.path.exists('output'):
         os.mkdir('output')
@@ -261,9 +302,11 @@ def scrape(job_search_keyword='', location_search_keyword='', glassdoor_start_ur
 
     print('Scraping Complete.')
 
+
 def main():
     print("Script started.")
-    scrape('Healthcare', 'Philadelphia', scrape_option=1)
+    scrape('cybersecurity', 'Philadelphia', scrape_option=1)
+
 
 if __name__ == "__main__":
     main()

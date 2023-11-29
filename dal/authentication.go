@@ -23,34 +23,6 @@ func ComparePassword(hashedPassword []byte, password string) error {
 	return bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
 }
 
-// The code defines a function that authenticates a user by querying a database with a username and password,
-// comparing the hashed password with the provided one, and generating a token for the user,
-// returning the token or an error.
-//
-//	func AuthenticateUser(username string, password string) (string, error) {
-//		var userID string
-//		var hashedPassword []byte
-//		var token string
-//
-//		err := DB.QueryRow("CALL authenticate_user(?, ?)", username, password).Scan(&userID, &hashedPassword)
-//		if err != nil {
-//			return "", err
-//		}
-//
-//		err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
-//		if err != nil {
-//			return "", err
-//		}
-//
-//		token, err = GenerateToken(userID)
-//		if err != nil {
-//			return "", err
-//		}
-//
-//		log.Printf("Generated token for user %s: %s", username, token)
-//
-//		return token, nil
-//	}
 func AuthenticateUser(username string, password string) (string, error) {
 	var userID string
 	var hashedPasswordStr string

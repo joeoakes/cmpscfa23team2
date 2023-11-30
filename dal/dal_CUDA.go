@@ -1,4 +1,4 @@
-package main
+package dal
 
 // Import required packages
 import (

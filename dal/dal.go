@@ -1,4 +1,4 @@
-package main
+package dal
 
 import (
 	"database/sql"
@@ -50,10 +50,10 @@ func InitDB() error {
 
 	// if you are running this from goFrontEnd
 	// Construct the path to the config file
-	//path := filepath.Join(cwd, "/../../mysql/config.json")
+	path := filepath.Join(cwd, "/../../mysql/config.json")
 
 	// if you testing dal:
-	path := filepath.Join(cwd, "/../mysql/config.json")
+	//path := filepath.Join(cwd, "/../mysql/config.json")
 
 	config, err := readJSONConfig(path)
 	if err != nil {

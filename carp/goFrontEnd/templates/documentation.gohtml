@@ -1,4 +1,52 @@
 {{ define "documentation" }}
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #375EAB;
+        }
+
+        h2 {
+            color: #375EAB;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #333;
+        }
+
+        a {
+            color: #375EAB;
+        }
+
+        .toggleVisible {
+            margin-bottom: 20px;
+        }
+
+        #pkg-overview, #pkg-index {
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
     <div class="container mt-5">
         <h1>Documentation</h1>
         <!-- Your documentation content goes here -->
@@ -47,10 +95,10 @@
             <div class="container">
 
 
-                <h1>
-                    Package dal
+                <h2>
+                    Packages with functions for DAL, Authentication, Authorization, and Logging
                     <span class="text-muted"></span>
-                </h1>
+                </h2>
 
 
 
@@ -93,9 +141,7 @@
                 </div>
                 <!-- The package's Name is printed as title by the top-level template -->
                 <div id="pkg-overview" class="toggleVisible">
-                    <div class="collapsed">
-                        <h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
-                    </div>
+
                     <div class="expanded">
                         <h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
 
@@ -104,9 +150,7 @@
                 </div>
 
                 <div id="pkg-index" class="toggleVisible">
-                    <div class="collapsed">
-                        <h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
-                    </div>
+
                     <div class="expanded">
                         <h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
 

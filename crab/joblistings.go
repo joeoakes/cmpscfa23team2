@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-func GetRandomUserAgent() string {
+func GetRandomUserAgent2() string {
 	userAgents := []string{
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15",
@@ -53,7 +53,7 @@ func GetRandomUserAgent() string {
 	index := rand.Intn(len(userAgents))
 	return userAgents[index]
 }
-func isURLAllowedByRobotsTXT(urlStr string) bool {
+func isURLAllowedByRobotsTXT2(urlStr string) bool {
 	parsedURL, err := url.Parse(urlStr)
 	if err != nil {
 		log.Println("Error parsing URL:", err)
@@ -336,7 +336,7 @@ func ScrapeGoogleJobs(urls []string) GoogleJobData {
 	return jobData
 }
 
-func main() {
+func main2() {
 	urls := []string{
 		"https://www.google.com/about/careers/applications/jobs/results/?location=USA",
 		// Add more URLs as needed

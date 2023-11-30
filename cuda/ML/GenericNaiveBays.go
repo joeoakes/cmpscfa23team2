@@ -21,7 +21,7 @@ var stopWords = map[string]bool{
 	"required": true, "then": true, "so": true, "our": true,
 	"your": true, "their": true, "'s": true, "her": true,
 	"him": true, "its": true, "he": true, "be": true,
-	"we": true, "as": true,
+	"we": true, "as": true, "on": true,
 	// More stop words can be added here
 }
 
@@ -102,6 +102,7 @@ func preprocessText(text string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	//fmt.Printf("Original Text: %s\n", text) // Debug original text
 
 	wordRegexp := regexp.MustCompile(`\b[a-zA-Z]{2,}\b`) // Match words with 2 or more letters
 	var processedWords []string
@@ -110,6 +111,7 @@ func preprocessText(text string) ([]string, error) {
 		word := strings.ToLower(token.Text)
 		if wordRegexp.MatchString(word) && !isStopWord(word) {
 			processedWords = append(processedWords, word)
+			//fmt.Printf("Processed Word: %s\n", word) // Debug processed words
 		}
 	}
 	return processedWords, nil
@@ -138,6 +140,7 @@ func (nbc *NaiveBayesClassifier) Train(data []GenericTextData) {
 					uniqueWords[word] = true
 					nbc.totalUniqueWords++
 				}
+				//fmt.Printf("Training with category: %s, Word: %s, Frequency: %d\n", category, word, nbc.wordFrequencies[category][word])
 
 				nbc.wordFrequencies[category][word]++
 				nbc.totalWords++
@@ -192,6 +195,7 @@ func (nbc *NaiveBayesClassifier) PredictWithProbabilities(skills []string) []cat
 	// Convert to a slice and sort by probability
 	var sortedCategories []categoryProb
 	for category, prob := range categoryProbabilities {
+		fmt.Printf("Category: %s, Probability: %f\n", category, prob) // Debugging probabilities
 		sortedCategories = append(sortedCategories, categoryProb{category, prob})
 	}
 	sort.Slice(sortedCategories, func(i, j int) bool {
@@ -261,10 +265,9 @@ func LoadDataFromMultipleJSONFiles(filenames []string) ([]GenericTextData, error
 
 	return combinedData, nil
 }
-
-// Function to extract and sort the most frequent words from the dataset
 func getMostFrequentWords(data []GenericTextData, topN int) []string {
 	wordFrequency := make(map[string]int)
+	wordSet := make(map[string]bool) // Set to keep track of unique words
 
 	for _, item := range data {
 		if item.Description != nil {
@@ -274,12 +277,14 @@ func getMostFrequentWords(data []GenericTextData, topN int) []string {
 				continue
 			}
 			for _, word := range words {
-				if _, isStopWord := stopWords[word]; !isStopWord {
+				if _, isStopWord := stopWords[word]; !isStopWord && !wordSet[word] {
 					wordFrequency[word]++
+					wordSet[word] = true // Mark word as seen
 				}
 			}
 		}
 	}
+
 	// Convert to slice and sort
 	type wordCountPair struct {
 		Word  string
@@ -300,6 +305,46 @@ func getMostFrequentWords(data []GenericTextData, topN int) []string {
 	}
 	return topWords
 }
+
+//// Function to extract and sort the most frequent words from the dataset
+//func getMostFrequentWords(data []GenericTextData, topN int) []string {
+//	wordFrequency := make(map[string]int)
+//
+//	for _, item := range data {
+//		if item.Description != nil {
+//			words, err := preprocessText(*item.Description)
+//			if err != nil {
+//				fmt.Println("Error preprocessing text:", err)
+//				continue
+//			}
+//			for _, word := range words {
+//				if _, isStopWord := stopWords[word]; !isStopWord {
+//					wordFrequency[word]++
+//				}
+//			}
+//		}
+//	}
+//	// Convert to slice and sort
+//	type wordCountPair struct {
+//		Word  string
+//		Count int
+//	}
+//	var sortedWords []wordCountPair
+//	for word, count := range wordFrequency {
+//		fmt.Printf("Top skill: %s, Frequency: %d\n", word, count) // Debug top skills
+//		sortedWords = append(sortedWords, wordCountPair{word, count})
+//	}
+//	sort.Slice(sortedWords, func(i, j int) bool {
+//		return sortedWords[i].Count > sortedWords[j].Count
+//	})
+//
+//	// Extract top N words
+//	var topWords []string
+//	for i := 0; i < topN && i < len(sortedWords); i++ {
+//		topWords = append(topWords, sortedWords[i].Word)
+//	}
+//	return topWords
+//}
 
 func main() {
 	startTime := time.Now()
@@ -345,7 +390,7 @@ func main() {
 	//}
 
 	// Use the getMostFrequentWords function to generate dynamic skill sets
-	topSkills := getMostFrequentWords(trainData, 5) // Get top 5 frequent skills from training data
+	topSkills := getMostFrequentWords(trainData, 3) // Get top 5 frequent skills from training data
 
 	// Test the classifier with dynamically generated skills
 	for _, skill := range topSkills {
@@ -356,12 +401,14 @@ func main() {
 			for _, categoryProb := range sortedCategories {
 				fmt.Printf("Job titles relevant to '%s' skill in the '%s' category:\n", skill, categoryProb.Category)
 				count := 0
+				uniqueTitles := make(map[string]bool) // Map to keep track of unique titles
 
 				for _, job := range combinedData {
 					if job.Category == categoryProb.Category && job.Title != nil {
 						title := *job.Title
-						if strings.Contains(strings.ToLower(*job.Description), skill) {
+						if strings.Contains(strings.ToLower(*job.Description), skill) && !uniqueTitles[title] {
 							fmt.Printf("Title: %s\n", title)
+							uniqueTitles[title] = true
 							count++
 							if count >= 3 { // Limit to top 3 unique job titles
 								break

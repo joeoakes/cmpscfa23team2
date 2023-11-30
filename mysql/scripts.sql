@@ -143,23 +143,20 @@ CREATE TABLE IF NOT EXISTS webcrawlers (
                                            created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
--- Table for the scraper engine
-CREATE TABLE IF NOT EXISTS scraper_engine (
-                                              engine_id CHAR(36) PRIMARY KEY,
-                                              engine_name NVARCHAR(50),
-                                              engine_description VARCHAR(250),
-                                              time_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
-);
+-- -- Table for the scraper engine
+-- CREATE TABLE IF NOT EXISTS scraper_engine (
+--                                               engine_id CHAR(36) PRIMARY KEY,
+--                                               engine_name NVARCHAR(50),
+--                                               engine_description VARCHAR(250),
+--                                               time_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+-- );
 
 -- Table for predictions
 CREATE TABLE IF NOT EXISTS predictions (
-                                           prediction_id INT PRIMARY KEY AUTO_INCREMENT,
-                                           engine_id CHAR(36),
-                                           prediction_tag CHAR(64),  -- New field for clustering similar predictions
+                                           prediction_id CHAR(36) PRIMARY KEY, -- Using CHAR(36) for UUID
                                            input_data TEXT,
-                                           prediction_info JSON,
-                                           prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                           FOREIGN KEY (engine_id) REFERENCES scraper_engine (engine_id)
+                                           prediction_info TEXT,
+                                           prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
 
@@ -245,16 +242,14 @@ DELIMITER ;
 -- SECTION: CUDA SPROCS
 -- ================================================
 
--- Stored Procedure to add a new prediction
 DELIMITER //
 CREATE PROCEDURE create_prediction(
-    IN p_engine_id CHAR(36),
-    IN p_prediction_tag CHAR(64),  -- New parameter
+    IN p_prediction_id CHAR(36),        -- UUID parameter
     IN p_prediction_info JSON
 )
 BEGIN
-    INSERT INTO predictions (engine_id, prediction_tag, prediction_info)
-    VALUES (p_engine_id, p_prediction_tag, p_prediction_info);
+    INSERT INTO predictions (prediction_id,prediction_info)
+    VALUES (p_prediction_id, p_prediction_info);
 END //
 DELIMITER ;
 
@@ -566,19 +561,19 @@ END //
 DELIMITER ;
 
 -- Stored Procedure to add a new scraper engine
-DELIMITER //
-CREATE PROCEDURE create_scraper_engine(
-    IN p_engine_name NVARCHAR(50),
-    IN p_engine_description VARCHAR(250)
-)
-BEGIN
-    DECLARE v_engine_id CHAR(36);
-    -- Generating a unique identifier and assigning it to v_engine_id
-    SET v_engine_id = UUID();
-    INSERT INTO scraper_engine(engine_id, engine_name, engine_description)
-    VALUES (v_engine_id, p_engine_name, p_engine_description);
-    SELECT v_engine_id;
-END //
+-- DELIMITER //
+-- CREATE PROCEDURE create_scraper_engine(
+--     IN p_engine_name NVARCHAR(50),
+--     IN p_engine_description VARCHAR(250)
+-- )
+-- BEGIN
+--     DECLARE v_engine_id CHAR(36);
+--     -- Generating a unique identifier and assigning it to v_engine_id
+--     SET v_engine_id = UUID();
+--     INSERT INTO scraper_engine(engine_id, engine_name, engine_description)
+--     VALUES (v_engine_id, p_engine_name, p_engine_description);
+--     SELECT v_engine_id;
+-- END //
 DELIMITER ;
 
 -- SPROC to insert URL records into the URLs table

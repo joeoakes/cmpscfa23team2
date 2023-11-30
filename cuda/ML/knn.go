@@ -3,6 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/vg"
+	"image/color"
 	"io/ioutil"
 	"math"
 	"math/rand"
@@ -10,22 +14,17 @@ import (
 	"time"
 )
 
-// WeatherData Hard coded weather data
-type WeatherData struct {
-	Location    string
-	Date        string
-	Temperature float64
-}
 type Item struct {
 	Domain string `json:"domain"`
 	Data   struct {
-		Title       string   `json:"title"`
-		URL         string   `json:"url"`
-		Description string   `json:"description"`
-		Price       string   `json:"price"`
-		Location    string   `json:"location"`
-		Features    []string `json:"features"`
-		Reviews     []struct {
+		Title       string `json:"title"`
+		URL         string `json:"url"`
+		Description string `json:"description"`
+		Price       string `json:"price"`
+		Location    string `json:"location"`
+
+		Features []string `json:"features"`
+		Reviews  []struct {
 			User    string `json:"user"`
 			Rating  int    `json:"rating"`
 			Comment string `json:"comment"`
@@ -47,6 +46,11 @@ type Point struct {
 
 // EuclideanDistance computes the Euclidean distance between two points
 func EuclideanDistance(a, b Point) float64 {
+	// error handling for trying to access an element of a slice that doesn't exist
+	if len(a.Features) != len(b.Features) {
+		fmt.Println("Error: Features lengths mismatch")
+		return 0.0
+	}
 	sum := 0.0
 	for i := range a.Features {
 		diff := a.Features[i] - b.Features[i]
@@ -65,6 +69,12 @@ type ByDistance struct {
 func (a ByDistance) Len() int      { return len(a.Points) }
 func (a ByDistance) Swap(i, j int) { a.Points[i], a.Points[j] = a.Points[j], a.Points[i] }
 func (a ByDistance) Less(i, j int) bool {
+	// additional error checking
+	if a.DistFunc == nil {
+		fmt.Println("Error: DistFunc is nil")
+		return false
+	}
+
 	return a.DistFunc(a.Target, a.Points[i]) < a.DistFunc(a.Target, a.Points[j])
 }
 
@@ -94,10 +104,14 @@ func KNN(k int, data []Point, target Point) string {
 	return predictedLabel
 }
 
+// NumFeatures creating a fixed length for feature slices so there is no mismatch in EuclideanDistance
+const NumFeatures = 10
+
 func ConvertItemsToPoints(items []Item) []Point {
 	var data []Point
 	for _, item := range items {
 		var features []float64
+
 		switch item.Domain {
 		case "e-commerce":
 			features = []float64{float64(len(item.Data.Description)), float64(len(item.Data.Features))}
@@ -105,8 +119,14 @@ func ConvertItemsToPoints(items []Item) []Point {
 			features = []float64{float64(len(item.Data.Description)), float64(countSubstring(item.Data.Features, "Bedrooms"))}
 		case "job-market":
 			features = []float64{float64(len(item.Data.Description)), float64(len(item.Data.Features))}
-
 		}
+
+		// pad or truncate features to ensure fixed length
+		for len(features) < NumFeatures {
+			features = append(features, 0.0)
+		}
+		features = features[:NumFeatures]
+
 		label := item.Domain
 		data = append(data, Point{Features: features, Label: label})
 
@@ -123,13 +143,80 @@ func countSubstring(slice []string, substring string) int {
 	return count
 }
 
-func main1() {
+// createScatterPlot creates and saves a scatter plot with highlighted target and predicted points.
+func createScatterPlot(data []Point, target Point, predictedLabel, filename, xLabel, yLabel string) error {
+	p := plot.New()
+
+	p.Title.Text = "KNN Scatter Plot"
+	p.Title.TextStyle.Font.Size = 16 // Set title font size
+
+	p.X.Label.Text = xLabel
+	p.X.Label.TextStyle.Font.Size = 16 // Set X-axis label font size
+	p.X.Tick.Label.Font.Size = 16      // Set X-axis tick label font size
+
+	p.Y.Label.Text = yLabel
+	p.Y.Label.TextStyle.Font.Size = 16 // Set Y-axis label font size
+	p.Y.Tick.Label.Font.Size = 16      // Set Y-axis tick label font size
+
+	// Create a map to store colors for each domain
+	colorMap := map[string]color.RGBA{
+		"e-commerce":  color.RGBA{R: 255, G: 0, B: 0, A: 255}, // Red
+		"real-estate": color.RGBA{R: 0, G: 255, B: 0, A: 255}, // Green
+		"job-market":  color.RGBA{R: 0, G: 0, B: 255, A: 255}, // Blue
+		"target":      color.RGBA{R: 255, G: 0, B: 0, A: 255}, // Target color (Red)
+		"predicted":   color.RGBA{R: 0, G: 0, B: 255, A: 255}, // Predicted color (Blue)
+	}
+
+	// Create points for the scatter plot
+	for _, point := range data {
+		// Create scatter plot points with different colors for different domains
+		s, err := plotter.NewScatter(plotter.XYs{{X: point.Features[0], Y: point.Features[1]}})
+		if err != nil {
+			fmt.Printf("Error creating scatter plot: %v\n", err)
+			return err
+		}
+
+		s.GlyphStyle.Color = colorMap[point.Label]
+		s.GlyphStyle.Radius = vg.Points(10) // Adjust the radius as needed
+
+		p.Add(s)
+	}
+
+	// Highlight the target and predicted points
+	targetScatter, err := plotter.NewScatter(plotter.XYs{{X: target.Features[0], Y: target.Features[1]}})
+	if err != nil {
+		fmt.Printf("Error creating target scatter plot: %v\n", err)
+		return err
+	}
+	targetScatter.GlyphStyle.Color = colorMap["target"]
+	p.Add(targetScatter)
+
+	predictedScatter, err := plotter.NewScatter(plotter.XYs{{X: target.Features[0], Y: target.Features[1]}})
+	if err != nil {
+		fmt.Printf("Error creating predicted scatter plot: %v\n", err)
+		return err
+	}
+	predictedScatter.GlyphStyle.Color = colorMap["predicted"]
+	p.Add(predictedScatter)
+
+	// Save the plot to a file
+	if err := p.Save(16*vg.Inch, 8*vg.Inch, filename); err != nil {
+		fmt.Printf("Error saving scatter plot: %v\n", err)
+		return err
+	}
+
+	return nil
+}
+
+// main function
+func main() {
 	// reading data from JSON file
 	file, err := ioutil.ReadFile("crab/template.json")
 	if err != nil {
 		fmt.Printf("Error reading JSON file: %v\n", err)
 		return
 	}
+
 	// turn JSON data into items
 	var jsonData map[string][]Item
 	err = json.Unmarshal(file, &jsonData)
@@ -142,6 +229,7 @@ func main1() {
 		fmt.Printf("Error: 'items' field not found in JSON.\n")
 		return
 	}
+
 	// convert items to points
 	data := ConvertItemsToPoints(items)
 	// seed random number generator to make it truly random
@@ -151,10 +239,16 @@ func main1() {
 	targetIndex := rand.Intn(len(items))
 	targetItem := items[targetIndex]
 	target := ConvertItemsToPoints([]Item{targetItem})[0]
+
 	// target point to classify
-	//target := Point{Features: []float64{79, 12}} // replace with relevant features for target
 	k := 1
 	label := KNN(k, data, target)
 	fmt.Printf("Label predicted for target is '%s'\n", label)
 
+	// creating and saving the scatter plot
+	err = createScatterPlot(data, target, label, "scatter_plot.png", "Feature 1", "Feature 2")
+	if err != nil {
+		fmt.Println("Error creating scatter plot:", err)
+		return
+	}
 }

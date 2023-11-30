@@ -4,18 +4,16 @@ from urllib.robotparser import RobotFileParser
 import et as et
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import json
 import random
 import datetime
+from urllib.robotparser import RobotFileParser
 from bs4 import BeautifulSoup
 from lxml import etree as et
-from selenium import webdriver
-from selenium.common import NoSuchElementException
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
-from selenium.webdriver.edge.options import Options as EdgeOptions
 import time
 
 
@@ -154,6 +152,7 @@ def __get_dom(driver):
     return et.HTML(page_content)
 
 
+
 def __scrape_indeed_page(job_url):
 
 
@@ -180,10 +179,10 @@ def __scrape_indeed_page(job_url):
             "company": company,
             "location": location,
             "salary": salary,
-            "description": description
         }
     finally:
         driver.quit()
+
 
 def __scrape_domain(driver, domain, location):
     print(f"Starting to scrape jobs for domain: {domain}")
@@ -219,12 +218,15 @@ def __scrape_domain(driver, domain, location):
 
     return scraped_data
 
+
+
 def __extract_element_text(wait, by, locator, default_text):
     try:
         element = wait.until(EC.presence_of_element_located((by, locator)))
         return element.text
     except Exception:
         return default_text
+
 
 def __extract_job_description(wait):
     try:
@@ -272,6 +274,7 @@ def get_web_driver():
     except Exception as e:
         print("Chrome WebDriver not found.", e)
         raise
+          
 def scrape(location_search_keyword='', scrape_option=0) -> None:
     driver = get_web_driver()
 
@@ -296,6 +299,6 @@ def scrape(location_search_keyword='', scrape_option=0) -> None:
 def main():
     print("Script started.")
     scrape('Philadelphia', scrape_option=1)
-
+          
 if __name__ == "__main__":
     main()

@@ -1,0 +1,4 @@
+2023/11/29 23:28:34 Successfully read and parsed config file.
+2023/11/29 23:28:34 Database initialized and connected successfully.
+2023/11/29 23:28:34 Log inserted successfully [200]
+2023/11/29 23:28:34 Database connection closed successfully!

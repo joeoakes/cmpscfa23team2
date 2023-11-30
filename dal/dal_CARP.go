@@ -1,4 +1,4 @@
-package main
+package dal
 
 import (
 	"database/sql"
@@ -25,8 +25,10 @@ func CreateUser(userName, userLogin, userRole string, userPassword string, activ
 	var userID string
 	err := DB.QueryRow("CALL create_user(?, ?, ?, ?, ?)", userName, userLogin, userRole, userPassword, activeOrNot).Scan(&userID)
 	if err != nil {
+		InsertLog("400", "Error creating user: "+err.Error(), "CreateUser()")
 		return "", err
 	} else { // If no error, log the user ID
+		InsertLog("200", "User created with ID: "+userID, "CreateUser()")
 		log.Printf("User created with ID: %s", userID)
 	}
 	return userID, nil
@@ -37,6 +39,7 @@ func CreateUser(userName, userLogin, userRole string, userPassword string, activ
 // It defines a function "UpdateUser" that calls a stored procedure to update a user's information in a database, logs the user's ID, and returns any encountered error.
 func UpdateUser(userID, userName, userLogin, userRole, userPassword string) error {
 	_, err := DB.Exec("CALL update_user(?, ?, ?, ?, ?)", userID, userName, userLogin, userRole, userPassword)
+	InsertLog("200", "User updated: "+userID, "UpdateUser()")
 	log.Printf("User: %s", userID)
 	return err
 }
@@ -46,9 +49,9 @@ func UpdateUser(userID, userName, userLogin, userRole, userPassword string) erro
 // It defines a function that deletes a user with the given userID from a database using a stored procedure and logs the operation, returning any potential errors.
 func DeleteUser(userID string) error {
 	_, err := DB.Exec("CALL delete_user(?)", userID)
+	InsertLog("200", "User deleted: "+userID, "DeleteUser()")
 	log.Printf("User: %s", userID)
 	return err
-
 }
 
 // This code defines a function that retrieves a user from a database using a stored procedure based on a given user login,
@@ -57,8 +60,10 @@ func GetUserByLogin(userLogin string) (*User, error) {
 	var u User
 	row := DB.QueryRow("CALL get_user_by_login(?)", userLogin)
 	if err := row.Scan(&u.UserID, &u.UserName, &u.UserLogin, &u.UserRole, &u.UserPassword, &u.ActiveOrNot, &u.UserDateAdded); err != nil {
+		InsertLog("400", "Error getting user by login: "+err.Error(), "GetUserByLogin()")
 		return nil, err
 	} else {
+		InsertLog("200", "Get User by Login: %+v", "GetUserByLogin()")
 		log.Printf("Get User: %+v", u)
 	}
 	return &u, nil
@@ -72,8 +77,10 @@ func GetUserByID(userID string) (*User, error) {
 	var u User
 	row := DB.QueryRow("CALL get_user_by_ID(?)", userID)
 	if err := row.Scan(&u.UserID, &u.UserName, &u.UserLogin, &u.UserRole, &u.UserPassword, &u.ActiveOrNot, &u.UserDateAdded); err != nil {
+		InsertLog("400", "Error getting user by ID: "+err.Error(), "GetUserByID()")
 		return nil, err
 	} else {
+		InsertLog("200", "Get User by ID: %+v", "GetUserByID()")
 		log.Printf("Get User: %+v", u)
 	}
 	return &u, nil
@@ -86,14 +93,16 @@ func GetUserByID(userID string) (*User, error) {
 func GetUsersByRole(role string) ([]*User, error) {
 	rows, err := DB.Query("CALL get_users_by_role(?)", role)
 	if err != nil {
+		InsertLog("400", "Error getting users by role: "+err.Error(), "GetUsersByRole()")
 		return nil, err
 	} else {
+		InsertLog("200", "Get Users by Role: %+v", "GetUsersByRole()")
 		log.Printf("Open query for getting Users by Role: %+v", rows)
 	}
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
-
+			InsertLog("400", "Error closing rows: "+err.Error(), "GetUsersByRole()")
 		}
 	}(rows)
 	log.Printf("Closing Rows: %+v", rows)
@@ -101,11 +110,14 @@ func GetUsersByRole(role string) ([]*User, error) {
 	for rows.Next() {
 		var u User
 		if err := rows.Scan(&u.UserID, &u.UserName, &u.UserLogin, &u.UserRole, &u.UserPassword, &u.ActiveOrNot, &u.UserDateAdded); err != nil {
+			InsertLog("400", "Error scanning rows: "+err.Error(), "GetUsersByRole()")
 			return nil, err
 		} else {
+			InsertLog("200", "Scan Rows: %+v", "GetUsersByRole()")
 			log.Printf("Scan Rows: %+v", rows)
 		}
 		users = append(users, &u)
+		InsertLog("200", "Get Users by Role: %+v", "GetUsersByRole()")
 		log.Printf("Get Users by Role: %+v", u)
 	}
 	return users, rows.Err()
@@ -118,12 +130,13 @@ func GetUsersByRole(role string) ([]*User, error) {
 func GetAllUsers() ([]*User, error) {
 	rows, err := DB.Query("CALL get_users()")
 	if err != nil {
+		InsertLog("400", "Error getting all users: "+err.Error(), "GetAllUsers()")
 		return nil, err
 	}
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
-
+			InsertLog("400", "Error closing rows: "+err.Error(), "GetAllUsers()")
 		}
 	}(rows)
 	log.Printf("Closing Rows: %+v", rows)
@@ -131,11 +144,13 @@ func GetAllUsers() ([]*User, error) {
 	for rows.Next() {
 		var u User
 		if err := rows.Scan(&u.UserID, &u.UserName, &u.UserLogin, &u.UserRole, &u.UserPassword, &u.ActiveOrNot, &u.UserDateAdded); err != nil {
+			InsertLog("400", "Error scanning rows: "+err.Error(), "GetAllUsers()")
 			return nil, err
 		}
 		users = append(users, &u)
 		log.Printf("User: %+v", u)
 	}
+	InsertLog("200", "Get All Users: %+v", "GetAllUsers()")
 	return users, rows.Err()
 }
 
@@ -146,8 +161,10 @@ func FetchUserIDByName(userName string) (string, error) {
 	var userID string
 	err := DB.QueryRow("CALL fetch_user_id(?)", userName).Scan(&userID)
 	if err != nil {
+		InsertLog("400", "Error fetching user ID by name: "+err.Error(), "FetchUserIDByName()")
 		return "", err
 	}
+	InsertLog("200", "User ID fetched by name: "+userID, "FetchUserIDByName()")
 	log.Printf("User ID: %s", userID)
 	return userID, nil
 }

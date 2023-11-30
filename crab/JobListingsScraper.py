@@ -1,18 +1,19 @@
 import os
+from multiprocessing import Pool
 from urllib.robotparser import RobotFileParser
 import et as et
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import json
 import random
 import datetime
+from urllib.robotparser import RobotFileParser
 from bs4 import BeautifulSoup
 from lxml import etree as et
-from selenium import webdriver
-from selenium.common import NoSuchElementException
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 import time
 
 
@@ -148,86 +149,76 @@ class JobListing:
 def __get_dom(driver):
     """Gather the data of the current page from web driver and return it."""
     page_content = driver.page_source
-    product_soup = BeautifulSoup(page_content, 'html.parser')
-    dom = et.HTML(str(product_soup))
-    return dom
+    return et.HTML(page_content)
 
 
 
-def __scrape_indeed(driver, query, location):
+def __scrape_indeed_page(job_url):
+
+
+    # Open a new driver instance for each page
+    driver = get_web_driver()
     try:
-        print("Starting to scrape jobs...")
-        job_listings = []
-        indeed_pagination_url = f"https://www.indeed.com/jobs?q={query}&l={location}"
-        job_urls = []
+        driver.get(job_url)
+        wait = WebDriverWait(driver, 5)  # Reduced wait time
 
-        driver.get(indeed_pagination_url)
-        print(f"Fetching URL: {indeed_pagination_url}")
-        page_counter = 0
-        while True:
-            wait = WebDriverWait(driver, 10)
-            jobs = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "job_seen_beacon")))
+        job_title = __extract_element_text(wait, By.XPATH, '//h1[contains(@class, "jobsearch-JobInfoHeader-title")]', "Title Not Found")
+        company = __extract_element_text(wait, By.CLASS_NAME, "css-1saizt3.e1wnkr790", "Company Not Found")
+        # First try to extract location with the first selector
+        location = __extract_element_text(wait, By.CLASS_NAME, "css-9yl11a.eu4oa1w0", "Location Not Found")
 
-            if not jobs:
-                print("No job cards found on the page.")
-                break
-            else:
-                print(f"Found {len(jobs)} job cards.")
+        # If not found, try the second selector
+        if location == "Location Not Found":
+            location = __extract_element_text(wait, By.CLASS_NAME, "css-ks9svk.eu4oa1w0", "Location Not Found")
+        salary = __extract_element_text(wait, By.CLASS_NAME, "css-2iqe2o.eu4oa1w0", "Not Available")
+        description = __extract_job_description(wait)
 
-            for job_card in jobs:
-                job_url_element = job_card.find_element(By.XPATH, './/a[@data-jk]')
-                job_url = job_url_element.get_attribute('href')
-                job_urls.append(job_url)
-
-            try:
-                next_button = driver.find_element(By.XPATH, '//a[@data-testid="pagination-page-next"]')
-                next_button.click()
-                page_counter += 1
-                if page_counter >= 5:
-                    break
-            except Exception:
-                break
-
-        for job_url in job_urls:
-            driver.get(job_url)
-            wait = WebDriverWait(driver, 1)
-
-            job_title = __extract_element_text(wait, By.XPATH, '//h1[contains(@class, "jobsearch-JobInfoHeader-title")]',
-                                               "Title Not Found")
-            company = __extract_element_text(wait, By.CLASS_NAME, "css-1saizt3.e1wnkr790", "Company Not Found")
-            location = __extract_element_text(wait, By.CLASS_NAME, "css-9yl11a.eu4oa1w0", "Location Not Found")
-            salary = __extract_element_text(wait, By.CLASS_NAME, "css-2iqe2o.eu4oa1w0", "Not Available")
-            description = __extract_job_description(wait)
-
-            job_listing = JobListing(
-                url=job_url,
-                title=job_title,
-                company=company,
-                location=location,
-                salary=salary,
-                description=description
-            )
-            job_listings.append(job_listing.to_dict())
-
-        scraped_data = {
-            "domain": query,
-            "url": indeed_pagination_url,
-            "data": job_listings,
-            "metadata": {
-                "source": indeed_pagination_url,
-                "timestamp": datetime.datetime.now().isoformat()
-            }
+        return {
+            "url": job_url,
+            "title": job_title,
+            "company": company,
+            "location": location,
+            "salary": salary,
         }
-
-        if not os.path.exists('output'):
-            os.makedirs('output')
-        file_path = os.path.join('output', 'indeed_jobs.json')
-        with open(file_path, 'w', encoding='utf-8') as f:
-            json.dump(scraped_data, f, ensure_ascii=False, indent=4)
-
-        print("Scraping completed.")
     finally:
         driver.quit()
+
+
+def __scrape_domain(driver, domain, location):
+    print(f"Starting to scrape jobs for domain: {domain}")
+    indeed_pagination_url = f"https://www.indeed.com/jobs?q={domain}&l={location}"
+    job_urls = []
+
+    driver.get(indeed_pagination_url)
+    print(f"Fetching URL: {indeed_pagination_url}")
+
+    wait = WebDriverWait(driver, 10)
+    jobs = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "job_seen_beacon")))
+
+    if not jobs:
+        print("No job cards found on the page.")
+        return []
+    print(f"Found {len(jobs)} job cards.")
+    for job_card in jobs:  # Scraping only the first job card for demonstration
+        job_url_element = job_card.find_element(By.XPATH, './/a[@data-jk]')
+        job_urls.append(job_url_element.get_attribute('href'))
+
+    with Pool(30) as p:  # Adjust the number of processes as needed
+        job_listings = p.map(__scrape_indeed_page, job_urls)
+
+    scraped_data = {
+        "domain": domain,
+        "url": indeed_pagination_url,
+        "data": job_listings,
+        "metadata": {
+            "source": indeed_pagination_url,
+            "timestamp": datetime.datetime.now().isoformat()
+        }
+    }
+
+    return scraped_data
+
+
 
 def __extract_element_text(wait, by, locator, default_text):
     try:
@@ -236,34 +227,78 @@ def __extract_element_text(wait, by, locator, default_text):
     except Exception:
         return default_text
 
+
 def __extract_job_description(wait):
     try:
         description_container = wait.until(EC.presence_of_element_located((By.ID, "jobDescriptionText")))
-        description_elements = description_container.find_elements(By.XPATH, './/p|.//ul/li')
-        description_texts = ['• ' + element.text if element.tag_name == 'li' else element.text
-                             for element in description_elements]
-        return ' '.join(description_texts)
+        # Select <p>, <ul>, <li>, and <br> elements
+        description_elements = description_container.find_elements(By.XPATH, './/p|.//ul/li|.//br')
+
+        description_texts = []
+        for element in description_elements:
+            if element.tag_name == 'li':
+                description_texts.append('• ' + element.text)
+            elif element.tag_name == 'br':
+                # Add a newline for <br> elements to maintain formatting
+                description_texts.append('\n')
+            else:
+                # For other elements, add their text directly
+                description_texts.append(element.text)
+
+        return ' '.join(description_texts).strip()
     except Exception:
         return "Not Available"
 
-def scrape(job_search_keyword='', location_search_keyword='', glassdoor_start_url='', scrape_option=0) -> None:
-    options = Options()
-    options.add_argument("-headless")
-    driver = webdriver.Firefox(options=options)
+def get_web_driver():
+    # Try initializing Firefox WebDriver
+    try:
+        firefox_options = FirefoxOptions()
+        firefox_options.add_argument("-headless")
+        return webdriver.Firefox(options=firefox_options)
+    except Exception as e:
+        print("Firefox WebDriver not found. Trying Edge...", e)
+
+    # Try initializing Edge WebDriver
+    try:
+        edge_options = EdgeOptions()
+        edge_options.add_argument("-headless")
+        return webdriver.Edge(options=edge_options)
+    except Exception as e:
+        print("Edge WebDriver not found. Trying Chrome...", e)
+
+    # Try initializing Chrome WebDriver
+    try:
+        chrome_options = ChromeOptions()
+        chrome_options.add_argument("-headless")
+        return webdriver.Chrome(options=chrome_options)
+    except Exception as e:
+        print("Chrome WebDriver not found.", e)
+        raise
+          
+def scrape(location_search_keyword='', scrape_option=0) -> None:
+    driver = get_web_driver()
+
+    domains = ['Healthcare', 'Business', 'Cybersecurity']
+    all_data = []
+
+    for domain in domains:
+        domain_data = __scrape_domain(driver, domain, location_search_keyword)
+        all_data.append(domain_data)
+
+    driver.quit()
 
     if not os.path.exists('output'):
-        os.mkdir('output')
-
-    match scrape_option:
-        case 1:
-            print('Scraping Indeed...')
-            __scrape_indeed(driver, job_search_keyword, location_search_keyword)
+        os.makedirs('output')
+    file_path = os.path.join('output', 'combined_jobs.json')
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(all_data, f, ensure_ascii=False, indent=4)
 
     print('Scraping Complete.')
 
+
 def main():
     print("Script started.")
-    scrape('Healthcare', 'Philadelphia', scrape_option=1)
-
+    scrape('Philadelphia', scrape_option=1)
+          
 if __name__ == "__main__":
     main()

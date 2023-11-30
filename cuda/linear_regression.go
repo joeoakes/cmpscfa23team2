@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-// for gas: ---------------------------------------------------------
+// for gas: -----------------------------------------------------------------------------------------
 // JSONData represents the structure of your entire JSON data
 type JSONGasData struct {
 	Domain string         `json:"domain"`
@@ -81,7 +81,7 @@ func extractPricesYearsAndCPI(items []GasolineData) ([]float64, []float64, []flo
 	return prices, years, cpiValues
 }
 
-// for books ---------------------------------------------------------
+// for books ---------------------------------------------------------------------------------------
 
 // JSONData represents the structure of your entire JSON data
 type JSONData struct {
@@ -136,7 +136,7 @@ func extractPrices(items []Item) []float64 {
 	return prices
 }
 
-// LINEAR REGRESSION ---------------------------------------------------
+// LINEAR REGRESSION --------------------------------------------------------------------------------
 
 // linearRegression calculates the coefficients for a simple linear regression model (y = ax + b).
 func linearRegression(x, y []float64) (a, b float64) {
@@ -183,7 +183,7 @@ func linearRegressionThreeVariables(x1, x2, y []float64) (a, b, c float64) {
 	return a, b, c
 }
 
-// SCATTER PLOT --------------------------------------------------------
+// SCATTER PLOT ------------------------------------------------------------------------------------
 
 // createScatterPlot creates and saves a scatter plot with the linear regression line.
 func createScatterPlot(x, y []float64, a, b float64, title, filename, xLabel, yLabel string) {
@@ -266,7 +266,7 @@ func main() {
 		yLabel := "Average Gasoline Prices"
 		createScatterPlot(append(years, newX...), prices, a, b, title, filename, xLabel, yLabel)
 
-	// case books ____________________________________________________
+	// case books ____________________________________________________________________________________
 	case "books":
 		filePath := "books_data.json"
 		items := readJSON(filePath)

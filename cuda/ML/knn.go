@@ -3,6 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/vg"
+	"image/color"
 	"io/ioutil"
 	"math"
 	"math/rand"
@@ -139,6 +143,72 @@ func countSubstring(slice []string, substring string) int {
 	return count
 }
 
+// createScatterPlot creates and saves a scatter plot with highlighted target and predicted points.
+func createScatterPlot(data []Point, target Point, predictedLabel, filename, xLabel, yLabel string) error {
+	p := plot.New()
+
+	p.Title.Text = "KNN Scatter Plot"
+	p.Title.TextStyle.Font.Size = 16 // Set title font size
+
+	p.X.Label.Text = xLabel
+	p.X.Label.TextStyle.Font.Size = 16 // Set X-axis label font size
+	p.X.Tick.Label.Font.Size = 16      // Set X-axis tick label font size
+
+	p.Y.Label.Text = yLabel
+	p.Y.Label.TextStyle.Font.Size = 16 // Set Y-axis label font size
+	p.Y.Tick.Label.Font.Size = 16      // Set Y-axis tick label font size
+
+	// Create a map to store colors for each domain
+	colorMap := map[string]color.RGBA{
+		"e-commerce":  color.RGBA{R: 255, G: 0, B: 0, A: 255}, // Red
+		"real-estate": color.RGBA{R: 0, G: 255, B: 0, A: 255}, // Green
+		"job-market":  color.RGBA{R: 0, G: 0, B: 255, A: 255}, // Blue
+		"target":      color.RGBA{R: 255, G: 0, B: 0, A: 255}, // Target color (Red)
+		"predicted":   color.RGBA{R: 0, G: 0, B: 255, A: 255}, // Predicted color (Blue)
+	}
+
+	// Create points for the scatter plot
+	for _, point := range data {
+		// Create scatter plot points with different colors for different domains
+		s, err := plotter.NewScatter(plotter.XYs{{X: point.Features[0], Y: point.Features[1]}})
+		if err != nil {
+			fmt.Printf("Error creating scatter plot: %v\n", err)
+			return err
+		}
+
+		s.GlyphStyle.Color = colorMap[point.Label]
+		s.GlyphStyle.Radius = vg.Points(10) // Adjust the radius as needed
+
+		p.Add(s)
+	}
+
+	// Highlight the target and predicted points
+	targetScatter, err := plotter.NewScatter(plotter.XYs{{X: target.Features[0], Y: target.Features[1]}})
+	if err != nil {
+		fmt.Printf("Error creating target scatter plot: %v\n", err)
+		return err
+	}
+	targetScatter.GlyphStyle.Color = colorMap["target"]
+	p.Add(targetScatter)
+
+	predictedScatter, err := plotter.NewScatter(plotter.XYs{{X: target.Features[0], Y: target.Features[1]}})
+	if err != nil {
+		fmt.Printf("Error creating predicted scatter plot: %v\n", err)
+		return err
+	}
+	predictedScatter.GlyphStyle.Color = colorMap["predicted"]
+	p.Add(predictedScatter)
+
+	// Save the plot to a file
+	if err := p.Save(16*vg.Inch, 8*vg.Inch, filename); err != nil {
+		fmt.Printf("Error saving scatter plot: %v\n", err)
+		return err
+	}
+
+	return nil
+}
+
+// main function
 func main() {
 	// reading data from JSON file
 	file, err := ioutil.ReadFile("crab/template.json")
@@ -146,6 +216,7 @@ func main() {
 		fmt.Printf("Error reading JSON file: %v\n", err)
 		return
 	}
+
 	// turn JSON data into items
 	var jsonData map[string][]Item
 	err = json.Unmarshal(file, &jsonData)
@@ -158,6 +229,7 @@ func main() {
 		fmt.Printf("Error: 'items' field not found in JSON.\n")
 		return
 	}
+
 	// convert items to points
 	data := ConvertItemsToPoints(items)
 	// seed random number generator to make it truly random
@@ -167,10 +239,16 @@ func main() {
 	targetIndex := rand.Intn(len(items))
 	targetItem := items[targetIndex]
 	target := ConvertItemsToPoints([]Item{targetItem})[0]
+
 	// target point to classify
-	//target := Point{Features: []float64{79, 12}} // replace with relevant features for target
 	k := 1
 	label := KNN(k, data, target)
 	fmt.Printf("Label predicted for target is '%s'\n", label)
 
+	// creating and saving the scatter plot
+	err = createScatterPlot(data, target, label, "scatter_plot.png", "Feature 1", "Feature 2")
+	if err != nil {
+		fmt.Println("Error creating scatter plot:", err)
+		return
+	}
 }

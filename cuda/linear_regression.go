@@ -45,12 +45,13 @@ func readGasJSON(filePath string) []GasolineData {
 	return data
 }
 
-// extractPricesAndYears extracts numerical values from price strings and returns both prices and years.
-func extractPricesAndYears(items []GasolineData) ([]float64, []float64) {
+// extractPricesAndYears extracts numerical values from price strings and returns prices, years, and cpiValues.
+func extractPricesYearsAndCPI(items []GasolineData) ([]float64, []float64, []float64) {
 	var prices []float64
 	var years []float64
+	var cpiValues []float64
 
-	for i, item := range items {
+	for _, item := range items {
 		priceStr := strings.ReplaceAll(item.AverageGasolinePrices, "$", "")
 		priceStr = strings.ReplaceAll(priceStr, ",", "")
 
@@ -64,13 +65,20 @@ func extractPricesAndYears(items []GasolineData) ([]float64, []float64) {
 			log.Fatal(err)
 		}
 
+		cpiStr := strings.ReplaceAll(item.AverageAnnualCPIForGas, "$", "")
+		cpi, err := strconv.ParseFloat(cpiStr, 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		prices = append(prices, price)
 		years = append(years, year)
+		cpiValues = append(cpiValues, cpi)
 
-		fmt.Printf("Item %d Year: %.2f, Price: %.2f\n", i+1, year, price)
+		// fmt.Printf("Item %d Year: %.2f, Price: %.2f, CPI: %.2f\n", i+1, year, price, cpi)
 	}
 
-	return prices, years
+	return prices, years, cpiValues
 }
 
 // for books ---------------------------------------------------------
@@ -128,6 +136,8 @@ func extractPrices(items []Item) []float64 {
 	return prices
 }
 
+// LINEAR REGRESSION ---------------------------------------------------
+
 // linearRegression calculates the coefficients for a simple linear regression model (y = ax + b).
 func linearRegression(x, y []float64) (a, b float64) {
 	var sumX, sumY, sumXY, sumX2 float64
@@ -145,6 +155,35 @@ func linearRegression(x, y []float64) (a, b float64) {
 
 	return a, b
 }
+
+// linearRegressionThreeVariables calculates the coefficients for a multiple linear regression model (y = ax1 + bx2 + c).
+func linearRegressionThreeVariables(x1, x2, y []float64) (a, b, c float64) {
+	var sumX1, sumX2, sumY, sumX1Y, sumX2Y, sumX1X2, sumX1Squared, sumX2Squared float64
+	n := float64(len(x1))
+
+	for i := 0; i < len(x1); i++ {
+		sumX1 += x1[i]
+		sumX2 += x2[i]
+		sumY += y[i]
+		sumX1Y += x1[i] * y[i]
+		sumX2Y += x2[i] * y[i]
+		sumX1X2 += x1[i] * x2[i]
+		sumX1Squared += x1[i] * x1[i]
+		sumX2Squared += x2[i] * x2[i]
+	}
+
+	denominator := n*sumX1Squared*sumX2Squared - sumX1*sumX1*sumX2*sumX2 - sumX2*sumX2*sumX1Squared + 2*sumX1*sumX2*sumX1X2 - sumX1X2*sumX1X2
+	a = (sumY*sumX1Squared*sumX2Squared - sumX1*sumX1Y*sumX2Squared - sumX2*sumX2Y*sumX1Squared +
+		2*sumX1Y*sumX2*sumX1X2 - sumX2Y*sumX1X2*sumX1 - sumY*sumX2*sumX1X2) / denominator
+	b = (n*sumX2Y*sumX1Squared - sumX2*sumY*sumX1Squared - sumX2Y*sumX1*sumX1 +
+		2*sumY*sumX1*sumX1X2 - sumY*sumX1X2*sumX2) / denominator
+	c = (-sumX2Squared*sumX1Y + sumX2*sumX1*sumY + sumX2Squared*sumX1*sumX1Y -
+		sumX1X2*sumY*sumX2 + sumX1X2*sumX2Y*sumX1 - sumX1*sumX2*sumX2Y) / denominator
+
+	return a, b, c
+}
+
+// SCATTER PLOT --------------------------------------------------------
 
 // createScatterPlot creates and saves a scatter plot with the linear regression line.
 func createScatterPlot(x, y []float64, a, b float64, title, filename, xLabel, yLabel string) {
@@ -179,34 +218,6 @@ func createScatterPlot(x, y []float64, a, b float64, title, filename, xLabel, yL
 	}
 }
 
-// createResidualsPlot creates and saves a plot of residuals.
-func createResidualsPlot(x, y []float64, a, b float64, filename, xLabel, yLabel string) {
-	p := plot.New()
-
-	p.Title.Text = "Residuals Plot"
-	p.X.Label.Text = xLabel
-	p.Y.Label.Text = "Residuals"
-
-	// Calculate residuals
-	residuals := make(plotter.XYs, len(x))
-	for i := range x {
-		residuals[i].X = x[i]
-		residuals[i].Y = y[i] - (a*x[i] + b)
-	}
-
-	// Add a scatter plot for residuals
-	scatter, err := plotter.NewScatter(residuals)
-	if err != nil {
-		log.Fatal(err)
-	}
-	p.Add(scatter)
-
-	// Save the residuals plot to a PNG file.
-	if err := p.Save(6*vg.Inch, 4*vg.Inch, filename); err != nil {
-		log.Fatal(err)
-	}
-}
-
 func main() {
 	// Accept user input for domain
 	var domain string
@@ -219,31 +230,16 @@ func main() {
 		filePath := "gasoline_data.json"
 		GasolineData := readGasJSON(filePath)
 
-		// Extract prices and years
-		prices, years := extractPricesAndYears(GasolineData)
+		// Extract prices, years, and CPI values
+		prices, years, cpiValues := extractPricesYearsAndCPI(GasolineData)
 
-		// Print prices and years for troubleshooting
-		fmt.Println("Prices:", prices)
-		fmt.Println("Years:", years)
-
-		// Perform linear regression for gas
-		yearsForRegression := make([]float64, len(GasolineData))
-		for i := 0; i < len(GasolineData); i++ {
-			yearsForRegression[i], _ = strconv.ParseFloat(GasolineData[i].Year, 64)
-		}
 		// Perform linear regression
-		a, b := linearRegression(yearsForRegression, prices)
+		a, b, c := linearRegressionThreeVariables(years, cpiValues, prices)
 
-		// Extend the time range for prediction (next 20 years)
+		// Extend the time range for prediction (next year)
 		var newX []float64
-		for i := 1; i <= 20; i++ {
+		for i := 1; i <= 1; i++ {
 			newX = append(newX, years[len(years)-1]+float64(i))
-		}
-
-		// Output the prediction for the extended x values
-		fmt.Println("Extended X Values:")
-		for _, xVal := range newX {
-			fmt.Printf("%.2f ", xVal)
 		}
 
 		// Predict y based on the regression model for the extended x values
@@ -253,22 +249,22 @@ func main() {
 			newY = append(newY, yVal)
 		}
 
-		// Output the prediction for the extended x values
-		fmt.Println("\nPredicted Values:")
-		for _, yVal := range newY {
-			fmt.Printf("%.2f ", yVal)
-		}
+		// Predict gas price for 2023
+		year2023 := 2023.0
+		cpi2023 := 349.189
+		price2023 := (0.10 * (a*year2023 + b*cpi2023 + c))
+
+		fmt.Printf("Predicted Gas Price for 2023: $%.2f\n", price2023)
+
+		// Append the predicted gas price to the existing prices slice
+		prices = append(prices, price2023)
 
 		// Create and save the scatter plot with the extended x values
 		title := "Gas Price Prediction Scatter Plot (Extended)"
 		filename := "gas_scatter_plot_extended.png"
-		residualsPlotFilename := "gas_residuals_plot.png"
 		xLabel := "Year"
 		yLabel := "Average Gasoline Prices"
-		createScatterPlot(append(years, newX...), append(prices, newY...), a, b, title, filename, xLabel, yLabel)
-
-		// Create and save the residuals plot
-		createResidualsPlot(years, prices, a, b, residualsPlotFilename, xLabel, yLabel)
+		createScatterPlot(append(years, newX...), prices, a, b, title, filename, xLabel, yLabel)
 
 	// case books ____________________________________________________
 	case "books":

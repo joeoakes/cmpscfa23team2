@@ -167,7 +167,7 @@ func GetSuccess() ([]Log, error) {
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query("Success")
+	rows, err := stmt.Query("200")
 	if err != nil {
 		InsertLog("400", "Failed to query SQL statement", "GetSuccess()")
 		return nil, err

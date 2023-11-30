@@ -1,5 +1,0 @@
-2023/11/29 21:13:37 Successfully read and parsed config file.
-2023/11/29 21:13:37 Database initialized and connected successfully.
-2023/11/29 21:13:37 User created with ID: 12627671-8f26-11ee-ae02-30d042e80ac3
-2023/11/29 21:13:37 Generated token for user hansi@hansi.com: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDEzMTQwMTcsInVpZCI6IjcxYWE4YjQ1LThlNTAtMTFlZS1iZGYzLTMwZDA0MmU4MGFjMyJ9.QGjcyHRbwMFsrRijPndphhdPlELgM7UqTDFfWSTllWQ
-2023/11/29 21:13:37 Database connection closed successfully!

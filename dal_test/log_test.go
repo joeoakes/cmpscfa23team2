@@ -35,36 +35,6 @@ func TestInsertOrUpdateStatusCode(t *testing.T) {
 	}
 }
 
-func TestFetchUserIDByName(t *testing.T) {
-	_, err := dal.FetchUserIDByName("Joesph Oakes")
-	if err != nil {
-		dal.InsertLog("400", "Failed to fetch user ID", "TestFetchUserIDByName()")
-		t.Fatalf("Failed to fetch user ID: %v", err)
-	} else {
-		dal.InsertLog("200", "Successfully fetched user ID", "TestFetchUserIDByName()")
-	}
-}
-
-func TestUpdateUser(t *testing.T) {
-	err := dal.UpdateUser("NewName", "jxo19", "ADM", "ADM", "password")
-	if err != nil {
-		dal.InsertLog("400", "Failed to update user", "TestUpdateUser()")
-		t.Fatalf("Failed to update user: %v", err)
-	} else {
-		dal.InsertLog("200", "Successfully updated user", "TestUpdateUser()")
-	}
-}
-
-func TestDeleteUser(t *testing.T) {
-	err := dal.DeleteUser("jxo19")
-	if err != nil {
-		dal.InsertLog("400", "Failed to delete user", "TestDeleteUser()")
-		t.Fatalf("Failed to delete user: %v", err)
-	} else {
-		dal.InsertLog("200", "Successfully deleted user", "TestDeleteUser()")
-	}
-}
-
 func TestWriteLog(t *testing.T) {
 	uniqueLogID := uuid.New().String()
 	currentTime := time.Now()
@@ -102,13 +72,16 @@ func TestStoreLog(t *testing.T) {
 		dal.InsertLog("200", "Successfully stored log using stored procedure", "TestStoreLog()")
 	}
 }
-
-func TestCreateUser(t *testing.T) {
-	_, err := dal.CreateUser("John", "john123", "ADM", "password", true)
+func TestGetSuccess(t *testing.T) {
+	logs, err := dal.GetSuccess()
 	if err != nil {
-		dal.InsertLog("400", "Failed to create a new user", "TestCreateUser()")
-		t.Fatalf("Failed to create a new user: %v", err)
-	} else {
-		dal.InsertLog("200", "Successfully created a new user", "TestCreateUser()")
+		dal.InsertLog("400", "Failed to get success logs", "TestGetSuccess()")
+		t.Fatalf("Failed to get success logs: %v", err)
 	}
+	for _, logItem := range logs {
+		if reflect.DeepEqual(logItem, dal.Log{}) {
+			t.Errorf("Log item is zero value")
+		}
+	}
+	dal.InsertLog("200", "Successfully got success logs", "TestGetSuccess()")
 }

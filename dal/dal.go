@@ -50,10 +50,10 @@ func InitDB() error {
 
 	// if you are running this from goFrontEnd
 	// Construct the path to the config file
-	path := filepath.Join(cwd, "/../../mysql/config.json")
+	//path := filepath.Join(cwd, "/../../mysql/config.json")
 
 	// if you testing dal:
-	//path := filepath.Join(cwd, "/../mysql/config.json")
+	path := filepath.Join(cwd, "/../mysql/config.json")
 
 	config, err := readJSONConfig(path)
 	if err != nil {
@@ -159,31 +159,36 @@ func main() {
 	// CUDA Testing
 
 	//testing inserting engine id
-	sampleEngineID := "sample_engine_id10"
-	sampleEngineName := "Sample Engine"
-	sampleEngineDescription := "This is a sample engine."
+	//sampleEngineID := "sample_engine_id10"
+	//sampleEngineName := "Sample Engine"
+	//sampleEngineDescription := "This is a sample engine."
+	//
+	//err = InsertSampleEngine(sampleEngineID, sampleEngineName, sampleEngineDescription)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Printf("Sample engine with ID %s inserted successfully.\n", sampleEngineID)
+	//testing if engine id existsf
+	//exists, err := EngineIDExists(sampleEngineID)
+	//if exists {
+	//	fmt.Printf("Engine with ID %s exists.\n", "sample_engine_id")
+	//} else {
+	//	fmt.Printf("Engine with ID %s does not exist.\n", "sample_engine_id")
+	//}
+	//engineID := "sample_engine_id5"          // Replace with an existing engine ID
+	//predictionInfo := "{\"key\": \"value\"}" // Replace with valid JSON data
 
-	err = InsertSampleEngine(sampleEngineID, sampleEngineName, sampleEngineDescription)
+	fileName := "sample_file_name.png"         // Replace with an actual file name
+	predictionInfo := "Sample Prediction Info" // Replace with an actual prediction info
+
+	err = InsertPrediction(fileName, predictionInfo)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Sample engine with ID %s inserted successfully.\n", sampleEngineID)
-	//testing if engine id exists
-	exists, err := EngineIDExists(sampleEngineID)
-	if exists {
-		fmt.Printf("Engine with ID %s exists.\n", "sample_engine_id")
-	} else {
-		fmt.Printf("Engine with ID %s does not exist.\n", "sample_engine_id")
-	}
-	engineID := "sample_engine_id5"          // Replace with an existing engine ID
-	predictionInfo := "{\"key\": \"value\"}" // Replace with valid JSON data
 
-	err = InsertPrediction(engineID, predictionInfo)
-	if err != nil {
-		log.Fatal(err)
-	}
+	fmt.Printf("Prediction for file %s inserted successfully.\n", fileName)
 
-	fmt.Printf("Prediction for engine %s inserted successfully.\n", engineID)
+	//fmt.Printf("Prediction for engine %s inserted successfully.\n", engineID)
 	// Additional functionality goes here
 	predictionResult := PerformMLPrediction("Test Data")
 	log.Printf(predictionResult)
@@ -225,12 +230,12 @@ func main() {
 	}
 
 	// Test: CreateScraperEngine
-	engineID, err = CreateScraperEngine("EngineName", "ScraperEngine")
-	if err != nil {
-		log.Printf("Error creating scraper engine: %s", err)
-	} else {
-		log.Printf("Scraper engine created with ID: %s", engineID)
-	}
+	//engineID, err = CreateScraperEngine("EngineName", "ScraperEngine")
+	//if err != nil {
+	//	log.Printf("Error creating scraper engine: %s", err)
+	//} else {
+	//	log.Printf("Scraper engine created with ID: %s", engineID)
+	//}
 
 	// Test: InsertURL
 	tags := map[string]interface{}{

@@ -1,4 +1,4 @@
-package dal
+package dal_test
 
 import (
 	"cmpscfa23team2/dal"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestEngineIDExists(t *testing.T) {
-	engineID := "test_engine_id"
+	engineID := "test_engine_id2"
 	// Insert a sample engine ID for testing
 	err := dal.InsertSampleEngine(engineID, "Test Engine", "test engine description")
 	if err != nil {
@@ -30,7 +30,7 @@ func TestEngineIDExists(t *testing.T) {
 }
 
 func TestInsertPrediction(t *testing.T) {
-	engineID := "test_engine2"
+	engineID := "test_engine23"
 	// Insert a sample engine ID for testing
 	err := dal.InsertSampleEngine(engineID, "test_engine2", "Test Engine Description")
 	if err != nil {

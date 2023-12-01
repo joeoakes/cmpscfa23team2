@@ -1,4 +1,4 @@
-package dal
+package dal_test
 
 import (
 	"cmpscfa23team2/dal"
@@ -60,7 +60,7 @@ func TestUpdateURL(t *testing.T) {
 }
 
 func TestGetURLTagsAndDomain(t *testing.T) {
-	id := "5422f84d-7f6c-11ee-aa3b-6c2b59772aba"
+	id := "20303a5b-8ff4-11ee-ae02-30d042e80ac3"
 	expectedTags := map[string]interface{}{"tag1": "value1", "tag2": "value2"}
 	expectedDomain := "example.com"
 

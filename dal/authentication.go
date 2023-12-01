@@ -3,7 +3,6 @@ package dal
 import (
 	"fmt"
 	"github.com/golang-jwt/jwt"
-	"golang.org/x/crypto/bcrypt"
 	"strings"
 	"time"
 )
@@ -167,6 +166,14 @@ func ValidateToken(tokenString string) (bool, error) {
 //	_, err = DB.Exec("CALL issue_refresh_token(?, ?)", userID, newRefreshToken)
 //	return newAccessToken, newRefreshToken, err
 //}
+
+func ExtractToken(r *http.Request) (string, error) {
+	cookie, err := r.Cookie("token")
+	if err != nil {
+		return "", err
+	}
+	return cookie.Value, nil
+}
 
 // This code defines a function called LogoutUser that takes a userID as a parameter and it uses the database connection.
 // (DB) to execute a SQL stored procedure to log out a user with the specified userID,

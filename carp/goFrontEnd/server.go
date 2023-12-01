@@ -20,6 +20,12 @@ type PageData struct {
 	ErrorMessage string
 }
 
+type DashPageData struct {
+	Title        string
+	Users        []*dal.User
+	ErrorMessage string
+}
+
 func main() {
 	dir, err := os.Getwd()
 	if err != nil {
@@ -60,7 +66,8 @@ func setupRoutes(tmpl *template.Template) {
 	http.HandleFunc("/login", makeHandler(tmpl, "login"))
 	http.HandleFunc("/register", makeHandler(tmpl, "register"))
 	http.HandleFunc("/documentation", makeHandler(tmpl, "documentation"))
-	http.HandleFunc("/dashboard", requireAdmin(makeHandler(tmpl, "dashboard")))
+	http.HandleFunc("/dashboard", dashHandler(tmpl))
+	//http.HandleFunc("/dashboard", requireAdmin(dashHandler(tmpl)))
 	http.HandleFunc("/settings", requireAdmin(makeHandler(tmpl, "settings")))
 
 	fs := http.FileServer(http.Dir("static"))
@@ -76,6 +83,11 @@ func makeHandler(tmpl *template.Template, content string) http.HandlerFunc {
 
 		if r.Method == "POST" && content == "login" {
 			loginHandler(tmpl, w, r)
+			return
+		}
+
+		if r.Method == "POST" && content == "dashboard" {
+			dashHandler(tmpl)
 			return
 		}
 
@@ -211,5 +223,41 @@ func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Req
 
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+// renderDashboardTemplate renders the dashboard with a potential error message.
+func renderDashboardTemplate(tmpl *template.Template, w http.ResponseWriter, users []*dal.User, errorMessage string) {
+	data := DashPageData{
+		Title:        "Dashboard",
+		Users:        users,
+		ErrorMessage: errorMessage,
+	}
+	err := tmpl.ExecuteTemplate(w, "dashboard", data)
+	if err != nil {
+		log.Printf("Error executing dashboard template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
+
+func dashHandler(tmpl *template.Template) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		users, err := dal.GetAllUsers()
+		if err != nil {
+			log.Printf("Error fetching users: %v", err)
+			http.Error(w, "Unable to fetch user data", http.StatusInternalServerError)
+			return
+		}
+
+		data := DashPageData{
+			Title: "Dashboard",
+			Users: users,
+		}
+
+		err = tmpl.ExecuteTemplate(w, "dashboard", data)
+		if err != nil {
+			log.Printf("Error executing template: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
 	}
 }

@@ -9,18 +9,167 @@ import (
 	"image/color"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 )
+
+// for airfare: -------------------------------------------------------------------------------------
+// JSONData represents the structure of your entire JSON data
+type JSONAirfareData struct {
+	Domain string      `json:"domain"`
+	Data   AirfareData `json:"data"`
+}
+
+// AirfareData represents the structure of each item in the JSON data for airfare
+type AirfareData struct {
+	Title          string            `json:"title"`
+	Year           string            `json:"year"`
+	Location       string            `json:"location"`
+	Features       []string          `json:"features"`
+	AdditionalInfo AirfareAdditional `json:"additional_info"`
+	Metadata       AirfareMetadata   `json:"metadata"`
+}
+
+// AirfareAdditional represents additional information for airfare data
+type AirfareAdditional struct {
+	Country    string         `json:"country"`
+	MonthsData []AirfareMonth `json:"months_data"`
+}
+
+// AirfareMonth represents each month's data for airfare
+type AirfareMonth struct {
+	Month string `json:"month"`
+	Rate  string `json:"rate"`
+}
+
+// AirfareMetadata represents metadata for airfare data
+type AirfareMetadata struct {
+	Source    string `json:"source"`
+	Timestamp string `json:"timestamp"`
+}
+
+// readAirfareJSON reads airfare JSON data from a file and returns a slice of AirfareData
+func readAirfareJSON(filePath string) AirfareData {
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	var data JSONAirfareData
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return data.Data
+}
+
+// extractPricesYearsAndCPIAirfare extracts numerical values from AirfareData and returns prices, months, and cpiValues
+func extractPricesYearsAndCPIAirfare(data AirfareData) ([]float64, []string, []float64) {
+	var prices []float64
+	var months []string
+	var cpiValues []float64
+
+	for _, monthData := range data.AdditionalInfo.MonthsData {
+		priceStr := strings.ReplaceAll(monthData.Rate, "$", "")
+		price, err := strconv.ParseFloat(priceStr, 64)
+		if err != nil {
+			// Skip invalid entries
+			continue
+		}
+
+		prices = append(prices, price)
+		months = append(months, monthData.Month)
+	}
+
+	return prices, months, cpiValues
+}
+
+// for gas: -------------------------------------------------------------------------------------
+// JSONData represents the structure of your entire JSON data
+type JSONGasData struct {
+	Domain string         `json:"domain"`
+	Data   []GasolineData `json:"data"`
+}
+
+// GasolineData represents the structure of each item in the JSON data for gas
+type GasolineData struct {
+	Year                     string `json:"year"`
+	AverageGasolinePrices    string `json:"average_gasoline_prices"`
+	AverageAnnualCPIForGas   string `json:"average_annual_cpi_for_gas"`
+	GasPricesAdjustedForInfl string `json:"gas_prices_adjusted_for_inflation"`
+}
+
+// read gas
+func readGasJSON(filePath string) []GasolineData {
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	var data []GasolineData
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return data
+}
+
+// extractPricesAndYears extracts numerical values from price strings and returns prices, years, and cpiValues.
+func extractPricesYearsAndCPI(items []GasolineData) ([]float64, []float64, []float64) {
+	var prices []float64
+	var years []float64
+	var cpiValues []float64
+
+	for _, item := range items {
+		priceStr := strings.ReplaceAll(item.AverageGasolinePrices, "$", "")
+		priceStr = strings.ReplaceAll(priceStr, ",", "")
+
+		price, err := strconv.ParseFloat(priceStr, 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		year, err := strconv.ParseFloat(item.Year, 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		cpiStr := strings.ReplaceAll(item.AverageAnnualCPIForGas, "$", "")
+		cpi, err := strconv.ParseFloat(cpiStr, 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		prices = append(prices, price)
+		years = append(years, year)
+		cpiValues = append(cpiValues, cpi)
+	}
+
+	return prices, years, cpiValues
+}
+
+// for books --------------------------------------------------------------------------------------
 
 // JSONData represents the structure of your entire JSON data
 type JSONData struct {
-	Items []Item `json:"items"`
+	Domain string `json:"domain"`
+	Data   []Item `json:"data"`
 }
 
-// Item represents the structure of your JSON data
+// Item represents the structure of each item in the JSON data
 type Item struct {
-	Domain string `json:"domain"`
-	X      float64
-	Y      float64
+	Title       string `json:"title"`
+	URL         string `json:"url"`
+	Description string `json:"description"`
+	Price       string `json:"price"`
+	Metadata    struct {
+		Source    string `json:"source"`
+		Timestamp string `json:"timestamp"`
+	} `json:"metadata"`
 }
 
 // readJSON reads data from a JSON file and returns a slice of records.
@@ -37,36 +186,28 @@ func readJSON(filePath string) []Item {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return jsonData.Items
+	return jsonData.Data
 }
 
-// processColumnValues processes the JSON records and returns a map of columns and their values.
-func processColumnValues(items []Item) map[int]plotter.Values {
-	columnsValues := make(map[int]plotter.Values)
+// extractPrices extracts numerical values from price strings.
+func extractPrices(items []Item) []float64 {
+	var prices []float64
 	for i, item := range items {
-		columnsValues[0] = append(columnsValues[0], float64(i+1))
-		columnsValues[1] = append(columnsValues[1], item.X)
-		columnsValues[2] = append(columnsValues[2], item.Y)
+		priceStr := strings.ReplaceAll(item.Price, "£", "")
+		priceStr = strings.ReplaceAll(priceStr, ",", "")
+
+		price, err := strconv.ParseFloat(priceStr, 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		prices = append(prices, price)
+		fmt.Printf("Item %d Price: %.2f\n", i+1, price)
 	}
-	return columnsValues
+	return prices
 }
 
-// createHistogram creates and saves a histogram plot for the given values.
-func createHistogram(values plotter.Values, title string, filename string) {
-	p := plot.New()
-	p.Title.Text = title
-
-	h, err := plotter.NewHist(values, 16)
-	if err != nil {
-		log.Fatal(err)
-	}
-	h.Normalize(1)
-	p.Add(h)
-
-	if err := p.Save(10*vg.Centimeter, 10*vg.Centimeter, filename); err != nil {
-		log.Fatal(err)
-	}
-}
+// LINEAR REGRESSION -----------------------------------------------------------------------
 
 // linearRegression calculates the coefficients for a simple linear regression model (y = ax + b).
 func linearRegression(x, y []float64) (a, b float64) {
@@ -85,6 +226,35 @@ func linearRegression(x, y []float64) (a, b float64) {
 
 	return a, b
 }
+
+// linearRegressionThreeVariables calculates the coefficients for a multiple linear regression model (y = ax1 + bx2 + c).
+func linearRegressionThreeVariables(x1, x2, y []float64) (a, b, c float64) {
+	var sumX1, sumX2, sumY, sumX1Y, sumX2Y, sumX1X2, sumX1Squared, sumX2Squared float64
+	n := float64(len(x1))
+
+	for i := 0; i < len(x1); i++ {
+		sumX1 += x1[i]
+		sumX2 += x2[i]
+		sumY += y[i]
+		sumX1Y += x1[i] * y[i]
+		sumX2Y += x2[i] * y[i]
+		sumX1X2 += x1[i] * x2[i]
+		sumX1Squared += x1[i] * x1[i]
+		sumX2Squared += x2[i] * x2[i]
+	}
+
+	denominator := n*sumX1Squared*sumX2Squared - sumX1*sumX1*sumX2*sumX2 - sumX2*sumX2*sumX1Squared + 2*sumX1*sumX2*sumX1X2 - sumX1X2*sumX1X2
+	a = (sumY*sumX1Squared*sumX2Squared - sumX1*sumX1Y*sumX2Squared - sumX2*sumX2Y*sumX1Squared +
+		2*sumX1Y*sumX2*sumX1X2 - sumX2Y*sumX1X2*sumX1 - sumY*sumX2*sumX1X2) / denominator
+	b = (n*sumX2Y*sumX1Squared - sumX2*sumY*sumX1Squared - sumX2Y*sumX1*sumX1 +
+		2*sumY*sumX1*sumX1X2 - sumY*sumX1X2*sumX2) / denominator
+	c = (-sumX2Squared*sumX1Y + sumX2*sumX1*sumY + sumX2Squared*sumX1*sumX1Y -
+		sumX1X2*sumY*sumX2 + sumX1X2*sumX2Y*sumX1 - sumX1*sumX2*sumX2Y) / denominator
+
+	return a, b, c
+}
+
+// SCATTER PLOT --------------------------------------------------------------------------------
 
 // createScatterPlot creates and saves a scatter plot with the linear regression line.
 func createScatterPlot(x, y []float64, a, b float64, title, filename, xLabel, yLabel string) {
@@ -118,54 +288,149 @@ func createScatterPlot(x, y []float64, a, b float64, title, filename, xLabel, yL
 		log.Fatal(err)
 	}
 }
+
 func main() {
-	filePath := "crab/template.json" // Update with your actual data file path and file type
-	items := readJSON(filePath)
+	// Accept user input for domain
+	var domain string
+	fmt.Print("Enter domain (gas/books/airfare): ")
+	fmt.Scan(&domain)
 
-	// Domain to axis labels mapping
-	axisLabels := map[string][2]string{
-		"RealEstate": {"Square Footage", "Price (Thousands)"},
-		"Healthcare": {"Age (Years)", "Blood Pressure"},
-		"Weather":    {"Temperature (°C)", "Ice Cream Sales"},
-	}
+	// Handle different domains
+	switch domain {
+	case "gas":
+		filePath := "gasoline_data.json"
+		GasolineData := readGasJSON(filePath)
 
-	// Group data by domain
-	domainData := make(map[string][]Item)
-	for _, item := range items {
-		domain := item.Domain
-		domainData[domain] = append(domainData[domain], item)
-	}
+		// Extract prices, years, and CPI values
+		prices, years, cpiValues := extractPricesYearsAndCPI(GasolineData)
 
-	for domain, data := range domainData {
-		fmt.Printf("\nAnalyzing domain: %s\n", domain)
+		// Perform linear regression
+		a, b, c := linearRegressionThreeVariables(years, cpiValues, prices)
 
-		xValues := make([]float64, len(data))
-		yValues := make([]float64, len(data))
-
-		for i, item := range data {
-			x := item.X
-			y := item.Y
-
-			xValues[i] = x
-			yValues[i] = y
+		// Extend the time range for prediction (next year)
+		var newX []float64
+		for i := 1; i <= 1; i++ {
+			newX = append(newX, years[len(years)-1]+float64(i))
 		}
 
-		// Calculate linear regression coefficients
-		a, b := linearRegression(xValues, yValues)
-		fmt.Printf("Linear Regression Model for %s: y = %.2fx + %.2f\n", domain, a, b)
+		// Predict y based on the regression model for the extended x values
+		var newY []float64
+		for _, xVal := range newX {
+			yVal := a*xVal + b
+			newY = append(newY, yVal)
+		}
 
-		// Retrieve axis labels for the domain
-		labels := axisLabels[domain]
+		// Predict gas price for 2023
+		year2023 := 2023.0
+		cpi2023 := 349.189
+		price2023 := (0.10 * (a*year2023 + b*cpi2023 + c))
 
-		// Create scatter plot with domain-specific axis labels
-		plotFileName := fmt.Sprintf("%s_scatter_plot.png", domain)
-		createScatterPlot(xValues, yValues, a, b, fmt.Sprintf("%s Linear Regression", domain), plotFileName, labels[0], labels[1])
+		fmt.Printf("Predicted Gas Price for 2023: %.2f\n", price2023)
 
-		// Example prediction
-		newX := 50.0       // Example new x value for prediction
-		newY := a*newX + b // Predict y based on the regression model
-		fmt.Printf("Prediction for %s: For x = %.2f, predicted y = %.2f\n\n", domain, newX, newY)
+		// Append the predicted gas price to the existing prices slice
+		prices = append(prices, price2023)
+
+		// Create and save the scatter plot with the extended x values
+		title := "Gas Price Prediction Scatter Plot (Extended)"
+		filename := "gas_scatter_plot_extended.png"
+		xLabel := "Year"
+		yLabel := "Average Gasoline Prices"
+		createScatterPlot(append(years, newX...), prices, a, b, title, filename, xLabel, yLabel)
+
+	// case airfare ---------------------------------------------------
+	case "airfare":
+		filePath := "airfare_data_price.json"
+		airfareData := readAirfareJSON(filePath)
+
+		// Extract prices, months, and inflation rate values
+		prices, months, _ := extractPricesYearsAndCPIAirfare(airfareData)
+
+		// Perform linear regression
+		indices := make([]float64, len(months))
+		for i := 0; i < len(months); i++ {
+			indices[i] = float64(i + 1)
+		}
+
+		// Perform linear regression
+		a, b := linearRegression(indices, prices)
+
+		// Output the prediction for new x values (months)
+		// Example new x values for prediction
+		newX := indices // Assuming you want to predict for the same months
+		var newY []float64
+
+		for _, xVal := range newX {
+			yVal := a*xVal + b // Predict y based on the regression model
+			newY = append(newY, yVal)
+		}
+
+		// Output the prediction for a new x value (month)
+		// Example new x value for prediction
+		// Predict y based on the regression model
+		fmt.Println("New X Values:")
+		for _, xVal := range newX {
+			fmt.Printf("%.2f ", xVal)
+		}
+		fmt.Println("\nPredicted Values:")
+		for _, yVal := range newY {
+			fmt.Printf("%.2f ", yVal)
+		}
+
+		// Create and save the scatter plot
+		title := "Airfare Price Prediction Scatter Plot"
+		filename := "airfare_scatter_plot.png"
+		xLabel := "Month Index"
+		yLabel := "Average Airfare Prices"
+		createScatterPlot(indices, prices, a, b, title, filename, xLabel, yLabel)
+
+	// case books __________________________________________________________________________________
+	case "books":
+		filePath := "books_data.json"
+		items := readJSON(filePath)
+
+		// Extract prices
+		prices := extractPrices(items)
+
+		// Print prices for troubleshooting
+		fmt.Println("Prices:", prices)
+
+		// Perform linear regression for books
+		indices := make([]float64, len(items))
+		for i := 0; i < len(items); i++ {
+			indices[i] = float64(i + 1)
+		}
+		// Perform linear regression
+		a, b := linearRegression(indices, prices)
+
+		// Output the prediction for new x values
+		newX := indices // Example new x values for prediction
+		var newY []float64
+
+		for _, xVal := range newX {
+			yVal := a*xVal + b // Predict y based on the regression model
+			newY = append(newY, yVal)
+		}
+
+		// Output the prediction for a new x value
+		// Example new x value for prediction
+		// Predict y based on the regression model
+		fmt.Println("New X Values:")
+		for _, xVal := range newX {
+			fmt.Printf("%.2f ", xVal)
+		}
+		fmt.Println("\nPredicted Values:")
+		for _, yVal := range newY {
+			fmt.Printf("%.2f ", yVal)
+		}
+
+		// Create and save the scatter plot
+		title := "Book Price Prediction Scatter Plot"
+		filename := "book_scatter_plot.png"
+		xLabel := "Book Index"
+		yLabel := "Price"
+		createScatterPlot(indices, prices, a, b, title, filename, xLabel, yLabel)
+
+	default:
+		log.Fatal("Unknown domain:", domain)
 	}
-
-	fmt.Println("Analysis complete.")
 }

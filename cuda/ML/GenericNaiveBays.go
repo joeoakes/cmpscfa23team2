@@ -3,23 +3,37 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"github.com/jdkato/prose/v2"
+	"io"
 	"math"
+	"math/rand"
 	"os"
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 )
+
+var stopWords = map[string]bool{
+	"and": true, "or": true, "the": true, "in": true,
+	"of": true, "a": true, "is": true, "to": true,
+	"with": true, "for": true, "s": true, "you": true,
+	"required": true, "then": true, "so": true, "our": true,
+	"your": true, "their": true, "'s": true, "her": true,
+	"him": true, "its": true, "he": true, "be": true,
+	"we": true, "as": true, "on": true,
+	// More stop words can be added here
+}
 
 // GenericTextData represents any text data with an associated category.
 type GenericTextData struct {
 	Title       *string `json:"title"`
 	URL         *string `json:"url"`
 	Description *string `json:"description"`
-	Price       *string `json:"price"`
+	Salary      *string `json:"salary"` // Changed from Price to Salary
 	Category    string  `json:"domain"`
-	Source      *string `json:"source"`
-	Timestamp   *string `json:"timestamp"`
+	Company     *string `json:"company"`  // Added Company
+	Location    *string `json:"location"` // Added Location
 }
 
 // NaiveBayesClassifier struct to hold model data.
@@ -28,6 +42,26 @@ type NaiveBayesClassifier struct {
 	categoryCounts   map[string]int
 	totalWords       int
 	totalUniqueWords int
+}
+
+// Define categoryProb struct
+type categoryProb struct {
+	Category string
+	Prob     float64
+}
+
+// JSONData structure to match your data format
+type JSONData struct {
+	Domain string `json:"domain"`
+	URL    string `json:"url"`
+	Data   []struct {
+		Title       string `json:"title"`
+		URL         string `json:"url"`
+		Description string `json:"description"`
+		Company     string `json:"company"`
+		Location    string `json:"location"`
+		Salary      string `json:"salary"`
+	} `json:"data"`
 }
 
 // NewNaiveBayesClassifier creates a new Naive Bayes Classifier.
@@ -40,26 +74,47 @@ func NewNaiveBayesClassifier() *NaiveBayesClassifier {
 	}
 }
 
-// stopWords is a map of common words to be excluded from the analysis.
-var stopWords = map[string]bool{
-	"and": true, "or": true, "the": true, "in": true,
-	"of": true, "a": true, "is": true, "to": true,
-	// More stop words can be added here
+func isStopWord(word string) bool {
+	// stopWords is a map of common words to be excluded from the analysis.
+	return stopWords[word]
 }
 
-// preprocessText preprocesses the text by converting it to lower case, removing punctuation, and excluding stop words.
-func preprocessText(text string) []string {
-	// Regular expression to match word characters
-	wordRegexp := regexp.MustCompile("\\b\\w+\\b")
+//// preprocessText preprocesses the text by converting it to lower case and excluding stop words.
+//func preprocessText(text string) ([]string, error) {
+//	doc, err := prose.NewDocument(text)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	var processedWords []string
+//	for _, token := range doc.Tokens() {
+//		word := strings.ToLower(token.Text)
+//		if !isStopWord(word) && token.Tag != "PUNCT" {
+//			processedWords = append(processedWords, word)
+//		}
+//	}
+//	return processedWords, nil
+//}
 
-	words := wordRegexp.FindAllString(strings.ToLower(text), -1)
+// preprocessText preprocesses the text by converting it to lower case and excluding stop words and special characters.
+func preprocessText(text string) ([]string, error) {
+	doc, err := prose.NewDocument(text)
+	if err != nil {
+		return nil, err
+	}
+	//fmt.Printf("Original Text: %s\n", text) // Debug original text
+
+	wordRegexp := regexp.MustCompile(`\b[a-zA-Z]{2,}\b`) // Match words with 2 or more letters
 	var processedWords []string
-	for _, word := range words {
-		if _, ok := stopWords[word]; !ok {
+
+	for _, token := range doc.Tokens() {
+		word := strings.ToLower(token.Text)
+		if wordRegexp.MatchString(word) && !isStopWord(word) {
 			processedWords = append(processedWords, word)
+			//fmt.Printf("Processed Word: %s\n", word) // Debug processed words
 		}
 	}
-	return processedWords
+	return processedWords, nil
 }
 
 // Train takes generic text data and trains the classifier.
@@ -67,9 +122,13 @@ func (nbc *NaiveBayesClassifier) Train(data []GenericTextData) {
 	uniqueWords := make(map[string]bool)
 
 	for _, item := range data {
-		// Check if Description is not nil before processing
-		if item.Description != nil {
-			words := preprocessText(*item.Description)
+		if item.Description != nil && item.Title != nil {
+			text := *item.Title + " " + *item.Description
+			words, err := preprocessText(text)
+			if err != nil {
+				fmt.Println("Error preprocessing text:", err)
+				continue
+			}
 			category := item.Category
 
 			if nbc.wordFrequencies[category] == nil {
@@ -81,6 +140,7 @@ func (nbc *NaiveBayesClassifier) Train(data []GenericTextData) {
 					uniqueWords[word] = true
 					nbc.totalUniqueWords++
 				}
+				//fmt.Printf("Training with category: %s, Word: %s, Frequency: %d\n", category, word, nbc.wordFrequencies[category][word])
 
 				nbc.wordFrequencies[category][word]++
 				nbc.totalWords++
@@ -104,312 +164,263 @@ func (nbc *NaiveBayesClassifier) calculateProbability(words []string, category s
 	return prob
 }
 
-// PredictWithProbabilities predicts the category for a given description and returns probabilities.
-func (nbc *NaiveBayesClassifier) PredictWithProbabilities(description *string) (string, map[string]float64) {
-	// Check if description is nil or empty before proceeding
-	if description == nil || *description == "" {
-		return "", nil
+// PredictWithProbabilities updated to return a sorted list of category probabilities
+func (nbc *NaiveBayesClassifier) PredictWithProbabilities(skills []string) []categoryProb {
+	if len(skills) == 0 {
+		return nil
 	}
 
-	words := preprocessText(*description) // Dereference the pointer to get the string value
-	if len(words) == 0 {
-		return "", nil // Return empty category if no words after preprocessing
+	var combinedSkills string
+	for _, skill := range skills {
+		processedSkill, err := preprocessText(skill)
+		if err != nil {
+			fmt.Println("Error preprocessing skill:", err)
+			continue
+		}
+		combinedSkills += strings.Join(processedSkill, " ") + " "
+	}
+
+	words, err := preprocessText(combinedSkills)
+	if err != nil {
+		fmt.Println("Error preprocessing skills:", err)
+		return nil
 	}
 
 	categoryProbabilities := make(map[string]float64)
 	for category := range nbc.categoryCounts {
 		prob := nbc.calculateProbability(words, category)
-		categoryProbabilities[category] = math.Exp(prob) // Convert log probability back
+		categoryProbabilities[category] += math.Exp(prob) // Sum probabilities for each category
 	}
 
-	// Get the category with the highest probability
-	var topCategory string
-	maxProb := 0.0
+	// Convert to a slice and sort by probability
+	var sortedCategories []categoryProb
 	for category, prob := range categoryProbabilities {
-		if prob > maxProb {
-			maxProb = prob
-			topCategory = category
-		}
+		fmt.Printf("Category: %s, Probability: %f\n", category, prob) // Debugging probabilities
+		sortedCategories = append(sortedCategories, categoryProb{category, prob})
 	}
-
-	return topCategory, categoryProbabilities
-}
-
-// displayTopCategories displays top 'n' categories based on probability.
-func displayTopCategories(probs map[string]float64, n int) {
-	type categoryProb struct {
-		Category string
-		Prob     float64
-	}
-	var sortedProbs []categoryProb
-	for category, prob := range probs {
-		sortedProbs = append(sortedProbs, categoryProb{category, prob})
-	}
-
-	sort.Slice(sortedProbs, func(i, j int) bool {
-		return sortedProbs[i].Prob > sortedProbs[j].Prob
+	sort.Slice(sortedCategories, func(i, j int) bool {
+		return sortedCategories[i].Prob > sortedCategories[j].Prob
 	})
 
-	for i := 0; i < n && i < len(sortedProbs); i++ {
-		fmt.Printf("%d. %s: %e\n", i+1, sortedProbs[i].Category, sortedProbs[i].Prob)
-	}
+	return sortedCategories
 }
 
-// JSON structure to match your data format
-type JSONData struct {
-	Items []struct {
-		Domain string `json:"domain"`
-		Data   struct {
-			Title       *string `json:"title"`
-			URL         *string `json:"url"`
-			Description *string `json:"description"`
-			Price       *string `json:"price"`
-			Metadata    *struct {
-				Source    *string `json:"source"`
-				Timestamp *string `json:"timestamp"`
-			} `json:"metadata"`
-		} `json:"data"`
-	} `json:"items"`
-}
-
-// LoadDataFromJSON updated to handle your JSON structure
-func LoadDataFromJSON(filename string) ([]GenericTextData, error) {
+// LoadDataFromJSON function updated to extract only title, description, and category
+func LoadDataFromJSON(filename string, dataChan chan<- []GenericTextData, errChan chan<- error) {
 	var jsonData JSONData
 	var data []GenericTextData
 
 	file, err := os.Open(filename)
 	if err != nil {
-		return nil, err
+		errChan <- err
+		return
 	}
 	defer file.Close()
 
-	byteValue, err := ioutil.ReadAll(file)
+	byteValue, err := io.ReadAll(file)
 	if err != nil {
-		return nil, err
+		errChan <- err
+		return
 	}
 
 	err = json.Unmarshal(byteValue, &jsonData)
 	if err != nil {
-		return nil, err
+		errChan <- err
+		return
 	}
 
-	for _, item := range jsonData.Items {
-		var source, timestamp *string
-		if item.Data.Metadata != nil {
-			source = item.Data.Metadata.Source
-			timestamp = item.Data.Metadata.Timestamp
-		}
+	for _, item := range jsonData.Data {
 		data = append(data, GenericTextData{
-			Title:       item.Data.Title,
-			URL:         item.Data.URL,
-			Description: item.Data.Description,
-			Price:       item.Data.Price,
-			Category:    item.Domain,
-			Source:      source,
-			Timestamp:   timestamp,
+			Title:       &item.Title,
+			Description: &item.Description,
+			Category:    jsonData.Domain,
 		})
 	}
+	fmt.Println("Loading data from:", filename) // Debugging statement
+	dataChan <- data                            // Send the data to the channel
 
-	return data, nil
 }
 
-// Helper function to convert string to *string
-func strPtr(s string) *string {
-	return &s
-}
+// LoadDataFromMultipleJSONFiles loads data from multiple JSON files.
+func LoadDataFromMultipleJSONFiles(filenames []string) ([]GenericTextData, error) {
+	dataChan := make(chan []GenericTextData, len(filenames))
+	errChan := make(chan error, len(filenames))
 
-// Function to return the slice of GenericTextData
-func getTrainingData() []GenericTextData {
-	return []GenericTextData{
-		// Agriculture
-		{Description: strPtr("Agricultural technology and farm management"), Category: "Agriculture"},
-		{Description: strPtr("Sustainable farming practices"), Category: "Agriculture"},
-
-		// Aerospace
-		{Description: strPtr("Aerospace engineering and avionics"), Category: "Aerospace"},
-		{Description: strPtr("Spacecraft design and systems engineering"), Category: "Aerospace"},
-
-		// Art
-		{Description: strPtr("Photography and visual arts"), Category: "Art"},
-		{Description: strPtr("Contemporary art curation and management"), Category: "Art"},
-
-		// Automotive
-		{Description: strPtr("Automotive engineering and design"), Category: "Automotive"},
-		{Description: strPtr("Electric vehicle technology"), Category: "Automotive"},
-
-		// Biotech
-		{Description: strPtr("Biotechnology research and genetic engineering"), Category: "Biotech"},
-		{Description: strPtr("Clinical trial management in biotech"), Category: "Biotech"},
-
-		// Culinary
-		{Description: strPtr("Culinary arts and restaurant management"), Category: "Culinary"},
-		{Description: strPtr("Gourmet cuisine and fine dining"), Category: "Culinary"},
-
-		// Design
-		{Description: strPtr("Graphic design and digital media creation"), Category: "Design"},
-		{Description: strPtr("Interior design and space planning"), Category: "Design"},
-
-		// Education
-		{Description: strPtr("Educational curriculum design and teaching"), Category: "Education"},
-		{Description: strPtr("Educational technology and e-learning"), Category: "Education"},
-
-		// Energy
-		{Description: strPtr("Renewable energy and green technologies"), Category: "Energy"},
-		{Description: strPtr("Oil and gas exploration and production"), Category: "Energy"},
-
-		// Engineering
-		{Description: strPtr("Civil engineering and infrastructure development"), Category: "Engineering"},
-		{Description: strPtr("Mechanical engineering in manufacturing"), Category: "Engineering"},
-
-		// Environmental
-		{Description: strPtr("Environmental policy and sustainability"), Category: "Environmental"},
-		{Description: strPtr("Conservation biology and ecosystem management"), Category: "Environmental"},
-
-		// Event Management
-		{Description: strPtr("Event planning and management"), Category: "Event Management"},
-		{Description: strPtr("Corporate event coordination"), Category: "Event Management"},
-
-		// Fashion
-		{Description: strPtr("Fashion design and apparel merchandising"), Category: "Fashion"},
-		{Description: strPtr("Trend forecasting in fashion"), Category: "Fashion"},
-
-		// Finance
-		{Description: strPtr("Managing financial assets"), Category: "Finance"},
-		{Description: strPtr("Investment banking and asset management"), Category: "Finance"},
-
-		// Fitness
-		{Description: strPtr("Fitness training and sports coaching"), Category: "Fitness"},
-		{Description: strPtr("Health and wellness coaching"), Category: "Fitness"},
-
-		// Healthcare
-		{Description: strPtr("Nursing care and patient management"), Category: "Healthcare"},
-		{Description: strPtr("Clinical psychology and mental health counseling"), Category: "Healthcare"},
-
-		// Hospitality
-		{Description: strPtr("Hospitality services and hotel management"), Category: "Hospitality"},
-		{Description: strPtr("Travel and tourism management"), Category: "Hospitality"},
-
-		// HR
-		{Description: strPtr("Human resources policies and employee relations"), Category: "HR"},
-		{Description: strPtr("Talent acquisition and recruitment"), Category: "HR"},
-
-		// Journalism
-		{Description: strPtr("Journalism and news reporting"), Category: "Journalism"},
-		{Description: strPtr("Investigative journalism and documentary production"), Category: "Journalism"},
-
-		// Legal
-		{Description: strPtr("Legal compliance and corporate law"), Category: "Legal"},
-		{Description: strPtr("Intellectual property law and patent strategy"), Category: "Legal"},
-
-		// Marketing
-		{Description: strPtr("Marketing strategy and brand development"), Category: "Marketing"},
-		{Description: strPtr("Digital marketing and social media strategy"), Category: "Marketing"},
-
-		// Media
-		{Description: strPtr("Film production and media arts"), Category: "Media"},
-		{Description: strPtr("Broadcast journalism and television production"), Category: "Media"},
-
-		// Operations
-		{Description: strPtr("Supply chain logistics and management"), Category: "Operations"},
-		{Description: strPtr("Business operations and process improvement"), Category: "Operations"},
-
-		// Pharmaceutical
-		{Description: strPtr("Pharmaceutical research and development"), Category: "Pharmaceutical"},
-		{Description: strPtr("Regulatory affairs in pharmaceuticals"), Category: "Pharmaceutical"},
-
-		// Politics
-		{Description: strPtr("International diplomacy and policy analysis"), Category: "Politics"},
-		{Description: strPtr("Political campaign management and strategy"), Category: "Politics"},
-
-		// Public Relations
-		{Description: strPtr("Public relations and corporate communications"), Category: "Public Relations"},
-		{Description: strPtr("Crisis communication and reputation management"), Category: "Public Relations"},
-
-		// Real Estate
-		{Description: strPtr("Real estate development and property management"), Category: "Real Estate"},
-		{Description: strPtr("Commercial real estate investment and brokerage"), Category: "Real Estate"},
-
-		// Retail
-		{Description: strPtr("Retail sales management and merchandising"), Category: "Retail"},
-		{Description: strPtr("E-commerce and digital retail strategy"), Category: "Retail"},
-
-		// Technology
-		{Description: strPtr("Software development in Go"), Category: "Technology"},
-		{Description: strPtr("Developing advanced machine learning models"), Category: "Technology"},
-
-		// Veterinary
-		{Description: strPtr("Veterinary services and animal care"), Category: "Veterinary"},
-		{Description: strPtr("Animal nutrition and wellness"), Category: "Veterinary"},
+	for _, filename := range filenames {
+		go LoadDataFromJSON(filename, dataChan, errChan) // Start a goroutine
 	}
+
+	var combinedData []GenericTextData
+	for i := 0; i < len(filenames); i++ {
+		select {
+		case data := <-dataChan:
+			combinedData = append(combinedData, data...)
+		case err := <-errChan:
+			return nil, err
+		}
+	}
+	close(dataChan)
+	close(errChan)
+	fmt.Println("Data loading complete. Number of entries loaded:", len(combinedData)) // Debugging statement
+
+	return combinedData, nil
+}
+func getMostFrequentWords(data []GenericTextData, topN int) []string {
+	wordFrequency := make(map[string]int)
+	wordSet := make(map[string]bool) // Set to keep track of unique words
+
+	for _, item := range data {
+		if item.Description != nil {
+			words, err := preprocessText(*item.Description)
+			if err != nil {
+				fmt.Println("Error preprocessing text:", err)
+				continue
+			}
+			for _, word := range words {
+				if _, isStopWord := stopWords[word]; !isStopWord && !wordSet[word] {
+					wordFrequency[word]++
+					wordSet[word] = true // Mark word as seen
+				}
+			}
+		}
+	}
+
+	// Convert to slice and sort
+	type wordCountPair struct {
+		Word  string
+		Count int
+	}
+	var sortedWords []wordCountPair
+	for word, count := range wordFrequency {
+		sortedWords = append(sortedWords, wordCountPair{word, count})
+	}
+	sort.Slice(sortedWords, func(i, j int) bool {
+		return sortedWords[i].Count > sortedWords[j].Count
+	})
+
+	// Extract top N words
+	var topWords []string
+	for i := 0; i < topN && i < len(sortedWords); i++ {
+		topWords = append(topWords, sortedWords[i].Word)
+	}
+	return topWords
 }
 
-// prints non-empty fields from the GenericTextData
-func getScrapedData() {
-	jsonFile := "C:\\Users\\Public\\GoLandProjects\\PredictAi\\cuda\\ML\\scrapedData.json"
-	//fmt.Println(jsonFile)
+//// Function to extract and sort the most frequent words from the dataset
+//func getMostFrequentWords(data []GenericTextData, topN int) []string {
+//	wordFrequency := make(map[string]int)
+//
+//	for _, item := range data {
+//		if item.Description != nil {
+//			words, err := preprocessText(*item.Description)
+//			if err != nil {
+//				fmt.Println("Error preprocessing text:", err)
+//				continue
+//			}
+//			for _, word := range words {
+//				if _, isStopWord := stopWords[word]; !isStopWord {
+//					wordFrequency[word]++
+//				}
+//			}
+//		}
+//	}
+//	// Convert to slice and sort
+//	type wordCountPair struct {
+//		Word  string
+//		Count int
+//	}
+//	var sortedWords []wordCountPair
+//	for word, count := range wordFrequency {
+//		fmt.Printf("Top skill: %s, Frequency: %d\n", word, count) // Debug top skills
+//		sortedWords = append(sortedWords, wordCountPair{word, count})
+//	}
+//	sort.Slice(sortedWords, func(i, j int) bool {
+//		return sortedWords[i].Count > sortedWords[j].Count
+//	})
+//
+//	// Extract top N words
+//	var topWords []string
+//	for i := 0; i < topN && i < len(sortedWords); i++ {
+//		topWords = append(topWords, sortedWords[i].Word)
+//	}
+//	return topWords
+//}
 
-	jsonData, err := LoadDataFromJSON(jsonFile)
+func main() {
+	startTime := time.Now()
+
+	jsonFiles := []string{
+		"C:\\Users\\Public\\GoLandProjects\\PredictAi\\crab\\indeed_jobs.json",
+		"C:\\Users\\Public\\GoLandProjects\\PredictAi\\crab\\indeed_jobs2.json",
+		"C:\\Users\\Public\\GoLandProjects\\PredictAi\\crab\\indeed_jobs3.json",
+	}
+
+	// Load and combine data from all JSON files
+	combinedData, err := LoadDataFromMultipleJSONFiles(jsonFiles)
 	if err != nil {
-		fmt.Println("Error loading data from JSON:", err)
+		fmt.Println("Error loading data:", err)
 		os.Exit(1)
 	}
 
-	for _, item := range jsonData {
-		fmt.Println("Category:", item.Category)
-		if item.Title != nil && *item.Title != "" {
-			fmt.Println("Title:", *item.Title)
-		}
-		if item.URL != nil && *item.URL != "" {
-			fmt.Println("URL:", *item.URL)
-		}
-		if item.Description != nil && *item.Description != "" {
-			fmt.Println("Description:", *item.Description)
-		}
-		if item.Price != nil && *item.Price != "" {
-			fmt.Println("Price:", *item.Price)
-		}
-		if item.Source != nil && *item.Source != "" {
-			fmt.Println("Source:", *item.Source)
-		}
-		if item.Timestamp != nil && *item.Timestamp != "" {
-			fmt.Println("Timestamp:", *item.Timestamp)
-		}
-		fmt.Println()
-	}
-}
-func main() {
-	getScrapedData()
-	fmt.Println()
+	// Debugging: Print the size of the combined data
+	fmt.Println("Total data size before shuffle and split:", len(combinedData))
 
-	data := getTrainingData()
+	// Shuffle and split data
+	// Creating a new random source for reproducible sequences
+	src := rand.NewSource(time.Now().UnixNano())
+	rnd := rand.New(src)
 
+	// Shuffle and split data using the new random source
+	rnd.Shuffle(len(combinedData), func(i, j int) { combinedData[i], combinedData[j] = combinedData[j], combinedData[i] })
+	trainDataSize := int(float64(len(combinedData)) * 0.7)
+	trainData := combinedData[:trainDataSize]
+
+	// Debugging: Print the size of the training data
+	fmt.Println("Training data size after split:", len(trainData))
+
+	// Train classifier
 	classifier := NewNaiveBayesClassifier()
-	classifier.Train(data)
+	classifier.Train(trainData)
 
-	newJobListing := "Programming in Python and Go"
-	predictedIndustry, probs := classifier.PredictWithProbabilities(&newJobListing)
+	//testSkillsSets := [][]string{
+	//	{"cybersecurity", "encryption", "network security"}, // Cybersecurity skills
+	//	{"patient care", "nursing", "medical diagnosis"},    // Healthcare skills
+	//	{"financial analysis", "business development"},      // Business skills
+	//	// Add more skill sets as needed
+	//}
 
-	fmt.Printf("Predicted Industry: %s\n", predictedIndustry)
-	fmt.Println("Top Industries with Probabilities:")
-	displayTopCategories(probs, 3)
+	// Use the getMostFrequentWords function to generate dynamic skill sets
+	topSkills := getMostFrequentWords(trainData, 3) // Get top 5 frequent skills from training data
 
-	// Test Case 1 - this doesn't work right
-	testJobDescription1 := "Designing user interfaces and user experiences"
-	predictedIndustry1, _ := classifier.PredictWithProbabilities(&testJobDescription1)
-	fmt.Printf("Test 1 - Job Description: '%s'\nPredicted Industry: %s\n\n", testJobDescription1, predictedIndustry1)
+	// Test the classifier with dynamically generated skills
+	for _, skill := range topSkills {
+		if _, isStopWord := stopWords[skill]; !isStopWord {
+			testSkills := []string{skill}
+			sortedCategories := classifier.PredictWithProbabilities(testSkills)
 
-	// Test Case 2
-	testJobDescription2 := "Developing policies for environmental conservation"
-	predictedIndustry2, _ := classifier.PredictWithProbabilities(&testJobDescription2)
-	fmt.Printf("Test 2 - Job Description: '%s'\nPredicted Industry: %s\n\n", testJobDescription2, predictedIndustry2)
+			for _, categoryProb := range sortedCategories {
+				fmt.Printf("Job titles relevant to '%s' skill in the '%s' category:\n", skill, categoryProb.Category)
+				count := 0
+				uniqueTitles := make(map[string]bool) // Map to keep track of unique titles
 
-	// Test Case 3
-	testJobDescription3 := "Managing investment portfolios and financial risks"
-	predictedIndustry3, _ := classifier.PredictWithProbabilities(&testJobDescription3)
-	fmt.Printf("Test 3 - Job Description: '%s'\nPredicted Industry: %s\n\n", testJobDescription3, predictedIndustry3)
+				for _, job := range combinedData {
+					if job.Category == categoryProb.Category && job.Title != nil {
+						title := *job.Title
+						if strings.Contains(strings.ToLower(*job.Description), skill) && !uniqueTitles[title] {
+							fmt.Printf("Title: %s\n", title)
+							uniqueTitles[title] = true
+							count++
+							if count >= 3 { // Limit to top 3 unique job titles
+								break
+							}
+						}
+					}
+				}
+				fmt.Println()
+			}
+		}
+	}
 
-	// Test Case 4
-	testJobDescription4 := "Culinary techniques and kitchen management"
-	predictedIndustry4, _ := classifier.PredictWithProbabilities(&testJobDescription4)
-	fmt.Printf("Test 4 - Job Description: '%s'\nPredicted Industry: %s\n", testJobDescription4, predictedIndustry4)
+	elapsedTime := time.Since(startTime)
+	fmt.Printf("Execution time: %s\n", elapsedTime)
 }

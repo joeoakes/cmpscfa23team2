@@ -55,8 +55,10 @@ func setupServer() {
 	}
 }
 
+// Web Page Routes (set up login as first page):
 func setupRoutes(tmpl *template.Template) {
-	http.HandleFunc("/", makeHandler(tmpl, "home"))
+	http.HandleFunc("/", makeHandler(tmpl, "login"))
+	http.HandleFunc("/home", makeHandler(tmpl, "home"))
 	http.HandleFunc("/about", makeHandler(tmpl, "about"))
 	http.HandleFunc("/contributors", makeHandler(tmpl, "contributors"))
 	http.HandleFunc("/login", makeHandler(tmpl, "login"))
@@ -143,7 +145,7 @@ func loginHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Reques
 		})
 
 		// Redirect to the dashboard or home page
-		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+		http.Redirect(w, r, "/home", http.StatusSeeOther)
 
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

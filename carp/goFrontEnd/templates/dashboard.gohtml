@@ -52,6 +52,12 @@
                 <h4>CUDA Status</h4>
                 <p>"wow amazing pErForManCe"</p>
             </div>
+
+
+
+
+
+
             <div class="tab-pane fade" id="carp" role="tabpanel" aria-labelledby="carp-tab">
                 <!-- CARP Settings -->
                 <button class="btn btn-primary btn-settings" data-target="carp-manage-subscriptions" >Manage Subscriptions</button>
@@ -107,6 +113,7 @@
                 <h4>CARP Update Distribution Lists</h4>
                 <p>"wow amazing Listss"</p>
             </div>
+
             <div id="carp-monitor-performance" class="content-container" style="display:none;">
                 <h4>CARP Analyze Traffic</h4>
                 <p>"wow amazing Traffic"</p>
@@ -159,8 +166,46 @@
                         showContent(targetId);
                     });
                 });
-        });
-    </script>
+            </div>
+
+        </div>
+    </div>
+    <style>
+        .card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            background-color: #fff;
+            background-clip: border-box;
+            border: 0 solid transparent;
+            border-radius: 0;
+        }
+        .btn-circle.btn-lg, .btn-group-lg>.btn-circle.btn {
+            width: 50px;
+            height: 50px;
+            padding: 14px 15px;
+            font-size: 18px;
+            line-height: 23px;
+        }
+        .text-muted {
+            color: #8898aa!important;
+        }
+        [type=button]:not(:disabled), [type=reset]:not(:disabled), [type=submit]:not(:disabled), button:not(:disabled) {
+            cursor: pointer;
+        }
+        .btn-circle {
+            border-radius: 100%;
+            width: 40px;
+            height: 40px;
+            padding: 10px;
+        }
+        .user-table tbody tr .category-select {
+            max-width: 150px;
+            border-radius: 20px;
+        }
+    </style>
 
     <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>

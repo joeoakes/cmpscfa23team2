@@ -143,23 +143,20 @@ CREATE TABLE IF NOT EXISTS webcrawlers (
                                            created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
--- Table for the scraper engine
-CREATE TABLE IF NOT EXISTS scraper_engine (
-                                              engine_id CHAR(36) PRIMARY KEY,
-                                              engine_name NVARCHAR(50),
-                                              engine_description VARCHAR(250),
-                                              time_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
-);
+-- -- Table for the scraper engine
+-- CREATE TABLE IF NOT EXISTS scraper_engine (
+--                                               engine_id CHAR(36) PRIMARY KEY,
+--                                               engine_name NVARCHAR(50),
+--                                               engine_description VARCHAR(250),
+--                                               time_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+-- );
 
 -- Table for predictions
 CREATE TABLE IF NOT EXISTS predictions (
-                                           prediction_id INT PRIMARY KEY AUTO_INCREMENT,
-                                           engine_id CHAR(36),
-                                           prediction_tag CHAR(64),  -- New field for clustering similar predictions
+                                           prediction_id CHAR(36) PRIMARY KEY, -- Using CHAR(36) for UUID
                                            input_data TEXT,
-                                           prediction_info JSON,
-                                           prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                           FOREIGN KEY (engine_id) REFERENCES scraper_engine (engine_id)
+                                           prediction_info TEXT,
+                                           prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
 
@@ -245,16 +242,14 @@ DELIMITER ;
 -- SECTION: CUDA SPROCS
 -- ================================================
 
--- Stored Procedure to add a new prediction
 DELIMITER //
 CREATE PROCEDURE create_prediction(
-    IN p_engine_id CHAR(36),
-    IN p_prediction_tag CHAR(64),  -- New parameter
+    IN p_prediction_id CHAR(36),        -- UUID parameter
     IN p_prediction_info JSON
 )
 BEGIN
-    INSERT INTO predictions (engine_id, prediction_tag, prediction_info)
-    VALUES (p_engine_id, p_prediction_tag, p_prediction_info);
+    INSERT INTO predictions (prediction_id,prediction_info)
+    VALUES (p_prediction_id, p_prediction_info);
 END //
 DELIMITER ;
 
@@ -340,28 +335,6 @@ BEGIN
 END //
 DELIMITER ;
 
--- USE goengine;
-
--- DELIMITER //
-
--- DROP PROCEDURE IF EXISTS InsertLog;
--- CREATE PROCEDURE InsertLog(
---     IN pStatusCode VARCHAR(3),
---     IN pMessage VARCHAR(250),
---     IN pGoEngineArea VARCHAR(250)
--- )
--- BEGIN
---     DECLARE pLogID CHAR(36);
---     IF LENGTH(pStatusCode) > 3 THEN
---         SIGNAL SQLSTATE '45000'
---         SET MESSAGE_TEXT = 'Data too long for column pStatusCode';
---         RETURN;
---     END IF;
---     SET pLogID = UUID();
---     INSERT INTO log (logID, statusCode, message, goEngineArea)
---     VALUES (pLogID, pStatusCode, pMessage, pGoEngineArea);
--- END//
--- DELIMITER ;
 
 DELIMITER //
 
@@ -410,32 +383,6 @@ END //
 DELIMITER ;
 DELIMITER //
 
--- CREATE PROCEDURE PopulateLog()
--- BEGIN
---     DECLARE statusCodeExists INT;
-
---     SELECT COUNT(*) INTO statusCodeExists FROM logstatuscodes WHERE statusCode IN ('ERR', 'WAR', 'OPR');
-
---     IF statusCodeExists = 3 THEN
---         IF (SELECT COUNT(*) FROM log) = 0 THEN
---             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
---             VALUES (UUID(), 'ERR', 'An Error has occurred in the following area', 'CARP', NOW());
-
---             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
---             VALUES (UUID(), 'WAR', 'A Warning has been issued in the following area', 'CRAB', NOW());
-
---             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
---             VALUES (UUID(), 'OPR', 'Normal Operational Requirements have been met in the following area', 'CUDA', NOW());
---         END IF;
---     ELSE
---         -- If required code is missing from statusCodes, then this error is given
---         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Missing required status codes in logstatuscodes table.';
---     END IF;
--- END //
-
--- DELIMITER ;
-
--- CALL PopulateLog();
 
 select * from log
 -- Reset the delimiter back to default
@@ -566,19 +513,19 @@ END //
 DELIMITER ;
 
 -- Stored Procedure to add a new scraper engine
-DELIMITER //
-CREATE PROCEDURE create_scraper_engine(
-    IN p_engine_name NVARCHAR(50),
-    IN p_engine_description VARCHAR(250)
-)
-BEGIN
-    DECLARE v_engine_id CHAR(36);
-    -- Generating a unique identifier and assigning it to v_engine_id
-    SET v_engine_id = UUID();
-    INSERT INTO scraper_engine(engine_id, engine_name, engine_description)
-    VALUES (v_engine_id, p_engine_name, p_engine_description);
-    SELECT v_engine_id;
-END //
+-- DELIMITER //
+-- CREATE PROCEDURE create_scraper_engine(
+--     IN p_engine_name NVARCHAR(50),
+--     IN p_engine_description VARCHAR(250)
+-- )
+-- BEGIN
+--     DECLARE v_engine_id CHAR(36);
+--     -- Generating a unique identifier and assigning it to v_engine_id
+--     SET v_engine_id = UUID();
+--     INSERT INTO scraper_engine(engine_id, engine_name, engine_description)
+--     VALUES (v_engine_id, p_engine_name, p_engine_description);
+--     SELECT v_engine_id;
+-- END //
 DELIMITER ;
 
 -- SPROC to insert URL records into the URLs table
@@ -904,28 +851,6 @@ BEGIN
 END //
 DELIMITER ;
 
-
-# Old method
-# DELIMITER //
-# CREATE PROCEDURE authenticate_user(
-#     IN p_user_login NVARCHAR(36),
-#     IN p_user_password VARBINARY(255)
-# )
-# BEGIN
-#     DECLARE v_user_id CHAR(36);
-#     DECLARE v_authenticated BOOLEAN;
-#
-#     -- Check if the login and hashed password match any user
-#     SELECT user_id INTO v_user_id FROM users
-#     WHERE user_login = p_user_login AND user_password = p_user_password;
-#
-#     -- Determine if the user is authenticated
-#     SET v_authenticated = (v_user_id IS NOT NULL);
-#
-#     SELECT v_authenticated, v_user_id;
-# END //
-# DELIMITER ;
-
 DELIMITER //
 -- Procedure to create a new session for a user
 CREATE PROCEDURE create_session(
@@ -952,26 +877,27 @@ END //
 DELIMITER ;
 
 DELIMITER  //
+-- Procedure to validate a user's token
 CREATE PROCEDURE validate_refresh_token(
-    IN p_token VARBINARY(255)
+    IN p_token VARCHAR(255)
 )
 BEGIN
-    SELECT user_id
+    SELECT user_id, token, expiry
     FROM refresh_tokens
-    WHERE token = p_token AND expiry > CURRENT_TIMESTAMP;
-
+    WHERE token = p_token;
 END //
-DELIMITER ;
 
-DELIMITER //
+-- Procedure to issue a new refresh token
 CREATE PROCEDURE issue_refresh_token(
     IN p_user_id CHAR(36),
     IN p_token VARBINARY(255)
 )
 BEGIN
+    DELETE FROM refresh_tokens WHERE user_id = p_user_id;
     INSERT INTO refresh_tokens (token_id, user_id, token, expiry)
     VALUES (UUID(), p_user_id, p_token, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 7 DAY));
 END //
+
 DELIMITER ;
 
 DELIMITER //
@@ -1054,8 +980,15 @@ INSERT INTO users (user_id, user_name, user_login, user_role, user_password, act
 VALUES
     (UUID(), 'Joesph Oakes', 'jxo19', 'ADM', 'admin123', TRUE, CURRENT_TIMESTAMP()),
     (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', 'dev789', TRUE, CURRENT_TIMESTAMP()),
-    (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', 'std447', TRUE, CURRENT_TIMESTAMP()),
-    (UUID(), 'Test', 'test_user', 'USR', 'hashed_password_here', TRUE, CURRENT_TIMESTAMP());
+    (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', 'std447', TRUE, CURRENT_TIMESTAMP());
+
+-- Inserting sample users into the users table
+INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
+VALUES
+    ('9c0f0ac1-8d78-11ee-b6e0-4c796ed97681', 'test1', 'test1@test.com', 'USR', '$2a$10$6nsLKZMGjnG4osvBN3AbUOIvOnYXXZVrbcgdYY419OYUsGzqDlDMG', TRUE, '2023-11-27 17:59:24'),
+    ('a2eb8427-8d78-11ee-b6e0-4c796ed97681', 'test2', 'test2@test.com', 'USR', '$2a$10$M8s0NhMKr24C6bSwlWBfY.4pPSnWtHIAAVY5qKRPfnoXZAFvzcmgW', TRUE, '2023-11-27 17:59:36'),
+    (UUID(), 'hansi', 'hansi@hansi.com', 'USR', '$2a$10$C4ZoMvNpBqJ8MB9LMLzQye2uXvQKPujw1SXccnuLJ/frYoG6GUOZy', TRUE, CURRENT_TIMESTAMP());
+
 
 
 -- Inserting sample URLs into the URLs table

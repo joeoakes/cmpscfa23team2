@@ -190,18 +190,19 @@ footer.bg-dark .text-muted {
   margin: auto; /* Centering the card */
 }
 
+#image-description {
+  margin-bottom: 15px; /* Space between the description and image */
+  padding: 10px;
+  background-color: rgba(0, 123, 255, 0.1); /* Light blue background */
+  border-left: 4px solid #007bff; /* Blue accent border */
+  color: #007bff; /* Text color */
+  font-weight: 500; /* Semi-bold font */
+  text-align: left;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  font-size: 0.9rem; /* Font size */
+}
 
-.card {
-   position: relative;
-   display: flex;
-   flex-direction: column;
-   min-width: 0;
-   word-wrap: break-word;
-   background-color: #fff;
-   background-clip: border-box;
-   border: 0 solid transparent;
-   border-radius: 0;
- }
 .btn-circle.btn-lg, .btn-group-lg>.btn-circle.btn {
   width: 50px;
   height: 50px;
@@ -237,4 +238,3 @@ footer.bg-dark .text-muted {
   font-size: 0.8rem;
   padding: 0.25rem 0.5rem;
   margin-right: 10px;
-}

@@ -2,19 +2,20 @@ import os
 from multiprocessing import Pool
 from urllib.robotparser import RobotFileParser
 import et as et
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import json
 import random
 import datetime
-from urllib.robotparser import RobotFileParser
+import re
 from bs4 import BeautifulSoup
 from lxml import etree as et
-from selenium.webdriver.support import expected_conditions as EC
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
-import time
+from selenium.webdriver.edge.options import Options as EdgeOptions
+
 
 
 def get_random_user_agent():
@@ -179,6 +180,7 @@ def __scrape_indeed_page(job_url):
             "company": company,
             "location": location,
             "salary": salary,
+            "description": description
         }
     finally:
         driver.quit()
@@ -228,25 +230,39 @@ def __extract_element_text(wait, by, locator, default_text):
         return default_text
 
 
+
 def __extract_job_description(wait):
     try:
         description_container = wait.until(EC.presence_of_element_located((By.ID, "jobDescriptionText")))
-        # Select <p>, <ul>, <li>, and <br> elements
-        description_elements = description_container.find_elements(By.XPATH, './/p|.//ul/li|.//br')
+        html_content = description_container.get_attribute('outerHTML')
+        soup = BeautifulSoup(html_content, 'html.parser')
 
         description_texts = []
-        for element in description_elements:
-            if element.tag_name == 'li':
-                description_texts.append('• ' + element.text)
-            elif element.tag_name == 'br':
-                # Add a newline for <br> elements to maintain formatting
-                description_texts.append('\n')
-            else:
-                # For other elements, add their text directly
-                description_texts.append(element.text)
+        capture = False
 
-        return ' '.join(description_texts).strip()
-    except Exception:
+        # Define the keywords and bullet point indicators
+        keywords = [r'qualifications:', r'experience', r'requirements:', r'desired skills:', r'minimum qualifications', r'recruitment requirements:', r'responsibilities:', r'required experience', r'position requirements:', r'skills']
+        bullet_indicators = ['-', '•', '*']  # Add more indicators if needed
+
+        for element in soup.find_all(['p', 'li']):
+            text = element.get_text(strip=True)
+            lower_text = text.lower()
+
+            if any(re.search(keyword, lower_text, re.IGNORECASE) for keyword in keywords):
+                capture = True
+                continue  # Skip adding the keyword itself to the output
+
+            if capture:
+                if element.name == 'li' or any(text.startswith(indicator) for indicator in bullet_indicators):
+                    # Capture bullet points and lines that look like bullet points
+                    description_texts.append(text)
+                elif not any(text.startswith(indicator) for indicator in bullet_indicators):
+                    # Stop capturing on encountering a non-bullet point line
+                    capture = False
+
+        return '\n'.join(description_texts).strip()
+    except Exception as e:
+        print(f"Error in extracting job description: {e}")
         return "Not Available"
 
 def get_web_driver():
@@ -278,7 +294,7 @@ def get_web_driver():
 def scrape(location_search_keyword='', scrape_option=0) -> None:
     driver = get_web_driver()
 
-    domains = ['Healthcare', 'Business', 'Cybersecurity']
+    domains = ['Software Engineer']
     all_data = []
 
     for domain in domains:

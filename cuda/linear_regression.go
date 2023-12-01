@@ -13,7 +13,80 @@ import (
 	"strings"
 )
 
-// for gas: -----------------------------------------------------------------------------------------
+// for airfare: -------------------------------------------------------------------------------------
+// JSONData represents the structure of your entire JSON data
+type JSONAirfareData struct {
+	Domain string      `json:"domain"`
+	Data   AirfareData `json:"data"`
+}
+
+// AirfareData represents the structure of each item in the JSON data for airfare
+type AirfareData struct {
+	Title          string            `json:"title"`
+	Year           string            `json:"year"`
+	Location       string            `json:"location"`
+	Features       []string          `json:"features"`
+	AdditionalInfo AirfareAdditional `json:"additional_info"`
+	Metadata       AirfareMetadata   `json:"metadata"`
+}
+
+// AirfareAdditional represents additional information for airfare data
+type AirfareAdditional struct {
+	Country    string         `json:"country"`
+	MonthsData []AirfareMonth `json:"months_data"`
+}
+
+// AirfareMonth represents each month's data for airfare
+type AirfareMonth struct {
+	Month string `json:"month"`
+	Rate  string `json:"rate"`
+}
+
+// AirfareMetadata represents metadata for airfare data
+type AirfareMetadata struct {
+	Source    string `json:"source"`
+	Timestamp string `json:"timestamp"`
+}
+
+// readAirfareJSON reads airfare JSON data from a file and returns a slice of AirfareData
+func readAirfareJSON(filePath string) AirfareData {
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	var data JSONAirfareData
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return data.Data
+}
+
+// extractPricesYearsAndCPIAirfare extracts numerical values from AirfareData and returns prices, months, and cpiValues
+func extractPricesYearsAndCPIAirfare(data AirfareData) ([]float64, []string, []float64) {
+	var prices []float64
+	var months []string
+	var cpiValues []float64
+
+	for _, monthData := range data.AdditionalInfo.MonthsData {
+		priceStr := strings.ReplaceAll(monthData.Rate, "$", "")
+		price, err := strconv.ParseFloat(priceStr, 64)
+		if err != nil {
+			// Skip invalid entries
+			continue
+		}
+
+		prices = append(prices, price)
+		months = append(months, monthData.Month)
+	}
+
+	return prices, months, cpiValues
+}
+
+// for gas: -------------------------------------------------------------------------------------
 // JSONData represents the structure of your entire JSON data
 type JSONGasData struct {
 	Domain string         `json:"domain"`
@@ -74,14 +147,12 @@ func extractPricesYearsAndCPI(items []GasolineData) ([]float64, []float64, []flo
 		prices = append(prices, price)
 		years = append(years, year)
 		cpiValues = append(cpiValues, cpi)
-
-		// fmt.Printf("Item %d Year: %.2f, Price: %.2f, CPI: %.2f\n", i+1, year, price, cpi)
 	}
 
 	return prices, years, cpiValues
 }
 
-// for books ---------------------------------------------------------------------------------------
+// for books --------------------------------------------------------------------------------------
 
 // JSONData represents the structure of your entire JSON data
 type JSONData struct {
@@ -136,7 +207,7 @@ func extractPrices(items []Item) []float64 {
 	return prices
 }
 
-// LINEAR REGRESSION --------------------------------------------------------------------------------
+// LINEAR REGRESSION -----------------------------------------------------------------------
 
 // linearRegression calculates the coefficients for a simple linear regression model (y = ax + b).
 func linearRegression(x, y []float64) (a, b float64) {
@@ -183,7 +254,7 @@ func linearRegressionThreeVariables(x1, x2, y []float64) (a, b, c float64) {
 	return a, b, c
 }
 
-// SCATTER PLOT ------------------------------------------------------------------------------------
+// SCATTER PLOT --------------------------------------------------------------------------------
 
 // createScatterPlot creates and saves a scatter plot with the linear regression line.
 func createScatterPlot(x, y []float64, a, b float64, title, filename, xLabel, yLabel string) {
@@ -221,7 +292,7 @@ func createScatterPlot(x, y []float64, a, b float64, title, filename, xLabel, yL
 func main() {
 	// Accept user input for domain
 	var domain string
-	fmt.Print("Enter domain (gas/books): ")
+	fmt.Print("Enter domain (gas/books/airfare): ")
 	fmt.Scan(&domain)
 
 	// Handle different domains
@@ -254,7 +325,7 @@ func main() {
 		cpi2023 := 349.189
 		price2023 := (0.10 * (a*year2023 + b*cpi2023 + c))
 
-		fmt.Printf("Predicted Gas Price for 2023: $%.2f\n", price2023)
+		fmt.Printf("Predicted Gas Price for 2023: %.2f\n", price2023)
 
 		// Append the predicted gas price to the existing prices slice
 		prices = append(prices, price2023)
@@ -266,7 +337,53 @@ func main() {
 		yLabel := "Average Gasoline Prices"
 		createScatterPlot(append(years, newX...), prices, a, b, title, filename, xLabel, yLabel)
 
-	// case books ____________________________________________________________________________________
+	// case airfare ---------------------------------------------------
+	case "airfare":
+		filePath := "airfare_data_price.json"
+		airfareData := readAirfareJSON(filePath)
+
+		// Extract prices, months, and inflation rate values
+		prices, months, _ := extractPricesYearsAndCPIAirfare(airfareData)
+
+		// Perform linear regression
+		indices := make([]float64, len(months))
+		for i := 0; i < len(months); i++ {
+			indices[i] = float64(i + 1)
+		}
+
+		// Perform linear regression
+		a, b := linearRegression(indices, prices)
+
+		// Output the prediction for new x values (months)
+		// Example new x values for prediction
+		newX := indices // Assuming you want to predict for the same months
+		var newY []float64
+
+		for _, xVal := range newX {
+			yVal := a*xVal + b // Predict y based on the regression model
+			newY = append(newY, yVal)
+		}
+
+		// Output the prediction for a new x value (month)
+		// Example new x value for prediction
+		// Predict y based on the regression model
+		fmt.Println("New X Values:")
+		for _, xVal := range newX {
+			fmt.Printf("%.2f ", xVal)
+		}
+		fmt.Println("\nPredicted Values:")
+		for _, yVal := range newY {
+			fmt.Printf("%.2f ", yVal)
+		}
+
+		// Create and save the scatter plot
+		title := "Airfare Price Prediction Scatter Plot"
+		filename := "airfare_scatter_plot.png"
+		xLabel := "Month Index"
+		yLabel := "Average Airfare Prices"
+		createScatterPlot(indices, prices, a, b, title, filename, xLabel, yLabel)
+
+	// case books __________________________________________________________________________________
 	case "books":
 		filePath := "books_data.json"
 		items := readJSON(filePath)

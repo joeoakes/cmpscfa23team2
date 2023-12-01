@@ -215,7 +215,7 @@ func main() {
 	target := ConvertGasolineDataToPoints([]GasolineData{targetItem})[0]
 
 	// Number of nearest neighbors for KNN
-	k := 5
+	k := 1
 
 	// Perform KNN on the data
 	predictedLabel := KNN(k, data, target)

@@ -5,8 +5,9 @@ import (
 	"encoding/json"                    // For JSON handling
 	"fmt"                              // For formatted I/O
 	_ "github.com/go-sql-driver/mysql" // Import mysql driver
-	"log"                              // For logging
-	"time"                             // For simulating machine learning model processing time
+	"github.com/google/uuid"
+	"log"  // For logging
+	"time" // For simulating machine learning model processing time
 )
 
 // Prediction struct models the data structure of a prediction in the database
@@ -39,6 +40,7 @@ func EngineIDExists(engineID string) (bool, error) {
 
 // Function to insert a new prediction
 // The function InsertPrediction, that checks the existence of an engineID, logs the result, and inserts predictionInfo into a database table if the engineID exists, handling errors along the way.
+
 func InsertPrediction(engineID string, predictionInfo string) error {
 	exists, err := EngineIDExists(engineID)
 	if err != nil {
@@ -56,11 +58,12 @@ func InsertPrediction(engineID string, predictionInfo string) error {
 		log.Println("Engine ID exists.")
 	}
 
-	query := "INSERT INTO predictions (engine_id, prediction_info) VALUES (?, ?)"
-	_, err = DB.Exec(query, engineID, predictionInfo)
+	query := "INSERT INTO predictions (prediction_id, input_data, prediction_info) VALUES (?, ?, ?)"
+	_, err := DB.Exec(query, newUUID, fileName, predictionInfo)
 	if err != nil {
 		InsertLog("400", "Error storing prediction: "+err.Error(), "InsertPrediction()")
 		return fmt.Errorf("Error storing prediction: %v", err)
+
 	} else {
 		InsertLog("200", "Successfully inserted prediction.", "InsertPrediction()")
 		log.Println("Successfully inserted prediction.")

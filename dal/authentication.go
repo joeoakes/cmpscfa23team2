@@ -3,6 +3,8 @@ package dal
 import (
 	"fmt"
 	"github.com/golang-jwt/jwt"
+	"golang.org/x/crypto/bcrypt"
+	"net/http"
 	"strings"
 	"time"
 )

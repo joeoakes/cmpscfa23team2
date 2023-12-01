@@ -622,7 +622,123 @@
                 <p>Function inserts a sample engine&apos;s information into a database table, logs success, and returns any encountered errors</p>
 
                 <h2 id="InsertURL">func InsertURL</h2>
-                <pre>func InsertURL(url, domain string, tags map string)(string, error)</pre>
+                <pre>func InsertURL(url, domain string, tags map[string])(string, error)</pre>
+                <p>Function to insert a new URL
+                <p>Function &quot;InsertURL,&quot; inserts a URL into a database along with associated tags and logs the operation, returning the generated ID or an error.
+
+                <h2 id="IsUserActive">func IsUserActive</h2>
+                <pre>func IsUserActive(userID string)(bool, error)</pre>
+                <p>IsUserActive checks if a user is currently marked as active based on their user ID.
+                <p>It defines a function &quot;IsUserActive&quot; that checks the activity status of a user in a database and returns a boolean indicating whether the user is active or not, along with an error if any.
+
+
+                <h2 id="LogoutUser">func LogoutUser
+
+                </h2>
+                <pre>func LogoutUser(userID string) error</pre>
+                <p>This code defines a function called LogoutUser that takes a userID as a parameter and it uses the database connection.
+                    (DB) to execute a SQL stored procedure to log out a user with the specified userID,
+                    returning any potential errors encountered during the database operation.
+
+
+
+                <h2 id="PerformMLPrediction">func PerformMLPrediction
+
+
+
+                </h2>
+                <pre>func PerformMLPrediction(inputData string) string</pre>
+                <p>Simulated ML model prediction function
+                <p>It defines a function that simulates an ML model prediction with a 2-second delay
+                    and logs a success message before returning a prediction result as a formatted string.
+
+
+
+                <h2 id="RefreshToken">func RefreshToken
+
+
+
+                </h2>
+                <pre>func RefreshToken(oldRefreshToken string) (string, string, error)</pre>
+                <p>It defines a function called RefreshToken that takes an old refresh token as input, validates it against a database, generates a new access token and refresh token,
+                    and updates the database with the new refresh token
+
+
+
+
+                <h2 id="RegisterUser">func RegisterUser
+
+
+
+                </h2>
+                <pre>func RegisterUser(username string, login string, role string, password string, active bool) (string, error)</pre>
+                <p>It defines a function &quot;RegisterUser&quot; that securely registers a user by hashing their password
+                    and storing their information in a database, returning a user ID or an error.
+
+
+
+
+                <h2 id="StoreLog">func StoreLog
+
+                </h2>
+                <pre>func StoreLog(status_code string, message string, goEngineArea string) error</pre>
+                <p>This code prepares and executes a SQL statement to store log information in a database, logging the status of the SQL operations during the process
+
+
+
+                <h2 id="UpdateURL">func UpdateURL
+
+
+
+                </h2>
+                <pre>func UpdateURL(id, url, domain string, tags map[string]interface{}) error</pre>
+                <p>Function to update an existing URL
+                <p>It defines a function UpdateURL that updates a URL record in a database, converting tags into JSON format and logging the update action.
+
+
+
+
+                <h2 id="UpdateUser">func UpdateUser
+
+
+                </h2>
+                <pre>func UpdateUser(userID, userName, userLogin, userRole, userPassword string) error</pre>
+                <p>UpdateUser updates the details of a user.
+                <p>It defines a function &quot;UpdateUser&quot; that calls a stored procedure to update a user&apos;s information in a database, logs the user&apos;s ID, and returns any encountered error.
+
+
+
+                <h2 id="UpdateUserRole">func UpdateUserRole
+
+
+
+                </h2>
+                <pre>func UpdateUserRole(userID, newRole string) error</pre>
+                <p>UpdateUserRole allows for changing the role associated with a user.
+                <p>It defines a function UpdateUserRole that updates a user&apos;s role in a database using a stored procedure and logs the outcome, handling potential errors.
+
+
+                <h2 id="ValidateToken">func ValidateToken
+
+
+                </h2>
+                <pre>func ValidateToken(tokenString string) (bool, error)</pre>
+                <p>This code defines a function that validates a JSON Web Token (JWT) by parsing it
+                    verifying its signature using a secret key,
+                    and checking its expiration time
+
+
+
+                <h2 id="WriteLog">func WriteLog
+
+
+
+                </h2>
+                <pre>func WriteLog(logID string, status_code string, message string, goEngineArea string, dateTime time.Time) error</pre>
+                <p>WriteLog writes a log entry to the database
+                <p>This code defines a function WriteLog that validates a status code, inserts a log entry into a database,
+                    and logs the execution process, handling potential errors along the way.
+
 
                 <h2 id="JSON_Data_Connect">type JSON_Data_Connect
 

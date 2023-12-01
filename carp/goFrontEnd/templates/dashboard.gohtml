@@ -1,57 +1,4 @@
 {{ define "dashboard"}}
-    <style>
-
-        .card {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-            word-wrap: break-word;
-            background-color: #fff;
-            background-clip: border-box;
-            border: 0 solid transparent;
-            border-radius: 0;
-        }
-        .btn-circle.btn-lg, .btn-group-lg>.btn-circle.btn {
-            width: 50px;
-            height: 50px;
-            padding: 14px 15px;
-            font-size: 18px;
-            line-height: 23px;
-        }
-        .text-muted {
-            color: #8898aa!important;
-        }
-        [type=button]:not(:disabled), [type=reset]:not(:disabled), [type=submit]:not(:disabled), button:not(:disabled) {
-            cursor: pointer;
-        }
-        .btn-circle {
-            border-radius: 100%;
-            width: 40px;
-            height: 40px;
-            padding: 10px;
-        }
-        .user-table tbody tr .category-select {
-            max-width: 150px;
-            border-radius: 20px;
-        }
-
-        .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
-            color: #fff;
-            background-color: #007bff;
-        }
-        .tab-content {
-            margin-top: 20px;
-        }
-        .btn-settings {
-            font-size: 0.8rem;
-            padding: 0.25rem 0.5rem;
-            margin-right: 10px;
-        }
-
-
-    </style>
-
     <div class="container mt-4">
         <h2>System Settings</h2>
         <ul class="nav nav-pills" id="settingsTabs" role="tablist">
@@ -169,49 +116,49 @@
 
 
     </div>
-    <link rel="stylesheet" href="/static/css/styles.css" />
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/static/css/styles.css"/>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" type="text/css" rel="stylesheet"/>
 
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const buttons = document.querySelectorAll('.btn-settings');
-            const navLinks = document.querySelectorAll('#settingsTabs .nav-link');
+            document.addEventListener('DOMContentLoaded', function () {
+                const buttons = document.querySelectorAll('.btn-settings');
+                const navLinks = document.querySelectorAll('#settingsTabs .nav-link');
 
-            // This function hides all content containers and clear their content
-            function hideAllContent() {
-                const contentContainers = document.querySelectorAll('.content-container');
-                contentContainers.forEach(container => {
-                    container.style.display = 'none';
-                    // If you really want to clear the innerHTML of every container, uncomment the next line
-                    // container.innerHTML = '';
-                });
-            }
-
-            // This function shows the content for the clicked button
-            function showContent(contentId) {
-                hideAllContent(); // First, hide and clear all content containers
-                const contentContainer = document.getElementById(contentId);
-                if (contentContainer) {
-                    contentContainer.style.display = 'block'; // Then show the correct one
+                // This function hides all content containers and clear their content
+                function hideAllContent() {
+                    const contentContainers = document.querySelectorAll('.content-container');
+                    contentContainers.forEach(container => {
+                        container.style.display = 'none';
+                        // If you really want to clear the innerHTML of every container, uncomment the next line
+                        // container.innerHTML = '';
+                    });
                 }
-            }
 
-            // Add click event listener for each nav link to clear content containers on tab change
-            navLinks.forEach(link => {
-                link.addEventListener('click', function (event) {
-                    hideAllContent();
-                });
-            });
+                // This function shows the content for the clicked button
+                function showContent(contentId) {
+                    hideAllContent(); // First, hide and clear all content containers
+                    const contentContainer = document.getElementById(contentId);
+                    if (contentContainer) {
+                        contentContainer.style.display = 'block'; // Then show the correct one
+                    }
+                }
 
-            // Add click event listener for each button to show content on button click
-            buttons.forEach(button => {
-                button.addEventListener('click', function() {
-                    event.preventDefault(); // Stop any default action if the button is part of a form
-                    const targetId = this.getAttribute('data-target');
-                    showContent(targetId);
+                // Add click event listener for each nav link to clear content containers on tab change
+                navLinks.forEach(link => {
+                    link.addEventListener('click', function (event) {
+                        hideAllContent();
+                    });
                 });
-            });
+
+                // Add click event listener for each button to show content on button click
+                buttons.forEach(button => {
+                    button.addEventListener('click', function () {
+                        event.preventDefault(); // Stop any default action if the button is part of a form
+                        const targetId = this.getAttribute('data-target');
+                        showContent(targetId);
+                    });
+                });
         });
     </script>
 

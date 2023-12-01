@@ -18,12 +18,7 @@ type PageData struct {
 	Title        string
 	Content      string
 	ErrorMessage string
-}
-
-type DashPageData struct {
-	Title        string
 	Users        []*dal.User
-	ErrorMessage string
 }
 
 func main() {
@@ -32,6 +27,7 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Println("Current directory:", dir)
+
 	setupServer()
 }
 
@@ -49,7 +45,7 @@ func setupServer() {
 	log.Println("Template files found:", files)
 
 	tmpl := template.Must(template.ParseGlob("templates/*.gohtml"))
-
+	log.Println("Templates loaded:", tmpl.DefinedTemplates())
 	setupRoutes(tmpl)
 
 	log.Println("Starting server on :8080")
@@ -66,7 +62,9 @@ func setupRoutes(tmpl *template.Template) {
 	http.HandleFunc("/login", makeHandler(tmpl, "login"))
 	http.HandleFunc("/register", makeHandler(tmpl, "register"))
 	http.HandleFunc("/documentation", makeHandler(tmpl, "documentation"))
-	http.HandleFunc("/dashboard", dashHandler(tmpl))
+	http.HandleFunc("/dashboard", func(w http.ResponseWriter, r *http.Request) {
+		dashHandler(tmpl, w, r) // Invoking dashHandler correctly
+	})
 	//http.HandleFunc("/dashboard", requireAdmin(dashHandler(tmpl)))
 	http.HandleFunc("/settings", requireAdmin(makeHandler(tmpl, "settings")))
 
@@ -86,11 +84,6 @@ func makeHandler(tmpl *template.Template, content string) http.HandlerFunc {
 			return
 		}
 
-		if r.Method == "POST" && content == "dashboard" {
-			dashHandler(tmpl)
-			return
-		}
-
 		data := struct {
 			Title   string
 			Content string
@@ -98,6 +91,7 @@ func makeHandler(tmpl *template.Template, content string) http.HandlerFunc {
 			Title:   "PredictAI - " + content,
 			Content: content,
 		}
+
 		err := tmpl.ExecuteTemplate(w, "layout.gohtml", data)
 		if err != nil {
 			log.Printf("Error executing template: %v", err)
@@ -228,7 +222,7 @@ func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Req
 
 // renderDashboardTemplate renders the dashboard with a potential error message.
 func renderDashboardTemplate(tmpl *template.Template, w http.ResponseWriter, users []*dal.User, errorMessage string) {
-	data := DashPageData{
+	data := PageData{
 		Title:        "Dashboard",
 		Users:        users,
 		ErrorMessage: errorMessage,
@@ -240,24 +234,28 @@ func renderDashboardTemplate(tmpl *template.Template, w http.ResponseWriter, use
 	}
 }
 
-func dashHandler(tmpl *template.Template) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		users, err := dal.GetAllUsers()
-		if err != nil {
-			log.Printf("Error fetching users: %v", err)
-			http.Error(w, "Unable to fetch user data", http.StatusInternalServerError)
-			return
-		}
+func dashHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	log.Printf("beginning of dashHandler\n")
+	users, err := dal.GetAllUsers()
+	if err != nil {
+		log.Printf("Error fetching users: %v", err)
+		http.Error(w, "Unable to fetch user data", http.StatusInternalServerError)
+		return
+	}
+	log.Printf("before being passed to template: %+v\n")
 
-		data := DashPageData{
-			Title: "Dashboard",
-			Users: users,
-		}
+	data := PageData{
+		Title: "Dashboard",
+		Users: users,
+		// Ensure you have this if you are conditionally displaying templates within "layout.gohtml"
+		Content: "dashboard",
+	}
+	log.Printf("PageData being passed to template: %+v\n", data)
 
-		err = tmpl.ExecuteTemplate(w, "dashboard", data)
-		if err != nil {
-			log.Printf("Error executing template: %v", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		}
+	err = tmpl.ExecuteTemplate(w, "layout.gohtml", data) // Execute "layout", not "dashboard"
+	if err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }

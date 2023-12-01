@@ -6,6 +6,7 @@ import (
 	"fmt"                              // For formatted I/O
 	_ "github.com/go-sql-driver/mysql" // Import mysql driver
 	"github.com/google/uuid"
+	_ "github.com/google/uuid"
 	"log"  // For logging
 	"time" // For simulating machine learning model processing time
 )
@@ -41,49 +42,62 @@ func EngineIDExists(engineID string) (bool, error) {
 // Function to insert a new prediction
 // The function InsertPrediction, that checks the existence of an engineID, logs the result, and inserts predictionInfo into a database table if the engineID exists, handling errors along the way.
 
-func InsertPrediction(engineID string, predictionInfo string) error {
-	exists, err := EngineIDExists(engineID)
-	if err != nil {
-		InsertLog("400", "Error checking engine ID: "+err.Error(), "InsertPrediction()")
-		return fmt.Errorf("Error checking engine ID: %v", err)
-	} else {
-		InsertLog("200", "Successfully checked if engine ID exists.", "InsertPrediction()")
-		log.Println("Successfully checked if engine ID exists.")
-	}
-	if !exists {
-		InsertLog("400", "engine_id does not exist", "InsertPrediction()")
-		return fmt.Errorf("engine_id %s does not exist", engineID)
-	} else {
-		InsertLog("200", "Engine ID exists.", "InsertPrediction()")
-		log.Println("Engine ID exists.")
-	}
-
-	query := "INSERT INTO predictions (prediction_id, input_data, prediction_info) VALUES (?, ?, ?)"
-	_, err := DB.Exec(query, newUUID, fileName, predictionInfo)
-	if err != nil {
-		InsertLog("400", "Error storing prediction: "+err.Error(), "InsertPrediction()")
-		return fmt.Errorf("Error storing prediction: %v", err)
-
-	} else {
-		InsertLog("200", "Successfully inserted prediction.", "InsertPrediction()")
-		log.Println("Successfully inserted prediction.")
-	}
-	return nil
-}
+//func InsertPrediction(engineID string, predictionInfo string) error {
+//	exists, err := EngineIDExists(engineID)
+//	if err != nil {
+//		InsertLog("400", "Error checking engine ID: "+err.Error(), "InsertPrediction()")
+//		return fmt.Errorf("Error checking engine ID: %v", err)
+//	} else {
+//		InsertLog("200", "Successfully checked if engine ID exists.", "InsertPrediction()")
+//		log.Println("Successfully checked if engine ID exists.")
+//	}
+//	if !exists {
+//		InsertLog("400", "engine_id does not exist", "InsertPrediction()")
+//		return fmt.Errorf("engine_id %s does not exist", engineID)
+//	} else {
+//		InsertLog("200", "Engine ID exists.", "InsertPrediction()")
+//		log.Println("Engine ID exists.")
+//	}
+//
+//	query := "INSERT INTO predictions (prediction_id, input_data, prediction_info) VALUES (?, ?, ?)"
+//	_, err := DB.Exec(query, newUUID, fileName, predictionInfo)
+//	if err != nil {
+//		InsertLog("400", "Error storing prediction: "+err.Error(), "InsertPrediction()")
+//		return fmt.Errorf("Error storing prediction: %v", err)
+//
+//	} else {
+//		InsertLog("200", "Successfully inserted prediction.", "InsertPrediction()")
+//		log.Println("Successfully inserted prediction.")
+//	}
+//	return nil
+//}
 
 // Function to insert a sample engine ID into scraper_engine table
 //
 // Function inserts a sample engine's information into a database table, logs success, and returns any encountered errors.
-func InsertSampleEngine(engineID, engineName, engineDescription string) error {
-	query := "INSERT INTO scraper_engine (engine_id, engine_name, engine_description) VALUES (?, ?, ?)"
-	_, err := DB.Exec(query, engineID, engineName, engineDescription)
+//
+//	func InsertSampleEngine(engineID, engineName, engineDescription string) error {
+//		query := "INSERT INTO scraper_engine (engine_id, engine_name, engine_description) VALUES (?, ?, ?)"
+//		_, err := DB.Exec(query, engineID, engineName, engineDescription)
+//		if err != nil {
+//			InsertLog("400", "Error inserting sample engine: "+err.Error(), "InsertSampleEngine()")
+//			return fmt.Errorf("Error inserting sample engine: %v", err)
+//		} else {
+//			InsertLog("200", "Successfully inserted sample engine.", "InsertSampleEngine()")
+//			log.Println("Successfully inserted sample engine.")
+//		}
+//		return nil
+//	}
+func InsertPrediction(fileName, predictionInfo string) error {
+	// Generate a new UUID for the prediction
+	newUUID := uuid.New().String()
+
+	query := "INSERT INTO predictions (prediction_id, input_data, prediction_info) VALUES (?, ?, ?)"
+	_, err := DB.Exec(query, newUUID, fileName, predictionInfo)
 	if err != nil {
-		InsertLog("400", "Error inserting sample engine: "+err.Error(), "InsertSampleEngine()")
-		return fmt.Errorf("Error inserting sample engine: %v", err)
-	} else {
-		InsertLog("200", "Successfully inserted sample engine.", "InsertSampleEngine()")
-		log.Println("Successfully inserted sample engine.")
+		return fmt.Errorf("Error storing prediction: %v", err)
 	}
+	log.Printf("Successfully inserted prediction with ID %s.", newUUID)
 	return nil
 }
 

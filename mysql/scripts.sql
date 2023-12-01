@@ -335,28 +335,6 @@ BEGIN
 END //
 DELIMITER ;
 
--- USE goengine;
-
--- DELIMITER //
-
--- DROP PROCEDURE IF EXISTS InsertLog;
--- CREATE PROCEDURE InsertLog(
---     IN pStatusCode VARCHAR(3),
---     IN pMessage VARCHAR(250),
---     IN pGoEngineArea VARCHAR(250)
--- )
--- BEGIN
---     DECLARE pLogID CHAR(36);
---     IF LENGTH(pStatusCode) > 3 THEN
---         SIGNAL SQLSTATE '45000'
---         SET MESSAGE_TEXT = 'Data too long for column pStatusCode';
---         RETURN;
---     END IF;
---     SET pLogID = UUID();
---     INSERT INTO log (logID, statusCode, message, goEngineArea)
---     VALUES (pLogID, pStatusCode, pMessage, pGoEngineArea);
--- END//
--- DELIMITER ;
 
 DELIMITER //
 
@@ -405,32 +383,6 @@ END //
 DELIMITER ;
 DELIMITER //
 
--- CREATE PROCEDURE PopulateLog()
--- BEGIN
---     DECLARE statusCodeExists INT;
-
---     SELECT COUNT(*) INTO statusCodeExists FROM logstatuscodes WHERE statusCode IN ('ERR', 'WAR', 'OPR');
-
---     IF statusCodeExists = 3 THEN
---         IF (SELECT COUNT(*) FROM log) = 0 THEN
---             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
---             VALUES (UUID(), 'ERR', 'An Error has occurred in the following area', 'CARP', NOW());
-
---             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
---             VALUES (UUID(), 'WAR', 'A Warning has been issued in the following area', 'CRAB', NOW());
-
---             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
---             VALUES (UUID(), 'OPR', 'Normal Operational Requirements have been met in the following area', 'CUDA', NOW());
---         END IF;
---     ELSE
---         -- If required code is missing from statusCodes, then this error is given
---         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Missing required status codes in logstatuscodes table.';
---     END IF;
--- END //
-
--- DELIMITER ;
-
--- CALL PopulateLog();
 
 select * from log
 -- Reset the delimiter back to default
@@ -899,28 +851,6 @@ BEGIN
 END //
 DELIMITER ;
 
-
-# Old method
-# DELIMITER //
-# CREATE PROCEDURE authenticate_user(
-#     IN p_user_login NVARCHAR(36),
-#     IN p_user_password VARBINARY(255)
-# )
-# BEGIN
-#     DECLARE v_user_id CHAR(36);
-#     DECLARE v_authenticated BOOLEAN;
-#
-#     -- Check if the login and hashed password match any user
-#     SELECT user_id INTO v_user_id FROM users
-#     WHERE user_login = p_user_login AND user_password = p_user_password;
-#
-#     -- Determine if the user is authenticated
-#     SET v_authenticated = (v_user_id IS NOT NULL);
-#
-#     SELECT v_authenticated, v_user_id;
-# END //
-# DELIMITER ;
-
 DELIMITER //
 -- Procedure to create a new session for a user
 CREATE PROCEDURE create_session(
@@ -947,26 +877,27 @@ END //
 DELIMITER ;
 
 DELIMITER  //
+-- Procedure to validate a user's token
 CREATE PROCEDURE validate_refresh_token(
-    IN p_token VARBINARY(255)
+    IN p_token VARCHAR(255)
 )
 BEGIN
-    SELECT user_id
+    SELECT user_id, token, expiry
     FROM refresh_tokens
-    WHERE token = p_token AND expiry > CURRENT_TIMESTAMP;
-
+    WHERE token = p_token;
 END //
-DELIMITER ;
 
-DELIMITER //
+-- Procedure to issue a new refresh token
 CREATE PROCEDURE issue_refresh_token(
     IN p_user_id CHAR(36),
     IN p_token VARBINARY(255)
 )
 BEGIN
+    DELETE FROM refresh_tokens WHERE user_id = p_user_id;
     INSERT INTO refresh_tokens (token_id, user_id, token, expiry)
     VALUES (UUID(), p_user_id, p_token, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 7 DAY));
 END //
+
 DELIMITER ;
 
 DELIMITER //
@@ -1057,6 +988,7 @@ VALUES
     ('9c0f0ac1-8d78-11ee-b6e0-4c796ed97681', 'test1', 'test1@test.com', 'USR', '$2a$10$6nsLKZMGjnG4osvBN3AbUOIvOnYXXZVrbcgdYY419OYUsGzqDlDMG', TRUE, '2023-11-27 17:59:24'),
     ('a2eb8427-8d78-11ee-b6e0-4c796ed97681', 'test2', 'test2@test.com', 'USR', '$2a$10$M8s0NhMKr24C6bSwlWBfY.4pPSnWtHIAAVY5qKRPfnoXZAFvzcmgW', TRUE, '2023-11-27 17:59:36'),
     (UUID(), 'hansi', 'hansi@hansi.com', 'USR', '$2a$10$C4ZoMvNpBqJ8MB9LMLzQye2uXvQKPujw1SXccnuLJ/frYoG6GUOZy', TRUE, CURRENT_TIMESTAMP());
+
 
 
 -- Inserting sample URLs into the URLs table

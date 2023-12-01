@@ -1,0 +1,4410 @@
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2023",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "25.6"
+        },
+        {
+          "month": "Feb",
+          "rate": "26.5"
+        },
+        {
+          "month": "Mar",
+          "rate": "17.7"
+        },
+        {
+          "month": "Apr",
+          "rate": "-0.9"
+        },
+        {
+          "month": "May",
+          "rate": "-13.4"
+        },
+        {
+          "month": "Jun",
+          "rate": "-18.9"
+        },
+        {
+          "month": "Jul",
+          "rate": "-18.6"
+        },
+        {
+          "month": "Aug",
+          "rate": "-13.3"
+        },
+        {
+          "month": "Sep",
+          "rate": "-13.4"
+        },
+        {
+          "month": "Oct",
+          "rate": "-13.2"
+        },
+        {
+          "month": "Nov",
+          "rate": "Avail.Dec.12"
+        },
+        {
+          "month": "Dec",
+          "rate": ""
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "Year",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "Jan"
+        },
+        {
+          "month": "Feb",
+          "rate": "Feb"
+        },
+        {
+          "month": "Mar",
+          "rate": "Mar"
+        },
+        {
+          "month": "Apr",
+          "rate": "Apr"
+        },
+        {
+          "month": "May",
+          "rate": "May"
+        },
+        {
+          "month": "Jun",
+          "rate": "Jun"
+        },
+        {
+          "month": "Jul",
+          "rate": "Jul"
+        },
+        {
+          "month": "Aug",
+          "rate": "Aug"
+        },
+        {
+          "month": "Sep",
+          "rate": "Sep"
+        },
+        {
+          "month": "Oct",
+          "rate": "Oct"
+        },
+        {
+          "month": "Nov",
+          "rate": "Nov"
+        },
+        {
+          "month": "Dec",
+          "rate": "Dec"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1963",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": ""
+        },
+        {
+          "month": "Feb",
+          "rate": ""
+        },
+        {
+          "month": "Mar",
+          "rate": ""
+        },
+        {
+          "month": "Apr",
+          "rate": ""
+        },
+        {
+          "month": "May",
+          "rate": ""
+        },
+        {
+          "month": "Jun",
+          "rate": ""
+        },
+        {
+          "month": "Jul",
+          "rate": ""
+        },
+        {
+          "month": "Aug",
+          "rate": ""
+        },
+        {
+          "month": "Sep",
+          "rate": ""
+        },
+        {
+          "month": "Oct",
+          "rate": ""
+        },
+        {
+          "month": "Nov",
+          "rate": ""
+        },
+        {
+          "month": "Dec",
+          "rate": "23.7"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1964",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": ""
+        },
+        {
+          "month": "Feb",
+          "rate": ""
+        },
+        {
+          "month": "Mar",
+          "rate": ""
+        },
+        {
+          "month": "Apr",
+          "rate": ""
+        },
+        {
+          "month": "May",
+          "rate": ""
+        },
+        {
+          "month": "Jun",
+          "rate": "23.6"
+        },
+        {
+          "month": "Jul",
+          "rate": ""
+        },
+        {
+          "month": "Aug",
+          "rate": ""
+        },
+        {
+          "month": "Sep",
+          "rate": ""
+        },
+        {
+          "month": "Oct",
+          "rate": ""
+        },
+        {
+          "month": "Nov",
+          "rate": ""
+        },
+        {
+          "month": "Dec",
+          "rate": "23.7"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1965",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": ""
+        },
+        {
+          "month": "Feb",
+          "rate": ""
+        },
+        {
+          "month": "Mar",
+          "rate": ""
+        },
+        {
+          "month": "Apr",
+          "rate": ""
+        },
+        {
+          "month": "May",
+          "rate": ""
+        },
+        {
+          "month": "Jun",
+          "rate": "23.8"
+        },
+        {
+          "month": "Jul",
+          "rate": ""
+        },
+        {
+          "month": "Aug",
+          "rate": ""
+        },
+        {
+          "month": "Sep",
+          "rate": ""
+        },
+        {
+          "month": "Oct",
+          "rate": ""
+        },
+        {
+          "month": "Nov",
+          "rate": ""
+        },
+        {
+          "month": "Dec",
+          "rate": "23.9"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1966",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": ""
+        },
+        {
+          "month": "Feb",
+          "rate": ""
+        },
+        {
+          "month": "Mar",
+          "rate": "23.9"
+        },
+        {
+          "month": "Apr",
+          "rate": ""
+        },
+        {
+          "month": "May",
+          "rate": ""
+        },
+        {
+          "month": "Jun",
+          "rate": "23.8"
+        },
+        {
+          "month": "Jul",
+          "rate": ""
+        },
+        {
+          "month": "Aug",
+          "rate": ""
+        },
+        {
+          "month": "Sep",
+          "rate": "23.8"
+        },
+        {
+          "month": "Oct",
+          "rate": ""
+        },
+        {
+          "month": "Nov",
+          "rate": ""
+        },
+        {
+          "month": "Dec",
+          "rate": "23.8"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1967",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": ""
+        },
+        {
+          "month": "Feb",
+          "rate": ""
+        },
+        {
+          "month": "Mar",
+          "rate": "23.8"
+        },
+        {
+          "month": "Apr",
+          "rate": ""
+        },
+        {
+          "month": "May",
+          "rate": ""
+        },
+        {
+          "month": "Jun",
+          "rate": "23.9"
+        },
+        {
+          "month": "Jul",
+          "rate": ""
+        },
+        {
+          "month": "Aug",
+          "rate": ""
+        },
+        {
+          "month": "Sep",
+          "rate": "23.9"
+        },
+        {
+          "month": "Oct",
+          "rate": ""
+        },
+        {
+          "month": "Nov",
+          "rate": ""
+        },
+        {
+          "month": "Dec",
+          "rate": "24.0"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1968",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": ""
+        },
+        {
+          "month": "Feb",
+          "rate": ""
+        },
+        {
+          "month": "Mar",
+          "rate": "24.3"
+        },
+        {
+          "month": "Apr",
+          "rate": ""
+        },
+        {
+          "month": "May",
+          "rate": ""
+        },
+        {
+          "month": "Jun",
+          "rate": "24.5"
+        },
+        {
+          "month": "Jul",
+          "rate": ""
+        },
+        {
+          "month": "Aug",
+          "rate": ""
+        },
+        {
+          "month": "Sep",
+          "rate": "24.5"
+        },
+        {
+          "month": "Oct",
+          "rate": ""
+        },
+        {
+          "month": "Nov",
+          "rate": ""
+        },
+        {
+          "month": "Dec",
+          "rate": "24.5"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1969",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "24.5"
+        },
+        {
+          "month": "Feb",
+          "rate": "24.5"
+        },
+        {
+          "month": "Mar",
+          "rate": "26.2"
+        },
+        {
+          "month": "Apr",
+          "rate": "26.2"
+        },
+        {
+          "month": "May",
+          "rate": "26.2"
+        },
+        {
+          "month": "Jun",
+          "rate": "26.6"
+        },
+        {
+          "month": "Jul",
+          "rate": "26.6"
+        },
+        {
+          "month": "Aug",
+          "rate": "26.6"
+        },
+        {
+          "month": "Sep",
+          "rate": "26.4"
+        },
+        {
+          "month": "Oct",
+          "rate": "26.4"
+        },
+        {
+          "month": "Nov",
+          "rate": "26.4"
+        },
+        {
+          "month": "Dec",
+          "rate": "27.8"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1970",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "27.8"
+        },
+        {
+          "month": "Feb",
+          "rate": "27.8"
+        },
+        {
+          "month": "Mar",
+          "rate": "27.9"
+        },
+        {
+          "month": "Apr",
+          "rate": "27.9"
+        },
+        {
+          "month": "May",
+          "rate": "27.9"
+        },
+        {
+          "month": "Jun",
+          "rate": "27.9"
+        },
+        {
+          "month": "Jul",
+          "rate": "27.9"
+        },
+        {
+          "month": "Aug",
+          "rate": "27.9"
+        },
+        {
+          "month": "Sep",
+          "rate": "29.0"
+        },
+        {
+          "month": "Oct",
+          "rate": "29.0"
+        },
+        {
+          "month": "Nov",
+          "rate": "29.0"
+        },
+        {
+          "month": "Dec",
+          "rate": "29.1"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1971",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "29.1"
+        },
+        {
+          "month": "Feb",
+          "rate": "29.1"
+        },
+        {
+          "month": "Mar",
+          "rate": "29.6"
+        },
+        {
+          "month": "Apr",
+          "rate": "29.6"
+        },
+        {
+          "month": "May",
+          "rate": "29.6"
+        },
+        {
+          "month": "Jun",
+          "rate": "31.0"
+        },
+        {
+          "month": "Jul",
+          "rate": "31.0"
+        },
+        {
+          "month": "Aug",
+          "rate": "31.0"
+        },
+        {
+          "month": "Sep",
+          "rate": "31.0"
+        },
+        {
+          "month": "Oct",
+          "rate": "31.0"
+        },
+        {
+          "month": "Nov",
+          "rate": "31.0"
+        },
+        {
+          "month": "Dec",
+          "rate": "31.0"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1972",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "31.0"
+        },
+        {
+          "month": "Feb",
+          "rate": "31.0"
+        },
+        {
+          "month": "Mar",
+          "rate": "31.0"
+        },
+        {
+          "month": "Apr",
+          "rate": "31.0"
+        },
+        {
+          "month": "May",
+          "rate": "31.0"
+        },
+        {
+          "month": "Jun",
+          "rate": "30.9"
+        },
+        {
+          "month": "Jul",
+          "rate": "30.9"
+        },
+        {
+          "month": "Aug",
+          "rate": "30.9"
+        },
+        {
+          "month": "Sep",
+          "rate": "31.5"
+        },
+        {
+          "month": "Oct",
+          "rate": "31.5"
+        },
+        {
+          "month": "Nov",
+          "rate": "31.5"
+        },
+        {
+          "month": "Dec",
+          "rate": "31.6"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1973",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "31.6"
+        },
+        {
+          "month": "Feb",
+          "rate": "31.6"
+        },
+        {
+          "month": "Mar",
+          "rate": "31.6"
+        },
+        {
+          "month": "Apr",
+          "rate": "31.6"
+        },
+        {
+          "month": "May",
+          "rate": "31.6"
+        },
+        {
+          "month": "Jun",
+          "rate": "32.1"
+        },
+        {
+          "month": "Jul",
+          "rate": "32.1"
+        },
+        {
+          "month": "Aug",
+          "rate": "32.1"
+        },
+        {
+          "month": "Sep",
+          "rate": "32.8"
+        },
+        {
+          "month": "Oct",
+          "rate": "32.8"
+        },
+        {
+          "month": "Nov",
+          "rate": "32.8"
+        },
+        {
+          "month": "Dec",
+          "rate": "33.8"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1974",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "33.8"
+        },
+        {
+          "month": "Feb",
+          "rate": "33.8"
+        },
+        {
+          "month": "Mar",
+          "rate": "33.8"
+        },
+        {
+          "month": "Apr",
+          "rate": "33.8"
+        },
+        {
+          "month": "May",
+          "rate": "33.8"
+        },
+        {
+          "month": "Jun",
+          "rate": "35.4"
+        },
+        {
+          "month": "Jul",
+          "rate": "35.4"
+        },
+        {
+          "month": "Aug",
+          "rate": "35.4"
+        },
+        {
+          "month": "Sep",
+          "rate": "35.4"
+        },
+        {
+          "month": "Oct",
+          "rate": "35.4"
+        },
+        {
+          "month": "Nov",
+          "rate": "35.4"
+        },
+        {
+          "month": "Dec",
+          "rate": "36.8"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1975",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "36.8"
+        },
+        {
+          "month": "Feb",
+          "rate": "36.8"
+        },
+        {
+          "month": "Mar",
+          "rate": "36.9"
+        },
+        {
+          "month": "Apr",
+          "rate": "36.9"
+        },
+        {
+          "month": "May",
+          "rate": "36.9"
+        },
+        {
+          "month": "Jun",
+          "rate": "38.6"
+        },
+        {
+          "month": "Jul",
+          "rate": "38.6"
+        },
+        {
+          "month": "Aug",
+          "rate": "38.6"
+        },
+        {
+          "month": "Sep",
+          "rate": "38.7"
+        },
+        {
+          "month": "Oct",
+          "rate": "38.7"
+        },
+        {
+          "month": "Nov",
+          "rate": "38.7"
+        },
+        {
+          "month": "Dec",
+          "rate": "39.6"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1976",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "39.6"
+        },
+        {
+          "month": "Feb",
+          "rate": "39.6"
+        },
+        {
+          "month": "Mar",
+          "rate": "40.2"
+        },
+        {
+          "month": "Apr",
+          "rate": "40.2"
+        },
+        {
+          "month": "May",
+          "rate": "40.2"
+        },
+        {
+          "month": "Jun",
+          "rate": "41.4"
+        },
+        {
+          "month": "Jul",
+          "rate": "41.4"
+        },
+        {
+          "month": "Aug",
+          "rate": "41.4"
+        },
+        {
+          "month": "Sep",
+          "rate": "42.4"
+        },
+        {
+          "month": "Oct",
+          "rate": "42.5"
+        },
+        {
+          "month": "Nov",
+          "rate": "42.5"
+        },
+        {
+          "month": "Dec",
+          "rate": "42.5"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1977",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "42.5"
+        },
+        {
+          "month": "Feb",
+          "rate": "42.5"
+        },
+        {
+          "month": "Mar",
+          "rate": "43.2"
+        },
+        {
+          "month": "Apr",
+          "rate": "43.2"
+        },
+        {
+          "month": "May",
+          "rate": "43.2"
+        },
+        {
+          "month": "Jun",
+          "rate": "43.3"
+        },
+        {
+          "month": "Jul",
+          "rate": "43.3"
+        },
+        {
+          "month": "Aug",
+          "rate": "43.3"
+        },
+        {
+          "month": "Sep",
+          "rate": "44.0"
+        },
+        {
+          "month": "Oct",
+          "rate": "44.0"
+        },
+        {
+          "month": "Nov",
+          "rate": "44.0"
+        },
+        {
+          "month": "Dec",
+          "rate": "45.5"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1978",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "45.7"
+        },
+        {
+          "month": "Feb",
+          "rate": "45.7"
+        },
+        {
+          "month": "Mar",
+          "rate": "45.8"
+        },
+        {
+          "month": "Apr",
+          "rate": "45.9"
+        },
+        {
+          "month": "May",
+          "rate": "45.8"
+        },
+        {
+          "month": "Jun",
+          "rate": "45.7"
+        },
+        {
+          "month": "Jul",
+          "rate": "45.4"
+        },
+        {
+          "month": "Aug",
+          "rate": "45.3"
+        },
+        {
+          "month": "Sep",
+          "rate": "45.3"
+        },
+        {
+          "month": "Oct",
+          "rate": "45.3"
+        },
+        {
+          "month": "Nov",
+          "rate": "45.4"
+        },
+        {
+          "month": "Dec",
+          "rate": "45.1"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1979",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "45.3"
+        },
+        {
+          "month": "Feb",
+          "rate": "45.7"
+        },
+        {
+          "month": "Mar",
+          "rate": "45.8"
+        },
+        {
+          "month": "Apr",
+          "rate": "46.0"
+        },
+        {
+          "month": "May",
+          "rate": "46.3"
+        },
+        {
+          "month": "Jun",
+          "rate": "46.4"
+        },
+        {
+          "month": "Jul",
+          "rate": "47.4"
+        },
+        {
+          "month": "Aug",
+          "rate": "49.0"
+        },
+        {
+          "month": "Sep",
+          "rate": "51.1"
+        },
+        {
+          "month": "Oct",
+          "rate": "52.7"
+        },
+        {
+          "month": "Nov",
+          "rate": "55.4"
+        },
+        {
+          "month": "Dec",
+          "rate": "58.6"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1980",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "60.0"
+        },
+        {
+          "month": "Feb",
+          "rate": "61.0"
+        },
+        {
+          "month": "Mar",
+          "rate": "62.1"
+        },
+        {
+          "month": "Apr",
+          "rate": "63.1"
+        },
+        {
+          "month": "May",
+          "rate": "64.5"
+        },
+        {
+          "month": "Jun",
+          "rate": "65.8"
+        },
+        {
+          "month": "Jul",
+          "rate": "66.1"
+        },
+        {
+          "month": "Aug",
+          "rate": "69.2"
+        },
+        {
+          "month": "Sep",
+          "rate": "74.1"
+        },
+        {
+          "month": "Oct",
+          "rate": "75.2"
+        },
+        {
+          "month": "Nov",
+          "rate": "76.9"
+        },
+        {
+          "month": "Dec",
+          "rate": "78.2"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1981",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "79.3"
+        },
+        {
+          "month": "Feb",
+          "rate": "79.8"
+        },
+        {
+          "month": "Mar",
+          "rate": "82.1"
+        },
+        {
+          "month": "Apr",
+          "rate": "83.3"
+        },
+        {
+          "month": "May",
+          "rate": "83.3"
+        },
+        {
+          "month": "Jun",
+          "rate": "86.2"
+        },
+        {
+          "month": "Jul",
+          "rate": "87.7"
+        },
+        {
+          "month": "Aug",
+          "rate": "88.7"
+        },
+        {
+          "month": "Sep",
+          "rate": "89.0"
+        },
+        {
+          "month": "Oct",
+          "rate": "88.9"
+        },
+        {
+          "month": "Nov",
+          "rate": "89.5"
+        },
+        {
+          "month": "Dec",
+          "rate": "89.5"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1982",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "89.7"
+        },
+        {
+          "month": "Feb",
+          "rate": "90.6"
+        },
+        {
+          "month": "Mar",
+          "rate": "90.5"
+        },
+        {
+          "month": "Apr",
+          "rate": "91.4"
+        },
+        {
+          "month": "May",
+          "rate": "92.9"
+        },
+        {
+          "month": "Jun",
+          "rate": "94.6"
+        },
+        {
+          "month": "Jul",
+          "rate": "94.9"
+        },
+        {
+          "month": "Aug",
+          "rate": "95.0"
+        },
+        {
+          "month": "Sep",
+          "rate": "97.8"
+        },
+        {
+          "month": "Oct",
+          "rate": "98.8"
+        },
+        {
+          "month": "Nov",
+          "rate": "98.3"
+        },
+        {
+          "month": "Dec",
+          "rate": "97.7"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1983",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "98.5"
+        },
+        {
+          "month": "Feb",
+          "rate": "96.9"
+        },
+        {
+          "month": "Mar",
+          "rate": "96.2"
+        },
+        {
+          "month": "Apr",
+          "rate": "99.7"
+        },
+        {
+          "month": "May",
+          "rate": "98.2"
+        },
+        {
+          "month": "Jun",
+          "rate": "99.2"
+        },
+        {
+          "month": "Jul",
+          "rate": "100.0"
+        },
+        {
+          "month": "Aug",
+          "rate": "100.5"
+        },
+        {
+          "month": "Sep",
+          "rate": "101.1"
+        },
+        {
+          "month": "Oct",
+          "rate": "101.9"
+        },
+        {
+          "month": "Nov",
+          "rate": "103.1"
+        },
+        {
+          "month": "Dec",
+          "rate": "102.4"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1984",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "102.8"
+        },
+        {
+          "month": "Feb",
+          "rate": "102.6"
+        },
+        {
+          "month": "Mar",
+          "rate": "102.5"
+        },
+        {
+          "month": "Apr",
+          "rate": "102.7"
+        },
+        {
+          "month": "May",
+          "rate": "104.1"
+        },
+        {
+          "month": "Jun",
+          "rate": "105.6"
+        },
+        {
+          "month": "Jul",
+          "rate": "107.5"
+        },
+        {
+          "month": "Aug",
+          "rate": "108.5"
+        },
+        {
+          "month": "Sep",
+          "rate": "107.5"
+        },
+        {
+          "month": "Oct",
+          "rate": "108.3"
+        },
+        {
+          "month": "Nov",
+          "rate": "108.8"
+        },
+        {
+          "month": "Dec",
+          "rate": "109.0"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1985",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "109.6"
+        },
+        {
+          "month": "Feb",
+          "rate": "109.6"
+        },
+        {
+          "month": "Mar",
+          "rate": "110.9"
+        },
+        {
+          "month": "Apr",
+          "rate": "111.4"
+        },
+        {
+          "month": "May",
+          "rate": "111.5"
+        },
+        {
+          "month": "Jun",
+          "rate": "111.8"
+        },
+        {
+          "month": "Jul",
+          "rate": "111.8"
+        },
+        {
+          "month": "Aug",
+          "rate": "111.9"
+        },
+        {
+          "month": "Sep",
+          "rate": "113.9"
+        },
+        {
+          "month": "Oct",
+          "rate": "115.6"
+        },
+        {
+          "month": "Nov",
+          "rate": "116.1"
+        },
+        {
+          "month": "Dec",
+          "rate": "115.9"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1986",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "116.3"
+        },
+        {
+          "month": "Feb",
+          "rate": "115.8"
+        },
+        {
+          "month": "Mar",
+          "rate": "115.0"
+        },
+        {
+          "month": "Apr",
+          "rate": "115.4"
+        },
+        {
+          "month": "May",
+          "rate": "116.1"
+        },
+        {
+          "month": "Jun",
+          "rate": "116.8"
+        },
+        {
+          "month": "Jul",
+          "rate": "117.3"
+        },
+        {
+          "month": "Aug",
+          "rate": "117.0"
+        },
+        {
+          "month": "Sep",
+          "rate": "117.2"
+        },
+        {
+          "month": "Oct",
+          "rate": "117.3"
+        },
+        {
+          "month": "Nov",
+          "rate": "119.0"
+        },
+        {
+          "month": "Dec",
+          "rate": "122.0"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1987",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "122.4"
+        },
+        {
+          "month": "Feb",
+          "rate": "122.7"
+        },
+        {
+          "month": "Mar",
+          "rate": "123.4"
+        },
+        {
+          "month": "Apr",
+          "rate": "122.9"
+        },
+        {
+          "month": "May",
+          "rate": "122.3"
+        },
+        {
+          "month": "Jun",
+          "rate": "121.4"
+        },
+        {
+          "month": "Jul",
+          "rate": "121.3"
+        },
+        {
+          "month": "Aug",
+          "rate": "123.1"
+        },
+        {
+          "month": "Sep",
+          "rate": "123.9"
+        },
+        {
+          "month": "Oct",
+          "rate": "122.6"
+        },
+        {
+          "month": "Nov",
+          "rate": "123.9"
+        },
+        {
+          "month": "Dec",
+          "rate": "123.9"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1988",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "123.2"
+        },
+        {
+          "month": "Feb",
+          "rate": "121.5"
+        },
+        {
+          "month": "Mar",
+          "rate": "122.3"
+        },
+        {
+          "month": "Apr",
+          "rate": "123.9"
+        },
+        {
+          "month": "May",
+          "rate": "123.4"
+        },
+        {
+          "month": "Jun",
+          "rate": "124.0"
+        },
+        {
+          "month": "Jul",
+          "rate": "124.2"
+        },
+        {
+          "month": "Aug",
+          "rate": "124.2"
+        },
+        {
+          "month": "Sep",
+          "rate": "124.7"
+        },
+        {
+          "month": "Oct",
+          "rate": "125.0"
+        },
+        {
+          "month": "Nov",
+          "rate": "126.4"
+        },
+        {
+          "month": "Dec",
+          "rate": "128.0"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1989",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "129.3"
+        },
+        {
+          "month": "Feb",
+          "rate": "130.1"
+        },
+        {
+          "month": "Mar",
+          "rate": "130.4"
+        },
+        {
+          "month": "Apr",
+          "rate": "130.6"
+        },
+        {
+          "month": "May",
+          "rate": "130.8"
+        },
+        {
+          "month": "Jun",
+          "rate": "131.6"
+        },
+        {
+          "month": "Jul",
+          "rate": "131.6"
+        },
+        {
+          "month": "Aug",
+          "rate": "131.7"
+        },
+        {
+          "month": "Sep",
+          "rate": "131.8"
+        },
+        {
+          "month": "Oct",
+          "rate": "132.8"
+        },
+        {
+          "month": "Nov",
+          "rate": "134.2"
+        },
+        {
+          "month": "Dec",
+          "rate": "134.8"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1990",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "136.6"
+        },
+        {
+          "month": "Feb",
+          "rate": "140.0"
+        },
+        {
+          "month": "Mar",
+          "rate": "143.8"
+        },
+        {
+          "month": "Apr",
+          "rate": "145.6"
+        },
+        {
+          "month": "May",
+          "rate": "146.3"
+        },
+        {
+          "month": "Jun",
+          "rate": "146.8"
+        },
+        {
+          "month": "Jul",
+          "rate": "146.6"
+        },
+        {
+          "month": "Aug",
+          "rate": "146.8"
+        },
+        {
+          "month": "Sep",
+          "rate": "149.6"
+        },
+        {
+          "month": "Oct",
+          "rate": "153.6"
+        },
+        {
+          "month": "Nov",
+          "rate": "159.2"
+        },
+        {
+          "month": "Dec",
+          "rate": "165.4"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1991",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "166.5"
+        },
+        {
+          "month": "Feb",
+          "rate": "167.4"
+        },
+        {
+          "month": "Mar",
+          "rate": "163.2"
+        },
+        {
+          "month": "Apr",
+          "rate": "153.1"
+        },
+        {
+          "month": "May",
+          "rate": "151.1"
+        },
+        {
+          "month": "Jun",
+          "rate": "152.0"
+        },
+        {
+          "month": "Jul",
+          "rate": "151.5"
+        },
+        {
+          "month": "Aug",
+          "rate": "152.8"
+        },
+        {
+          "month": "Sep",
+          "rate": "150.6"
+        },
+        {
+          "month": "Oct",
+          "rate": "147.6"
+        },
+        {
+          "month": "Nov",
+          "rate": "150.9"
+        },
+        {
+          "month": "Dec",
+          "rate": "155.4"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1992",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "156.0"
+        },
+        {
+          "month": "Feb",
+          "rate": "154.7"
+        },
+        {
+          "month": "Mar",
+          "rate": "158.8"
+        },
+        {
+          "month": "Apr",
+          "rate": "160.7"
+        },
+        {
+          "month": "May",
+          "rate": "155.5"
+        },
+        {
+          "month": "Jun",
+          "rate": "145.4"
+        },
+        {
+          "month": "Jul",
+          "rate": "150.1"
+        },
+        {
+          "month": "Aug",
+          "rate": "147.8"
+        },
+        {
+          "month": "Sep",
+          "rate": "146.1"
+        },
+        {
+          "month": "Oct",
+          "rate": "157.6"
+        },
+        {
+          "month": "Nov",
+          "rate": "164.5"
+        },
+        {
+          "month": "Dec",
+          "rate": "165.7"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1993",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "170.7"
+        },
+        {
+          "month": "Feb",
+          "rate": "174.4"
+        },
+        {
+          "month": "Mar",
+          "rate": "173.4"
+        },
+        {
+          "month": "Apr",
+          "rate": "172.1"
+        },
+        {
+          "month": "May",
+          "rate": "176.3"
+        },
+        {
+          "month": "Jun",
+          "rate": "174.7"
+        },
+        {
+          "month": "Jul",
+          "rate": "179.6"
+        },
+        {
+          "month": "Aug",
+          "rate": "179.8"
+        },
+        {
+          "month": "Sep",
+          "rate": "180.8"
+        },
+        {
+          "month": "Oct",
+          "rate": "180.8"
+        },
+        {
+          "month": "Nov",
+          "rate": "188.3"
+        },
+        {
+          "month": "Dec",
+          "rate": "193.8"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1994",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "191.5"
+        },
+        {
+          "month": "Feb",
+          "rate": "191.8"
+        },
+        {
+          "month": "Mar",
+          "rate": "195.5"
+        },
+        {
+          "month": "Apr",
+          "rate": "192.3"
+        },
+        {
+          "month": "May",
+          "rate": "182.1"
+        },
+        {
+          "month": "Jun",
+          "rate": "182.3"
+        },
+        {
+          "month": "Jul",
+          "rate": "184.7"
+        },
+        {
+          "month": "Aug",
+          "rate": "187.4"
+        },
+        {
+          "month": "Sep",
+          "rate": "185.2"
+        },
+        {
+          "month": "Oct",
+          "rate": "179.9"
+        },
+        {
+          "month": "Nov",
+          "rate": "177.8"
+        },
+        {
+          "month": "Dec",
+          "rate": "175.3"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1995",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "179.5"
+        },
+        {
+          "month": "Feb",
+          "rate": "181.4"
+        },
+        {
+          "month": "Mar",
+          "rate": "188.5"
+        },
+        {
+          "month": "Apr",
+          "rate": "191.2"
+        },
+        {
+          "month": "May",
+          "rate": "191.2"
+        },
+        {
+          "month": "Jun",
+          "rate": "200.4"
+        },
+        {
+          "month": "Jul",
+          "rate": "199.2"
+        },
+        {
+          "month": "Aug",
+          "rate": "191.6"
+        },
+        {
+          "month": "Sep",
+          "rate": "189.7"
+        },
+        {
+          "month": "Oct",
+          "rate": "193.7"
+        },
+        {
+          "month": "Nov",
+          "rate": "191.5"
+        },
+        {
+          "month": "Dec",
+          "rate": "178.4"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1996",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "179.4"
+        },
+        {
+          "month": "Feb",
+          "rate": "188.4"
+        },
+        {
+          "month": "Mar",
+          "rate": "187.9"
+        },
+        {
+          "month": "Apr",
+          "rate": "187.7"
+        },
+        {
+          "month": "May",
+          "rate": "189.2"
+        },
+        {
+          "month": "Jun",
+          "rate": "192.1"
+        },
+        {
+          "month": "Jul",
+          "rate": "192.9"
+        },
+        {
+          "month": "Aug",
+          "rate": "190.9"
+        },
+        {
+          "month": "Sep",
+          "rate": "196.0"
+        },
+        {
+          "month": "Oct",
+          "rate": "200.1"
+        },
+        {
+          "month": "Nov",
+          "rate": "200.1"
+        },
+        {
+          "month": "Dec",
+          "rate": "204.7"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1997",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "198.1"
+        },
+        {
+          "month": "Feb",
+          "rate": "192.9"
+        },
+        {
+          "month": "Mar",
+          "rate": "201.6"
+        },
+        {
+          "month": "Apr",
+          "rate": "204.1"
+        },
+        {
+          "month": "May",
+          "rate": "201.5"
+        },
+        {
+          "month": "Jun",
+          "rate": "199.1"
+        },
+        {
+          "month": "Jul",
+          "rate": "203.6"
+        },
+        {
+          "month": "Aug",
+          "rate": "194.0"
+        },
+        {
+          "month": "Sep",
+          "rate": "198.0"
+        },
+        {
+          "month": "Oct",
+          "rate": "205.5"
+        },
+        {
+          "month": "Nov",
+          "rate": "197.5"
+        },
+        {
+          "month": "Dec",
+          "rate": "194.8"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1998",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "200.1"
+        },
+        {
+          "month": "Feb",
+          "rate": "206.6"
+        },
+        {
+          "month": "Mar",
+          "rate": "210.7"
+        },
+        {
+          "month": "Apr",
+          "rate": "210.1"
+        },
+        {
+          "month": "May",
+          "rate": "205.0"
+        },
+        {
+          "month": "Jun",
+          "rate": "200.9"
+        },
+        {
+          "month": "Jul",
+          "rate": "207.3"
+        },
+        {
+          "month": "Aug",
+          "rate": "207.8"
+        },
+        {
+          "month": "Sep",
+          "rate": "206.0"
+        },
+        {
+          "month": "Oct",
+          "rate": "205.2"
+        },
+        {
+          "month": "Nov",
+          "rate": "200.8"
+        },
+        {
+          "month": "Dec",
+          "rate": "202.8"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "1999",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "206.4"
+        },
+        {
+          "month": "Feb",
+          "rate": "211.4"
+        },
+        {
+          "month": "Mar",
+          "rate": "221.3"
+        },
+        {
+          "month": "Apr",
+          "rate": "225.8"
+        },
+        {
+          "month": "May",
+          "rate": "220.2"
+        },
+        {
+          "month": "Jun",
+          "rate": "209.7"
+        },
+        {
+          "month": "Jul",
+          "rate": "223.3"
+        },
+        {
+          "month": "Aug",
+          "rate": "217.2"
+        },
+        {
+          "month": "Sep",
+          "rate": "213.6"
+        },
+        {
+          "month": "Oct",
+          "rate": "224.9"
+        },
+        {
+          "month": "Nov",
+          "rate": "226.4"
+        },
+        {
+          "month": "Dec",
+          "rate": "224.9"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2000",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "221.8"
+        },
+        {
+          "month": "Feb",
+          "rate": "230.2"
+        },
+        {
+          "month": "Mar",
+          "rate": "240.7"
+        },
+        {
+          "month": "Apr",
+          "rate": "239.5"
+        },
+        {
+          "month": "May",
+          "rate": "241.3"
+        },
+        {
+          "month": "Jun",
+          "rate": "245.0"
+        },
+        {
+          "month": "Jul",
+          "rate": "246.8"
+        },
+        {
+          "month": "Aug",
+          "rate": "250.4"
+        },
+        {
+          "month": "Sep",
+          "rate": "244.9"
+        },
+        {
+          "month": "Oct",
+          "rate": "236.3"
+        },
+        {
+          "month": "Nov",
+          "rate": "238.0"
+        },
+        {
+          "month": "Dec",
+          "rate": "238.2"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2001",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "239.0"
+        },
+        {
+          "month": "Feb",
+          "rate": "242.0"
+        },
+        {
+          "month": "Mar",
+          "rate": "238.6"
+        },
+        {
+          "month": "Apr",
+          "rate": "235.5"
+        },
+        {
+          "month": "May",
+          "rate": "237.5"
+        },
+        {
+          "month": "Jun",
+          "rate": "249.3"
+        },
+        {
+          "month": "Jul",
+          "rate": "248.8"
+        },
+        {
+          "month": "Aug",
+          "rate": "244.3"
+        },
+        {
+          "month": "Sep",
+          "rate": "242.5"
+        },
+        {
+          "month": "Oct",
+          "rate": "236.4"
+        },
+        {
+          "month": "Nov",
+          "rate": "230.0"
+        },
+        {
+          "month": "Dec",
+          "rate": "229.0"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2002",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "229.9"
+        },
+        {
+          "month": "Feb",
+          "rate": "232.1"
+        },
+        {
+          "month": "Mar",
+          "rate": "233.2"
+        },
+        {
+          "month": "Apr",
+          "rate": "235.4"
+        },
+        {
+          "month": "May",
+          "rate": "239.6"
+        },
+        {
+          "month": "Jun",
+          "rate": "238.1"
+        },
+        {
+          "month": "Jul",
+          "rate": "235.1"
+        },
+        {
+          "month": "Aug",
+          "rate": "235.0"
+        },
+        {
+          "month": "Sep",
+          "rate": "230.0"
+        },
+        {
+          "month": "Oct",
+          "rate": "224.4"
+        },
+        {
+          "month": "Nov",
+          "rate": "222.6"
+        },
+        {
+          "month": "Dec",
+          "rate": "223.4"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2003",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "222.1"
+        },
+        {
+          "month": "Feb",
+          "rate": "224.7"
+        },
+        {
+          "month": "Mar",
+          "rate": "228.9"
+        },
+        {
+          "month": "Apr",
+          "rate": "231.0"
+        },
+        {
+          "month": "May",
+          "rate": "233.3"
+        },
+        {
+          "month": "Jun",
+          "rate": "238.0"
+        },
+        {
+          "month": "Jul",
+          "rate": "241.7"
+        },
+        {
+          "month": "Aug",
+          "rate": "237.9"
+        },
+        {
+          "month": "Sep",
+          "rate": "233.7"
+        },
+        {
+          "month": "Oct",
+          "rate": "233.6"
+        },
+        {
+          "month": "Nov",
+          "rate": "227.5"
+        },
+        {
+          "month": "Dec",
+          "rate": "223.1"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2004",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "224.9"
+        },
+        {
+          "month": "Feb",
+          "rate": "227.6"
+        },
+        {
+          "month": "Mar",
+          "rate": "230.0"
+        },
+        {
+          "month": "Apr",
+          "rate": "232.4"
+        },
+        {
+          "month": "May",
+          "rate": "230.5"
+        },
+        {
+          "month": "Jun",
+          "rate": "232.2"
+        },
+        {
+          "month": "Jul",
+          "rate": "233.3"
+        },
+        {
+          "month": "Aug",
+          "rate": "224.7"
+        },
+        {
+          "month": "Sep",
+          "rate": "221.0"
+        },
+        {
+          "month": "Oct",
+          "rate": "224.0"
+        },
+        {
+          "month": "Nov",
+          "rate": "226.2"
+        },
+        {
+          "month": "Dec",
+          "rate": "219.7"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2005",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "217.7"
+        },
+        {
+          "month": "Feb",
+          "rate": "220.9"
+        },
+        {
+          "month": "Mar",
+          "rate": "226.8"
+        },
+        {
+          "month": "Apr",
+          "rate": "234.9"
+        },
+        {
+          "month": "May",
+          "rate": "240.0"
+        },
+        {
+          "month": "Jun",
+          "rate": "245.6"
+        },
+        {
+          "month": "Jul",
+          "rate": "249.7"
+        },
+        {
+          "month": "Aug",
+          "rate": "244.2"
+        },
+        {
+          "month": "Sep",
+          "rate": "240.8"
+        },
+        {
+          "month": "Oct",
+          "rate": "244.3"
+        },
+        {
+          "month": "Nov",
+          "rate": "240.7"
+        },
+        {
+          "month": "Dec",
+          "rate": "233.8"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2006",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "236.5"
+        },
+        {
+          "month": "Feb",
+          "rate": "239.3"
+        },
+        {
+          "month": "Mar",
+          "rate": "242.0"
+        },
+        {
+          "month": "Apr",
+          "rate": "245.8"
+        },
+        {
+          "month": "May",
+          "rate": "252.3"
+        },
+        {
+          "month": "Jun",
+          "rate": "260.0"
+        },
+        {
+          "month": "Jul",
+          "rate": "263.3"
+        },
+        {
+          "month": "Aug",
+          "rate": "258.4"
+        },
+        {
+          "month": "Sep",
+          "rate": "252.4"
+        },
+        {
+          "month": "Oct",
+          "rate": "248.9"
+        },
+        {
+          "month": "Nov",
+          "rate": "237.0"
+        },
+        {
+          "month": "Dec",
+          "rate": "231.4"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2007",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "237.021"
+        },
+        {
+          "month": "Feb",
+          "rate": "242.627"
+        },
+        {
+          "month": "Mar",
+          "rate": "246.331"
+        },
+        {
+          "month": "Apr",
+          "rate": "248.807"
+        },
+        {
+          "month": "May",
+          "rate": "249.760"
+        },
+        {
+          "month": "Jun",
+          "rate": "256.723"
+        },
+        {
+          "month": "Jul",
+          "rate": "259.543"
+        },
+        {
+          "month": "Aug",
+          "rate": "255.105"
+        },
+        {
+          "month": "Sep",
+          "rate": "252.919"
+        },
+        {
+          "month": "Oct",
+          "rate": "257.409"
+        },
+        {
+          "month": "Nov",
+          "rate": "258.116"
+        },
+        {
+          "month": "Dec",
+          "rate": "255.873"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2008",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "258.046"
+        },
+        {
+          "month": "Feb",
+          "rate": "261.017"
+        },
+        {
+          "month": "Mar",
+          "rate": "271.514"
+        },
+        {
+          "month": "Apr",
+          "rate": "274.020"
+        },
+        {
+          "month": "May",
+          "rate": "285.607"
+        },
+        {
+          "month": "Jun",
+          "rate": "304.810"
+        },
+        {
+          "month": "Jul",
+          "rate": "311.244"
+        },
+        {
+          "month": "Aug",
+          "rate": "308.309"
+        },
+        {
+          "month": "Sep",
+          "rate": "297.228"
+        },
+        {
+          "month": "Oct",
+          "rate": "284.166"
+        },
+        {
+          "month": "Nov",
+          "rate": "268.452"
+        },
+        {
+          "month": "Dec",
+          "rate": "259.566"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2009",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "255.621"
+        },
+        {
+          "month": "Feb",
+          "rate": "251.829"
+        },
+        {
+          "month": "Mar",
+          "rate": "250.561"
+        },
+        {
+          "month": "Apr",
+          "rate": "248.943"
+        },
+        {
+          "month": "May",
+          "rate": "247.675"
+        },
+        {
+          "month": "Jun",
+          "rate": "252.803"
+        },
+        {
+          "month": "Jul",
+          "rate": "259.585"
+        },
+        {
+          "month": "Aug",
+          "rate": "259.351"
+        },
+        {
+          "month": "Sep",
+          "rate": "262.848"
+        },
+        {
+          "month": "Oct",
+          "rate": "265.696"
+        },
+        {
+          "month": "Nov",
+          "rate": "270.069"
+        },
+        {
+          "month": "Dec",
+          "rate": "270.667"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2010",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "264.331"
+        },
+        {
+          "month": "Feb",
+          "rate": "265.358"
+        },
+        {
+          "month": "Mar",
+          "rate": "269.377"
+        },
+        {
+          "month": "Apr",
+          "rate": "275.696"
+        },
+        {
+          "month": "May",
+          "rate": "281.740"
+        },
+        {
+          "month": "Jun",
+          "rate": "288.517"
+        },
+        {
+          "month": "Jul",
+          "rate": "285.979"
+        },
+        {
+          "month": "Aug",
+          "rate": "281.930"
+        },
+        {
+          "month": "Sep",
+          "rate": "278.828"
+        },
+        {
+          "month": "Oct",
+          "rate": "277.344"
+        },
+        {
+          "month": "Nov",
+          "rate": "282.695"
+        },
+        {
+          "month": "Dec",
+          "rate": "286.438"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2011",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "290.243"
+        },
+        {
+          "month": "Feb",
+          "rate": "298.099"
+        },
+        {
+          "month": "Mar",
+          "rate": "306.256"
+        },
+        {
+          "month": "Apr",
+          "rate": "309.087"
+        },
+        {
+          "month": "May",
+          "rate": "307.310"
+        },
+        {
+          "month": "Jun",
+          "rate": "307.804"
+        },
+        {
+          "month": "Jul",
+          "rate": "307.798"
+        },
+        {
+          "month": "Aug",
+          "rate": "308.670"
+        },
+        {
+          "month": "Sep",
+          "rate": "307.065"
+        },
+        {
+          "month": "Oct",
+          "rate": "304.031"
+        },
+        {
+          "month": "Nov",
+          "rate": "302.635"
+        },
+        {
+          "month": "Dec",
+          "rate": "299.315"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2012",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "295.429"
+        },
+        {
+          "month": "Feb",
+          "rate": "298.477"
+        },
+        {
+          "month": "Mar",
+          "rate": "303.843"
+        },
+        {
+          "month": "Apr",
+          "rate": "312.845"
+        },
+        {
+          "month": "May",
+          "rate": "317.066"
+        },
+        {
+          "month": "Jun",
+          "rate": "313.920"
+        },
+        {
+          "month": "Jul",
+          "rate": "305.689"
+        },
+        {
+          "month": "Aug",
+          "rate": "299.284"
+        },
+        {
+          "month": "Sep",
+          "rate": "299.228"
+        },
+        {
+          "month": "Oct",
+          "rate": "302.533"
+        },
+        {
+          "month": "Nov",
+          "rate": "305.354"
+        },
+        {
+          "month": "Dec",
+          "rate": "305.733"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2013",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "306.603"
+        },
+        {
+          "month": "Feb",
+          "rate": "309.283"
+        },
+        {
+          "month": "Mar",
+          "rate": "315.303"
+        },
+        {
+          "month": "Apr",
+          "rate": "318.815"
+        },
+        {
+          "month": "May",
+          "rate": "326.500"
+        },
+        {
+          "month": "Jun",
+          "rate": "325.321"
+        },
+        {
+          "month": "Jul",
+          "rate": "315.789"
+        },
+        {
+          "month": "Aug",
+          "rate": "303.848"
+        },
+        {
+          "month": "Sep",
+          "rate": "301.476"
+        },
+        {
+          "month": "Oct",
+          "rate": "310.012"
+        },
+        {
+          "month": "Nov",
+          "rate": "318.197"
+        },
+        {
+          "month": "Dec",
+          "rate": "301.357"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2014",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "291.836"
+        },
+        {
+          "month": "Feb",
+          "rate": "297.679"
+        },
+        {
+          "month": "Mar",
+          "rate": "302.464"
+        },
+        {
+          "month": "Apr",
+          "rate": "318.331"
+        },
+        {
+          "month": "May",
+          "rate": "341.947"
+        },
+        {
+          "month": "Jun",
+          "rate": "342.697"
+        },
+        {
+          "month": "Jul",
+          "rate": "315.012"
+        },
+        {
+          "month": "Aug",
+          "rate": "295.609"
+        },
+        {
+          "month": "Sep",
+          "rate": "292.397"
+        },
+        {
+          "month": "Oct",
+          "rate": "301.466"
+        },
+        {
+          "month": "Nov",
+          "rate": "305.885"
+        },
+        {
+          "month": "Dec",
+          "rate": "287.175"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2015",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "283.152"
+        },
+        {
+          "month": "Feb",
+          "rate": "288.626"
+        },
+        {
+          "month": "Mar",
+          "rate": "287.362"
+        },
+        {
+          "month": "Apr",
+          "rate": "294.603"
+        },
+        {
+          "month": "May",
+          "rate": "319.401"
+        },
+        {
+          "month": "Jun",
+          "rate": "324.953"
+        },
+        {
+          "month": "Jul",
+          "rate": "297.324"
+        },
+        {
+          "month": "Aug",
+          "rate": "277.768"
+        },
+        {
+          "month": "Sep",
+          "rate": "274.897"
+        },
+        {
+          "month": "Oct",
+          "rate": "285.837"
+        },
+        {
+          "month": "Nov",
+          "rate": "294.143"
+        },
+        {
+          "month": "Dec",
+          "rate": "278.658"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2016",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "278.334"
+        },
+        {
+          "month": "Feb",
+          "rate": "283.520"
+        },
+        {
+          "month": "Mar",
+          "rate": "283.584"
+        },
+        {
+          "month": "Apr",
+          "rate": "295.909"
+        },
+        {
+          "month": "May",
+          "rate": "309.540"
+        },
+        {
+          "month": "Jun",
+          "rate": "309.679"
+        },
+        {
+          "month": "Jul",
+          "rate": "283.501"
+        },
+        {
+          "month": "Aug",
+          "rate": "268.040"
+        },
+        {
+          "month": "Sep",
+          "rate": "267.457"
+        },
+        {
+          "month": "Oct",
+          "rate": "270.922"
+        },
+        {
+          "month": "Nov",
+          "rate": "274.761"
+        },
+        {
+          "month": "Dec",
+          "rate": "265.436"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2017",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "269.241"
+        },
+        {
+          "month": "Feb",
+          "rate": "280.517"
+        },
+        {
+          "month": "Mar",
+          "rate": "283.583"
+        },
+        {
+          "month": "Apr",
+          "rate": "294.034"
+        },
+        {
+          "month": "May",
+          "rate": "300.609"
+        },
+        {
+          "month": "Jun",
+          "rate": "296.384"
+        },
+        {
+          "month": "Jul",
+          "rate": "276.308"
+        },
+        {
+          "month": "Aug",
+          "rate": "259.359"
+        },
+        {
+          "month": "Sep",
+          "rate": "259.143"
+        },
+        {
+          "month": "Oct",
+          "rate": "267.297"
+        },
+        {
+          "month": "Nov",
+          "rate": "267.970"
+        },
+        {
+          "month": "Dec",
+          "rate": "254.947"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2018",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "255.496"
+        },
+        {
+          "month": "Feb",
+          "rate": "265.272"
+        },
+        {
+          "month": "Mar",
+          "rate": "267.482"
+        },
+        {
+          "month": "Apr",
+          "rate": "273.817"
+        },
+        {
+          "month": "May",
+          "rate": "280.804"
+        },
+        {
+          "month": "Jun",
+          "rate": "278.937"
+        },
+        {
+          "month": "Jul",
+          "rate": "264.994"
+        },
+        {
+          "month": "Aug",
+          "rate": "255.877"
+        },
+        {
+          "month": "Sep",
+          "rate": "258.196"
+        },
+        {
+          "month": "Oct",
+          "rate": "265.930"
+        },
+        {
+          "month": "Nov",
+          "rate": "263.809"
+        },
+        {
+          "month": "Dec",
+          "rate": "248.290"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2019",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "248.433"
+        },
+        {
+          "month": "Feb",
+          "rate": "259.049"
+        },
+        {
+          "month": "Mar",
+          "rate": "259.698"
+        },
+        {
+          "month": "Apr",
+          "rate": "268.767"
+        },
+        {
+          "month": "May",
+          "rate": "283.275"
+        },
+        {
+          "month": "Jun",
+          "rate": "283.001"
+        },
+        {
+          "month": "Jul",
+          "rate": "268.314"
+        },
+        {
+          "month": "Aug",
+          "rate": "259.849"
+        },
+        {
+          "month": "Sep",
+          "rate": "263.149"
+        },
+        {
+          "month": "Oct",
+          "rate": "269.871"
+        },
+        {
+          "month": "Nov",
+          "rate": "268.994"
+        },
+        {
+          "month": "Dec",
+          "rate": "252.411"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2020",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "255.200"
+        },
+        {
+          "month": "Feb",
+          "rate": "265.142"
+        },
+        {
+          "month": "Mar",
+          "rate": "232.113"
+        },
+        {
+          "month": "Apr",
+          "rate": "203.342"
+        },
+        {
+          "month": "May",
+          "rate": "201.649"
+        },
+        {
+          "month": "Jun",
+          "rate": "206.066"
+        },
+        {
+          "month": "Jul",
+          "rate": "204.785"
+        },
+        {
+          "month": "Aug",
+          "rate": "199.496"
+        },
+        {
+          "month": "Sep",
+          "rate": "197.424"
+        },
+        {
+          "month": "Oct",
+          "rate": "215.993"
+        },
+        {
+          "month": "Nov",
+          "rate": "223.360"
+        },
+        {
+          "month": "Dec",
+          "rate": "205.983"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2021",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "200.825"
+        },
+        {
+          "month": "Feb",
+          "rate": "197.204"
+        },
+        {
+          "month": "Mar",
+          "rate": "197.134"
+        },
+        {
+          "month": "Apr",
+          "rate": "222.953"
+        },
+        {
+          "month": "May",
+          "rate": "250.209"
+        },
+        {
+          "month": "Jun",
+          "rate": "256.684"
+        },
+        {
+          "month": "Jul",
+          "rate": "243.613"
+        },
+        {
+          "month": "Aug",
+          "rate": "212.882"
+        },
+        {
+          "month": "Sep",
+          "rate": "198.975"
+        },
+        {
+          "month": "Oct",
+          "rate": "205.994"
+        },
+        {
+          "month": "Nov",
+          "rate": "215.159"
+        },
+        {
+          "month": "Dec",
+          "rate": "208.954"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2022",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "210.762"
+        },
+        {
+          "month": "Feb",
+          "rate": "222.227"
+        },
+        {
+          "month": "Mar",
+          "rate": "243.689"
+        },
+        {
+          "month": "Apr",
+          "rate": "297.143"
+        },
+        {
+          "month": "May",
+          "rate": "344.853"
+        },
+        {
+          "month": "Jun",
+          "rate": "344.101"
+        },
+        {
+          "month": "Jul",
+          "rate": "311.205"
+        },
+        {
+          "month": "Aug",
+          "rate": "283.911"
+        },
+        {
+          "month": "Sep",
+          "rate": "284.313"
+        },
+        {
+          "month": "Oct",
+          "rate": "294.340"
+        },
+        {
+          "month": "Nov",
+          "rate": "292.656"
+        },
+        {
+          "month": "Dec",
+          "rate": "268.519"
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+},
+{
+  "domain": "airfare",
+  "url": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+  "data": {
+    "title": "Airfare Inflation Data",
+    "year": "2023",
+    "location": "United States",
+    "features": [
+      "Month",
+      "Inflation Rate"
+    ],
+    "additional_info": {
+      "country": "USA",
+      "months_data": [
+        {
+          "month": "Jan",
+          "rate": "264.629"
+        },
+        {
+          "month": "Feb",
+          "rate": "281.216"
+        },
+        {
+          "month": "Mar",
+          "rate": "286.814"
+        },
+        {
+          "month": "Apr",
+          "rate": "294.550"
+        },
+        {
+          "month": "May",
+          "rate": "298.489"
+        },
+        {
+          "month": "Jun",
+          "rate": "279.224"
+        },
+        {
+          "month": "Jul",
+          "rate": "253.345"
+        },
+        {
+          "month": "Aug",
+          "rate": "246.185"
+        },
+        {
+          "month": "Sep",
+          "rate": "246.151"
+        },
+        {
+          "month": "Oct",
+          "rate": "255.480"
+        },
+        {
+          "month": "Nov",
+          "rate": "Avail.\n      Dec.12"
+        },
+        {
+          "month": "Dec",
+          "rate": ""
+        }
+      ]
+    },
+    "metadata": {
+      "source": "https://www.usinflationcalculator.com/inflation/airfare-inflation/",
+      "timestamp": "2023-11-30T21:05:18-05:00"
+    }
+  }
+}

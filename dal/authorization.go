@@ -1,9 +1,19 @@
-package main
+package dal
 
 import (
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
+	"strconv"
 )
+
+// Permission represents a user's permission to perform an action on a resource.
+//
+// The code defines a struct named "Permission" with two fields, "Action" and "Resource," to represent permissions for actions on specific resources.
+type Permission struct {
+	Action   string
+	Resource string
+}
 
 // GetUserRole fetches the role associated with a given user ID.
 //
@@ -13,8 +23,10 @@ func GetUserRole(userID string) (string, error) {
 	err := DB.QueryRow("Call get_user_role(?)", userID).Scan(&userRole)
 	if err != nil {
 		log.Printf("Error in GetUserRole: %v", err)
+		InsertLog("400", "Error in GetUserRole: "+err.Error(), "GetUserRole()")
 		return "", err
 	}
+	InsertLog("200", "GetUserRole: User Role for UserID "+userID+" is "+userRole, "GetUserRole()")
 	log.Printf("GetUserRole: User Role for UserID %s is %s", userID, userRole)
 	return userRole, nil
 }
@@ -26,9 +38,11 @@ func IsUserActive(userID string) (bool, error) {
 	var isActive bool
 	err := DB.QueryRow("CALL is_user_active(?)", userID).Scan(&isActive)
 	if err != nil {
+		InsertLog("400", "Error in IsUserActive: "+err.Error(), "IsUserActive()")
 		log.Printf("Error in IsUserActive: %v", err)
 		return false, err
 	}
+	InsertLog("200", "IsUserActive: UserID "+userID+" is active: "+strconv.FormatBool(isActive), "IsUserActive()")
 	log.Printf("IsUserActive: UserID %s is active: %v", userID, isActive)
 	return isActive, nil
 }
@@ -37,10 +51,12 @@ func IsUserActive(userID string) (bool, error) {
 func AuthorizeUser(userID string, requiredRole string) (bool, error) {
 	userRole, err := GetUserRole(userID)
 	if err != nil {
+		InsertLog("400", "Error in AuthorizeUser: "+err.Error(), "AuthorizeUser()")
 		log.Printf("Error in AuthorizeUser: %v", err)
 		return false, err
 	}
 	hasPermission := userRole == requiredRole
+	InsertLog("200", "AuthorizeUser: UserID "+userID+" has required role "+requiredRole+": "+strconv.FormatBool(hasPermission), "AuthorizeUser()")
 	log.Printf("AuthorizeUser: UserID %s has required role %s: %v", userID, requiredRole, hasPermission)
 	return hasPermission, nil
 }
@@ -53,6 +69,7 @@ func GetPermissionsForRole(userRole string) ([]Permission, error) {
 	// Execute a stored procedure to fetch permissions for the user role.
 	rows, err := DB.Query("CALL get_permissions_for_role(?)", userRole)
 	if err != nil {
+		InsertLog("400", "Error in GetPermissionsForRole: "+err.Error(), "GetPermissionsForRole()")
 		log.Printf("Error in GetPermissionsForRole: %v", err)
 		return nil, err
 	}
@@ -63,6 +80,7 @@ func GetPermissionsForRole(userRole string) ([]Permission, error) {
 	for rows.Next() {
 		var action, resource string
 		if err := rows.Scan(&action, &resource); err != nil {
+			InsertLog("400", "Error in GetPermissionsForRole (Scan): "+err.Error(), "GetPermissionsForRole()")
 			log.Printf("Error in GetPermissionsForRole (Scan): %v", err)
 			return nil, err
 		}
@@ -70,10 +88,12 @@ func GetPermissionsForRole(userRole string) ([]Permission, error) {
 	}
 
 	if err := rows.Err(); err != nil {
+		InsertLog("400", "Error in GetPermissionsForRole (Rows): "+err.Error(), "GetPermissionsForRole()")
 		log.Printf("Error in GetPermissionsForRole (Rows): %v", err)
 		return nil, err
 	}
 
+	InsertLog("200", "GetPermissionsForRole: Permissions for Role "+userRole+": "+fmt.Sprintf("%+v", permissions), "GetPermissionsForRole()")
 	log.Printf("GetPermissionsForRole: Permissions for Role %s: %+v", userRole, permissions)
 	return permissions, nil
 }
@@ -84,9 +104,11 @@ func CheckPermission(userRole, action, resource string) (bool, error) {
 	var hasPermission bool
 	err := DB.QueryRow("CALL check_permission(?, ?, ?)", userRole, action, resource).Scan(&hasPermission)
 	if err != nil {
+		InsertLog("400", "Error in CheckPermission: "+err.Error(), "CheckPermission()")
 		log.Printf("Error in CheckPermission: %v", err)
 		return false, err
 	}
+	InsertLog("200", "CheckPermission: Role "+userRole+" has permission for Action "+action+" on Resource "+resource+": "+strconv.FormatBool(hasPermission), "CheckPermission()")
 	log.Printf("CheckPermission: Role %s has permission for Action %s on Resource %s: %v", userRole, action, resource, hasPermission)
 	return hasPermission, nil
 }
@@ -97,8 +119,10 @@ func CheckPermission(userRole, action, resource string) (bool, error) {
 func UpdateUserRole(userID, newRole string) error {
 	_, err := DB.Exec("CALL update_user_role(?, ?)", userID, newRole)
 	if err != nil {
+		InsertLog("400", "Error in UpdateUserRole: "+err.Error(), "UpdateUserRole()")
 		log.Printf("Error in UpdateUserRole: %v", err)
 	} else {
+		InsertLog("200", "UpdateUserRole: Role updated for UserID "+userID+" to "+newRole, "UpdateUserRole()")
 		log.Printf("UpdateUserRole: Role updated for UserID %s to %s", userID, newRole)
 	}
 	return err
@@ -110,8 +134,10 @@ func UpdateUserRole(userID, newRole string) error {
 func DeactivateUser(userID string) error {
 	_, err := DB.Exec("CALL deactivate_user(?)", userID)
 	if err != nil {
+		InsertLog("400", "Error in DeactivateUser: "+err.Error(), "DeactivateUser()")
 		log.Printf("Error in DeactivateUser: %v", err)
 	} else {
+		InsertLog("200", "DeactivateUser: UserID "+userID+" marked as inactive", "DeactivateUser()")
 		log.Printf("DeactivateUser: UserID %s marked as inactive", userID)
 	}
 	return err
@@ -121,8 +147,10 @@ func DeactivateUser(userID string) error {
 func AddPermission(userRole, action, resource string) error {
 	_, err := DB.Exec("CALL add_permission(?, ?, ?)", userRole, action, resource)
 	if err != nil {
+		InsertLog("400", "Error in AddPermission: "+err.Error(), "AddPermission()")
 		log.Printf("Error in AddPermission: %v", err)
 	} else {
+		InsertLog("200", "AddPermission: Permission added for Role "+userRole+": Action "+action+" on Resource "+resource, "AddPermission()")
 		log.Printf("AddPermission: Permission added for Role %s: Action %s on Resource %s", userRole, action, resource)
 	}
 	return err
@@ -134,28 +162,21 @@ func AddPermission(userRole, action, resource string) error {
 func HasPermission(userID, action, resource string) (bool, error) {
 	userRole, err := GetUserRole(userID)
 	if err != nil {
+		InsertLog("400", "Error in HasPermission (GetUserRole): "+err.Error(), "HasPermission()")
 		log.Printf("Error in HasPermission (GetUserRole): %v", err)
 		return false, err
 	}
 
 	hasPermission, err := CheckPermission(userRole, action, resource)
 	if err != nil {
+		InsertLog("400", "Error in HasPermission (CheckPermission): "+err.Error(), "HasPermission()")
 		log.Printf("Error in HasPermission (CheckPermission): %v", err)
 		return false, err
 	}
 
+	InsertLog("200", "HasPermission: UserID "+userID+" has permission for Action "+action+" on Resource "+resource+": "+strconv.FormatBool(hasPermission), "HasPermission()")
 	log.Printf("HasPermission: UserID %s has permission for Action %s on Resource %s: %v", userID, action, resource, hasPermission)
 	return hasPermission, nil
-}
-
-// ... [Additional functions for other sprocs as required]
-
-// Permission represents a user's permission to perform an action on a resource.
-//
-// The code defines a struct named "Permission" with two fields, "Action" and "Resource," to represent permissions for actions on specific resources.
-type Permission struct {
-	Action   string
-	Resource string
 }
 
 // NewPermission creates a new Permission object.

@@ -139,7 +139,7 @@ func loginHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Reques
 		})
 
 		// Redirect to the dashboard or home page
-		http.Redirect(w, r, "/about", http.StatusSeeOther)
+		http.Redirect(w, r, "/home", http.StatusSeeOther)
 
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

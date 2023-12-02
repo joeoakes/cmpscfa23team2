@@ -70,90 +70,65 @@ $(document).ready(function() {
     logout();
   });
 
-  // Handle AI Prediction Form submission
-  $('#aiPredictionForm').submit(function (event) {
+  $('#aiPredictionForm').submit(function(event) {
     event.preventDefault();
 
     var domain = $('#domainSelect').val();
-    var query = $('#querySelect').val();
+    var queryType = $('#querySelect').val();
 
-    // Define the base path for images
-    var basePath = 'static/Assets/MachineLearning/';
-
-
-    // Define a variable for the image path
-    var imagePath, imageDescription;
-
-
-    // Check domain and query combinations
-    if (domain === "E-commerce") {
-      switch (query) {
-        case "E-commerce Query 1 Used car":
-          imagePath = basePath + 'KNN/e-commerceQuery1Pic.png';
-          imageDescription = 'Description for E-commerce Query 1...';
-          break;
-        case "E-commerce Query 2 Gold Price":
-          imagePath = basePath + 'KNN/e-commerceQuery2Pic.png';
-          imageDescription = 'Description for E-commerce Query 2...';
-          break;
-        case "E-commerce Query 3 Silver Price":
-          imagePath = basePath + 'KNN/e-commerceQuery3Pic.png';
-          imageDescription = 'Description for E-commerce Query 3...';
-          break;
+    $.ajax({
+      url: '/api/predictions?domain=' + encodeURIComponent(domain) + '&queryType=' + encodeURIComponent(queryType),
+      type: 'GET',
+      success: function(response) {
+        // Check if the response contains valid prediction info
+        if (response && response.prediction_info) {
+          var predictionInfo = response.prediction_info;
+          // Check if the prediction info is a file path
+          if (/\.(jpg|png|gif)$/.test(predictionInfo)) {
+            // Display the image
+            var imagePath = 'static/Assets/MachineLearning/' + predictionInfo;
+            $('#predictionResult').html('<img src="' + imagePath + '" alt="Prediction Result" style="max-width: 100%; height: auto;">');
+          } else {
+            // Display text prediction
+            $('#predictionResult').text(predictionInfo);
+          }
+        } else {
+          // Handle missing or invalid prediction info
+          $('#predictionResult').text("No prediction data available for the selected query.");
+        }
+      },
+      error: function(xhr, status, error) {
+        // Display a user-friendly error message
+        console.error('Error fetching prediction:', error);
+        $('#predictionResult').text("An error occurred while fetching the prediction. Please try again later.");
       }
-    } else if (domain === "RealEstate") {
-      switch (query) {
-        case "Real Estate Query 1 Philadelphia":
-          imagePath = basePath + 'LinearRegression/realEstateQuery1Pic.png';
-          imageDescription = 'Description for Real Estate Query 1...';
-          break;
-        case "Real Estate Query 2 New York":
-          imagePath = basePath + 'LinearRegression/realEstateQuery2Pic.png';
-          imageDescription = 'Description for Real Estate Query 2...';
-          break;
-        case "Real Estate Query 3 California":
-          imagePath = basePath + 'LinearRegression/realEstateQuery3Pic.png';
-          imageDescription = 'Description for Real Estate Query 3...';
-          break;
-      }
-    }
-
-    // Display the image if a path is set, otherwise show the simulation result
-    if (imagePath) {
-      $('#predictionResult').html(`
-            <div id="image-description">${imageDescription}</div>
-            <img src="${imagePath}" alt="Result" style="width: 100%; height: auto; object-fit: contain;">
-        `);
-    } else {
-      // Simulation of the prediction result for other selections or Job Market
-      console.log("Selected Query: " + query + ", Domain: " + domain);
-      $('#predictionResult').text("Simulation of the prediction result.");
-    }
+    });
   });
 
 // Function to handle settings actions
-  function performAction(module, action) {
-    $.ajax({
-      url: '/settings/' + module + '/' + action.toLowerCase(),
-      type: 'POST',
-      success: function (response) {
-        console.log(response.message);
-      },
-      error: function (xhr, status, error) {
-        console.error(module + ' ' + action + ' failed:', error);
-      }
-    });
-  }
+    function performAction(module, action) {
+      $.ajax({
+        url: '/settings/' + module + '/' + action.toLowerCase(),
+        type: 'POST',
+        success: function (response) {
+          console.log(response.message);
+        },
+        error: function (xhr, status, error) {
+          console.error(module + ' ' + action + ' failed:', error);
+        }
+      });
+    }
 
 // Function to run on login success
-  function onLoginSuccess(token) {
-    $('#loginModal').modal('hide');
-    localStorage.setItem('token', token);
-  }
+    function onLoginSuccess(token) {
+      $('#loginModal').modal('hide');
+      localStorage.setItem('token', token);
+    }
 
 // Function to logout
-  function logout() {
-    localStorage.removeItem('token');
-    window.location.href = '/';
-  }
-});
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = '/';
+    }
+  });
+

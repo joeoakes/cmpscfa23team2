@@ -7,6 +7,7 @@ package dal
 
 import (
 	"cmpscfa23team2/dal"
+	"encoding/json"
 	"html/template"
 	"log"
 	"net/http"
@@ -18,7 +19,6 @@ type PageData struct {
 	Title        string
 	Content      string
 	ErrorMessage string
-	Users        []*dal.User
 }
 
 func main() {
@@ -61,7 +61,7 @@ func setupRoutes(tmpl *template.Template) {
 	http.HandleFunc("/home", makeHandler(tmpl, "home"))
 	http.HandleFunc("/about", makeHandler(tmpl, "about"))
 	http.HandleFunc("/contributors", makeHandler(tmpl, "contributors"))
-	http.HandleFunc("/login", makeHandler(tmpl, "login"))
+	//http.HandleFunc("/login", makeHandler(tmpl, "login"))
 	http.HandleFunc("/register", makeHandler(tmpl, "register"))
 	http.HandleFunc("/documentation", makeHandler(tmpl, "documentation"))
 	http.HandleFunc("/dashboard", func(w http.ResponseWriter, r *http.Request) {
@@ -69,7 +69,7 @@ func setupRoutes(tmpl *template.Template) {
 	})
 	//http.HandleFunc("/dashboard", requireAdmin(dashHandler(tmpl)))
 	http.HandleFunc("/settings", requireAdmin(makeHandler(tmpl, "settings")))
-
+	http.HandleFunc("/api/predictions", predictionHandler)
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 }
@@ -163,7 +163,6 @@ func renderLoginTemplate(tmpl *template.Template, w http.ResponseWriter, errorMe
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
-
 func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 
@@ -221,6 +220,35 @@ func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Req
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }
+
+func predictionHandler(w http.ResponseWriter, r *http.Request) {
+	// Only allow GET requests for this endpoint
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Extract query parameters for 'domain' and 'queryType'
+	domain := r.URL.Query().Get("domain")
+	query_identifier := r.URL.Query().Get("queryType") // Changed from 'query' to 'queryType'
+
+	// Check if both 'domain' and 'queryType' parameters are provided
+	if domain == "" || query_identifier == "" {
+		http.Error(w, "Missing domain or queryType parameter", http.StatusBadRequest)
+		return
+	}
+
+	// Fetch prediction data
+	predictionData, err := dal.FetchPredictionData(query_identifier, domain)
+	if err != nil {
+		log.Printf("Error fetching prediction data: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with the fetched prediction data
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(predictionData)
 
 // renderDashboardTemplate renders the dashboard with a potential error message.
 func renderDashboardTemplate(tmpl *template.Template, w http.ResponseWriter, users []*dal.User, errorMessage string) {

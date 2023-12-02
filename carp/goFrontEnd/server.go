@@ -1,4 +1,4 @@
-package main
+package dal
 
 // The errors: the file does not see the other methods from the middleware
 // change the configurations of the build to: from 'file' to 'directory' goFrontEnd

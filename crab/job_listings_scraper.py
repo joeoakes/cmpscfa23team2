@@ -102,7 +102,7 @@ def __scrape_indeed_page(job_url):
         # If not found, try the second selector
         if location == "Location Not Found":
             location = __extract_element_text(wait, By.CLASS_NAME, "css-ks9svk.eu4oa1w0", "Location Not Found")
-        salary = __extract_element_text(wait, By.CLASS_NAME, "css-2iqe2o.eu4oa1w0", "Not Available")
+        salary = __extract_element_text(wait, By.CLASS_NAME, "css-2iqe2o.eu4oa1w0", "Salary Not Found")
         description = __extract_job_description(wait)
 
         return {
@@ -117,26 +117,29 @@ def __scrape_indeed_page(job_url):
         driver.quit()
 
 
-def __scrape_domain(driver, domain, location):
+def __scrape_domain(driver, domain, location, num_pages=1):
     print(f"Starting to scrape jobs for domain: {domain}")
     indeed_pagination_url = f"https://www.indeed.com/jobs?q={domain}&l={location}"
     job_urls = []
 
-    driver.get(indeed_pagination_url)
-    print(f"Fetching URL: {indeed_pagination_url}")
+    for page in range(num_pages):
+        driver.get(indeed_pagination_url + f"&start={page * 10}")
+        print(f"Fetching URL: {indeed_pagination_url}")
 
-    wait = WebDriverWait(driver, 10)
-    jobs = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "job_seen_beacon")))
+        wait = WebDriverWait(driver, 10)
+        jobs = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "job_seen_beacon")))
 
-    if not jobs:
-        print("No job cards found on the page.")
-        return []
-    print(f"Found {len(jobs)} job cards.")
-    for job_card in jobs:  # Scraping only the first job card for demonstration
-        job_url_element = job_card.find_element(By.XPATH, './/a[@data-jk]')
-        job_urls.append(job_url_element.get_attribute('href'))
+        if not jobs:
+            print("No job cards found on the page.")
+            break
 
-    with Pool(30) as p:  # Adjust the number of processes as needed
+        print(f"Found {len(jobs)} job cards on page {page + 1}.")
+
+        for job_card in jobs:
+            job_url_element = job_card.find_element(By.XPATH, './/a[@data-jk]')
+            job_urls.append(job_url_element.get_attribute('href'))
+
+    with Pool(60) as p:
         job_listings = p.map(__scrape_indeed_page, job_urls)
 
     scraped_data = {
@@ -172,7 +175,11 @@ def __extract_job_description(wait):
         capture = False
 
         # Define the keywords and bullet point indicators
-        keywords = [r'qualifications:', r'experience', r'requirements:', r'desired skills:', r'minimum qualifications', r'recruitment requirements:', r'responsibilities:', r'required experience', r'position requirements:', r'skills']
+        keywords = [r'qualifications:', r'experience', r'requirements:', r'responsibilities',
+                    r'desired skills:', r'minimum qualifications', r'recruitment requirements:', r'experience:',
+                    r'skills:', r'Recruitment Requirements:', r'responsibilities:', r'required experience',
+                    r'position requirements:', r'skills', r'Skills and Abilities', r'Abilities',
+                    r'Qualifications', r'RECRUITMENT REQUIREMENTS:']
         bullet_indicators = ['-', '•', '*']  # Add more indicators if needed
 
         for element in soup.find_all(['p', 'li']):
@@ -181,20 +188,19 @@ def __extract_job_description(wait):
 
             if any(re.search(keyword, lower_text, re.IGNORECASE) for keyword in keywords):
                 capture = True
-                continue  # Skip adding the keyword itself to the output
 
             if capture:
                 if element.name == 'li' or any(text.startswith(indicator) for indicator in bullet_indicators):
-                    # Capture bullet points and lines that look like bullet points
                     description_texts.append(text)
-                elif not any(text.startswith(indicator) for indicator in bullet_indicators):
-                    # Stop capturing on encountering a non-bullet point line
+                elif not any(text.startswith(indicator) for indicator in bullet_indicators) and not any(re.search(keyword, lower_text, re.IGNORECASE) for keyword in keywords):
+                    # Stop capturing on encountering a non-bullet point line and not a keyword line
                     capture = False
 
         return '\n'.join(description_texts).strip()
     except Exception as e:
         print(f"Error in extracting job description: {e}")
         return "Not Available"
+
 
 def get_web_driver():
     # Try initializing Firefox WebDriver
@@ -221,15 +227,15 @@ def get_web_driver():
     except Exception as e:
         print("Chrome WebDriver not found.", e)
         raise
-          
-def scrape(location_search_keyword='', scrape_option=0) -> None:
+
+def scrape(location_search_keyword='', num_pages=1, scrape_option=0) -> None:
     driver = get_web_driver()
 
-    domains = ['Software Engineer']
+    domains = ['Healthcare', 'Business', 'Cybersecurity']
     all_data = []
 
     for domain in domains:
-        domain_data = __scrape_domain(driver, domain, location_search_keyword)
+        domain_data = __scrape_domain(driver, domain, location_search_keyword, num_pages)
         all_data.append(domain_data)
 
     driver.quit()
@@ -245,7 +251,7 @@ def scrape(location_search_keyword='', scrape_option=0) -> None:
 
 def main():
     print("Script started.")
-    scrape('Philadelphia', scrape_option=1)
+    scrape('Philadelphia', num_pages=1, scrape_option=1)
           
 if __name__ == "__main__":
     main()

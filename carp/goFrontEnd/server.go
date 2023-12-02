@@ -1,4 +1,4 @@
-package main
+package dal
 
 // The errors: the file does not see the other methods from the middleware
 // change the configurations of the build to: from 'file' to 'directory' goFrontEnd
@@ -19,8 +19,6 @@ type PageData struct {
 	Title        string
 	Content      string
 	ErrorMessage string
-	Username     string // Add Username field
-	Email        string // Add Email field
 }
 
 func main() {
@@ -29,6 +27,7 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Println("Current directory:", dir)
+
 	setupServer()
 }
 
@@ -46,7 +45,7 @@ func setupServer() {
 	log.Println("Template files found:", files)
 
 	tmpl := template.Must(template.ParseGlob("templates/*.gohtml"))
-
+	log.Println("Templates loaded:", tmpl.DefinedTemplates())
 	setupRoutes(tmpl)
 
 	log.Println("Starting server on :8080")
@@ -65,7 +64,10 @@ func setupRoutes(tmpl *template.Template) {
 	//http.HandleFunc("/login", makeHandler(tmpl, "login"))
 	http.HandleFunc("/register", makeHandler(tmpl, "register"))
 	http.HandleFunc("/documentation", makeHandler(tmpl, "documentation"))
-	http.HandleFunc("/dashboard", requireAdmin(makeHandler(tmpl, "dashboard")))
+	http.HandleFunc("/dashboard", func(w http.ResponseWriter, r *http.Request) {
+		dashHandler(tmpl, w, r) // Invoking dashHandler correctly
+	})
+	//http.HandleFunc("/dashboard", requireAdmin(dashHandler(tmpl)))
 	http.HandleFunc("/settings", requireAdmin(makeHandler(tmpl, "settings")))
 	http.HandleFunc("/api/predictions", predictionHandler)
 	fs := http.FileServer(http.Dir("static"))
@@ -91,6 +93,7 @@ func makeHandler(tmpl *template.Template, content string) http.HandlerFunc {
 			Title:   "PredictAI - " + content,
 			Content: content,
 		}
+
 		err := tmpl.ExecuteTemplate(w, "layout.gohtml", data)
 		if err != nil {
 			log.Printf("Error executing template: %v", err)
@@ -142,7 +145,7 @@ func loginHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Reques
 		})
 
 		// Redirect to the dashboard or home page
-		http.Redirect(w, r, "/about", http.StatusSeeOther)
+		http.Redirect(w, r, "/home", http.StatusSeeOther)
 
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -161,13 +164,20 @@ func renderLoginTemplate(tmpl *template.Template, w http.ResponseWriter, errorMe
 	}
 }
 func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+
 	switch r.Method {
 	case "GET":
-		// Render the registration form with initial data
-		data := PageData{Title: "Register"}
-		tmpl.ExecuteTemplate(w, "register", data)
+		data := RegistrationPageData{Title: "Register"}
+		err := tmpl.ExecuteTemplate(w, "register", data)
+		if err != nil {
+			log.Printf("Error executing register template: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 
 	case "POST":
+
 		// Parse form values
 		if err := r.ParseForm(); err != nil {
 			http.Error(w, "Error parsing form", http.StatusBadRequest)
@@ -182,7 +192,10 @@ func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Req
 
 		// Check if passwords match
 		if password != confirmPassword {
-			renderRegistrationTemplate(tmpl, w, "Passwords do not match", username, email)
+			tmpl.ExecuteTemplate(w, "register", RegistrationPageData{
+				Title:        "Register",
+				ErrorMessage: "Passwords do not match",
+			})
 			return
 		}
 
@@ -193,7 +206,10 @@ func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Req
 		// Call DAL function to register user
 		_, err := dal.RegisterUser(username, email, defaultRole, password, active)
 		if err != nil {
-			renderRegistrationTemplate(tmpl, w, "Registration failed: "+err.Error(), username, email)
+			tmpl.ExecuteTemplate(w, "register", RegistrationPageData{
+				Title:        "Register",
+				ErrorMessage: "Registration failed: " + err.Error(),
+			})
 			return
 		}
 
@@ -205,20 +221,6 @@ func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Req
 	}
 }
 
-func renderRegistrationTemplate(tmpl *template.Template, w http.ResponseWriter, errorMessage string, username string, email string) {
-	data := PageData{
-		Title:        "Register",
-		ErrorMessage: errorMessage,
-		Username:     username, // Set the Username field
-		Email:        email,    // Set the Email field
-	}
-	data.Content = "register"
-	err := tmpl.ExecuteTemplate(w, "register", data)
-	if err != nil {
-		log.Printf("Error executing template: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
-}
 func predictionHandler(w http.ResponseWriter, r *http.Request) {
 	// Only allow GET requests for this endpoint
 	if r.Method != http.MethodGet {
@@ -247,4 +249,43 @@ func predictionHandler(w http.ResponseWriter, r *http.Request) {
 	// Respond with the fetched prediction data
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(predictionData)
+
+// renderDashboardTemplate renders the dashboard with a potential error message.
+func renderDashboardTemplate(tmpl *template.Template, w http.ResponseWriter, users []*dal.User, errorMessage string) {
+	data := PageData{
+		Title:        "Dashboard",
+		Users:        users,
+		ErrorMessage: errorMessage,
+	}
+	err := tmpl.ExecuteTemplate(w, "dashboard", data)
+	if err != nil {
+		log.Printf("Error executing dashboard template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
+
+func dashHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	log.Printf("beginning of dashHandler\n")
+	users, err := dal.GetAllUsers()
+	if err != nil {
+		log.Printf("Error fetching users: %v", err)
+		http.Error(w, "Unable to fetch user data", http.StatusInternalServerError)
+		return
+	}
+	log.Printf("before being passed to template: %+v\n")
+
+	data := PageData{
+		Title: "Dashboard",
+		Users: users,
+		// Ensure you have this if you are conditionally displaying templates within "layout.gohtml"
+		Content: "dashboard",
+	}
+	log.Printf("PageData being passed to template: %+v\n", data)
+
+	err = tmpl.ExecuteTemplate(w, "layout.gohtml", data) // Execute "layout", not "dashboard"
+	if err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
 }

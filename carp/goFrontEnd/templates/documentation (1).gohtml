@@ -1,0 +1,1032 @@
+{{ define "documentation" }}
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            /*max-width: 800px;*/
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #375EAB;
+        }
+
+        h2 {
+            color: #375EAB;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #333;
+        }
+
+        a {
+            color: #375EAB;
+        }
+
+        .toggleVisible {
+            margin-bottom: 20px;
+        }
+
+        #pkg-overview, #pkg-index {
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+    <div class="container mt-5">
+        <h1>Documentation</h1>
+        <!-- Your documentation content goes here -->
+        <p>This is the documentation page for the PredictAI platform.</p>
+{{/*        <!DOCTYPE html>*/}}
+{{/*        <html>*/}}
+        <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta name="theme-color" content="#375EAB">
+
+            <title>dal - Go Documentation Server</title>
+
+            <link type="text/css" rel="stylesheet" href="/lib/godoc/style.css">
+
+            <script>window.initFuncs = [];</script>
+            <script src="/lib/godoc/jquery.js" defer></script>
+
+
+
+            <script>var goVersion = "go1.21.1";</script>
+            <script src="/lib/godoc/godocs.js" defer></script>
+        </head>
+{{/*        <body>*/}}
+
+        <div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+            ...
+        </div><!-- #lowframe -->
+
+{{/*        <div id="topbar" class="wide"><div class="container">*/}}
+{{/*                <div class="top-heading" id="heading-wide"><a href="/pkg/">Go Documentation Server</a></div>*/}}
+{{/*                <div class="top-heading" id="heading-narrow"><a href="/pkg/">GoDoc</a></div>*/}}
+{{/*                <a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>*/}}
+{{/*                <form method="GET" action="/search">*/}}
+{{/*                    <div id="menu">*/}}
+
+{{/*                        <span class="search-box"><input type="search" id="search" name="q" placeholder="Search" aria-label="Search" required><button type="submit"><span><!-- magnifying glass: --><svg width="24" height="24" viewBox="0 0 24 24"><title>submit search</title><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></span></button></span>*/}}
+{{/*                    </div>*/}}
+{{/*                </form>*/}}
+
+{{/*            </div></div>*/}}
+
+
+
+        <div id="page" class="wide">
+            <div class="container">
+
+
+                <h2>
+                    Functions for DAL, Authentication, Authorization, and Logging
+                    <span class="text-muted"></span>
+                </h2>
+
+
+
+
+
+
+
+                <div id="nav"></div>
+
+
+                <!--
+                    Copyright 2009 The Go Authors. All rights reserved.
+                    Use of this source code is governed by a BSD-style
+                    license that can be found in the LICENSE file.
+                -->
+                <!--
+                    Note: Static (i.e., not template-generated) href and id
+                    attributes start with "pkg-" to make it impossible for
+                    them to conflict with generated attributes (some of which
+                    correspond to Go identifiers).
+                -->
+
+                <script>
+                    document.ANALYSIS_DATA = null;
+                    document.CALLGRAPH = null;
+                </script>
+
+
+
+                <div id="short-nav">
+                    {{/*                    <dl>*/}}
+                    {{/*                        <dd><code>import "cmpscfa23team2/DAL"</code></dd>*/}}
+                    {{/*                    </dl>*/}}
+                    <dl>
+                        <dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+                        <dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+
+
+                    </dl>
+                </div>
+                <!-- The package's Name is printed as title by the top-level template -->
+                <div id="pkg-overview" class="toggleVisible">
+
+                    <div class="expanded">
+                        <h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+                        <p> Contains the functions of DAL, Authentication, Authorization and Logging methods</p>
+
+                    </div>
+                </div>
+
+                <div id="pkg-index" class="toggleVisible">
+
+                    <div class="expanded">
+                        <h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+                        <!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+                        <div id="manual-nav">
+                            <dl>
+
+                                <dd><a href="#pkg-constants">Constants</a></dd>
+
+
+                                <dd><a href="#pkg-variables">Variables</a></dd>
+
+
+
+                                <dd><a href="#AddPermission">func AddPermission(userRole, action, resource string) error</a></dd>
+
+
+                                <dd><a href="#AuthenticateUser">func AuthenticateUser(username string, password string) (string, error)</a></dd>
+
+
+                                <dd><a href="#AuthorizeUser">func AuthorizeUser(userID string, requiredRole string) (bool, error)</a></dd>
+
+
+                                <dd><a href="#ChangePassword">func ChangePassword(userID string, newPassword string) error</a></dd>
+
+
+                                <dd><a href="#CheckPermission">func CheckPermission(userRole, action, resource string) (bool, error)</a></dd>
+
+
+                                <dd><a href="#CloseDb">func CloseDb()</a></dd>
+
+
+                                <dd><a href="#ComparePassword">func ComparePassword(hashedPassword []byte, password string) error</a></dd>
+
+
+                                <dd><a href="#ConvertPredictionToJSON">func ConvertPredictionToJSON(predictionResult string) (string, error)</a></dd>
+
+
+                                <dd><a href="#CreateScraperEngine">func CreateScraperEngine(engineName, engineDescription string) (string, error)</a></dd>
+
+
+                                <dd><a href="#CreateUser">func CreateUser(userName, userLogin, userRole string, userPassword string, activeOrNot bool) (string, error)</a></dd>
+
+
+                                <dd><a href="#CreateWebCrawler">func CreateWebCrawler(sourceURL string) (string, error)</a></dd>
+
+
+                                <dd><a href="#DeactivateUser">func DeactivateUser(userID string) error</a></dd>
+
+
+                                <dd><a href="#DeleteUser">func DeleteUser(userID string) error</a></dd>
+
+
+                                <dd><a href="#EngineIDExists">func EngineIDExists(engineID string) (bool, error)</a></dd>
+
+
+                                <dd><a href="#FetchUserIDByName">func FetchUserIDByName(userName string) (string, error)</a></dd>
+
+
+                                <dd><a href="#GenerateToken">func GenerateToken(userID string) (string, error)</a></dd>
+
+
+                                <dd><a href="#GetRandomURL">func GetRandomURL() (string, error)</a></dd>
+
+
+                                <dd><a href="#GetURLTagsAndDomain">func GetURLTagsAndDomain(id string) (map[string]interface{}, string, error)</a></dd>
+
+
+                                <dd><a href="#GetURLsAndTags">func GetURLsAndTags() (map[string]map[string]interface{}, error)</a></dd>
+
+
+                                <dd><a href="#GetURLsFromDomain">func GetURLsFromDomain(domain string) ([]string, error)</a></dd>
+
+
+                                <dd><a href="#GetURLsOnly">func GetURLsOnly() ([]string, error)</a></dd>
+
+
+                                <dd><a href="#GetUUIDFromURLAndDomain">func GetUUIDFromURLAndDomain(url, domain string) (string, error)</a></dd>
+
+
+                                <dd><a href="#GetUserRole">func GetUserRole(userID string) (string, error)</a></dd>
+
+
+                                <dd><a href="#HasPermission">func HasPermission(userID, action, resource string) (bool, error)</a></dd>
+
+
+                                <dd><a href="#HashPassword">func HashPassword(password string) ([]byte, error)</a></dd>
+
+
+                                <dd><a href="#InitDB">func InitDB() error</a></dd>
+
+
+                                <dd><a href="#InsertLog">func InsertLog(statusCode, message, goEngineArea string) error</a></dd>
+
+
+                                <dd><a href="#InsertOrUpdateStatusCode">func InsertOrUpdateStatusCode(statusCode, statusMessage string) error</a></dd>
+
+
+                                <dd><a href="#InsertPrediction">func InsertPrediction(engineID string, predictionInfo string) error</a></dd>
+
+
+                                <dd><a href="#InsertSampleEngine">func InsertSampleEngine(engineID, engineName, engineDescription string) error</a></dd>
+
+
+                                <dd><a href="#InsertURL">func InsertURL(url, domain string, tags map[string]interface{}) (string, error)</a></dd>
+
+
+                                <dd><a href="#IsUserActive">func IsUserActive(userID string) (bool, error)</a></dd>
+
+
+                                <dd><a href="#LogoutUser">func LogoutUser(userID string) error</a></dd>
+
+
+                                <dd><a href="#PerformMLPrediction">func PerformMLPrediction(inputData string) string</a></dd>
+
+
+                                <dd><a href="#RefreshToken">func RefreshToken(oldRefreshToken string) (string, string, error)</a></dd>
+
+
+                                <dd><a href="#RegisterUser">func RegisterUser(username string, login string, role string, password string, active bool) (string, error)</a></dd>
+
+
+                                <dd><a href="#StoreLog">func StoreLog(status_code string, message string, goEngineArea string) error</a></dd>
+
+
+                                <dd><a href="#UpdateURL">func UpdateURL(id, url, domain string, tags map[string]interface{}) error</a></dd>
+
+
+                                <dd><a href="#UpdateUser">func UpdateUser(userID, userName, userLogin, userRole, userPassword string) error</a></dd>
+
+
+                                <dd><a href="#UpdateUserRole">func UpdateUserRole(userID, newRole string) error</a></dd>
+
+
+                                <dd><a href="#ValidateToken">func ValidateToken(tokenString string) (bool, error)</a></dd>
+
+
+                                <dd><a href="#WriteLog">func WriteLog(logID string, status_code string, message string, goEngineArea string, dateTime time.Time) error</a></dd>
+
+
+
+                                <dd><a href="#JSON_Data_Connect">type JSON_Data_Connect</a></dd>
+
+
+
+
+                                <dd><a href="#Log">type Log</a></dd>
+
+
+                                <dd>&nbsp; &nbsp; <a href="#GetLog">func GetLog() ([]Log, error)</a></dd>
+
+
+                                <dd>&nbsp; &nbsp; <a href="#GetSuccess">func GetSuccess() ([]Log, error)</a></dd>
+
+
+
+
+                                <dd><a href="#LogStatusCodes">type LogStatusCodes</a></dd>
+
+
+
+
+                                <dd><a href="#Permission">type Permission</a></dd>
+
+
+                                <dd>&nbsp; &nbsp; <a href="#GetPermissionsForRole">func GetPermissionsForRole(userRole string) ([]Permission, error)</a></dd>
+
+
+                                <dd>&nbsp; &nbsp; <a href="#NewPermission">func NewPermission(action, resource string) Permission</a></dd>
+
+
+
+
+                                <dd><a href="#Prediction">type Prediction</a></dd>
+
+
+
+
+                                <dd><a href="#User">type User</a></dd>
+
+
+                                <dd>&nbsp; &nbsp; <a href="#GetAllUsers">func GetAllUsers() ([]*User, error)</a></dd>
+
+
+                                <dd>&nbsp; &nbsp; <a href="#GetUserByID">func GetUserByID(userID string) (*User, error)</a></dd>
+
+
+                                <dd>&nbsp; &nbsp; <a href="#GetUserByLogin">func GetUserByLogin(userLogin string) (*User, error)</a></dd>
+
+
+                                <dd>&nbsp; &nbsp; <a href="#GetUsersByRole">func GetUsersByRole(role string) ([]*User, error)</a></dd>
+
+
+
+
+                            </dl>
+                        </div><!-- #manual-nav -->
+
+
+
+
+
+
+
+
+
+                    </div><!-- .expanded -->
+                </div><!-- #pkg-index -->
+
+
+
+
+                <h2 id="pkg-constants">Constants</h2>
+
+
+                <pre>const <span id="SECRET_KEY">SECRET_KEY</span> = &#34;SECRETKEY123!&#34;</pre>
+
+
+
+                <h2 id="pkg-variables">Variables</h2>
+
+
+                <pre>var <span id="DB">DB</span> * sql .</pre>
+
+
+
+
+
+                <h2 id="AddPermission">func AddPermission
+
+
+
+                </h2>
+                <pre>func AddPermission(userRole, action, resource string) error</pre>
+                <p>AddPermission allows for adding a new permission to a user role.
+
+
+
+
+
+
+
+                <h2 id="AuthenticateUser">func AuthenticateUser
+
+
+
+                </h2>
+                <pre>func AuthenticateUser(username string, password string) (string, error)</pre>
+                <p>The code defines a function that authenticates a user by querying a database with a username and password, comparing the hashed password with the provided one, and generating a token for the user, returning the token or an error.
+
+
+
+
+
+
+
+                <h2 id="AuthorizeUser">func AuthorizeUser
+
+
+
+                </h2>
+                <pre>func AuthorizeUser(userID string, requiredRole string) (bool, error)</pre>
+                <p>AuthorizeUser verifies if a user has the necessary role to perform a certain action.
+
+
+
+
+
+
+
+                <h2 id="ChangePassword">func ChangePassword</a>
+
+
+
+                </h2>
+                <pre>func ChangePassword(userID string, newPassword string) error</pre>
+                <p>Takes a user ID and a new password as input and returns an error if there is any issue with the password change process
+
+
+
+
+
+
+
+                <h2 id="CheckPermission">func CheckPermission
+
+
+
+                </h2>
+                <pre>func CheckPermission(userRole, action, resource string) (bool, error)</pre>
+                <p>CheckPermission verifies if a specific role has permission to perform a certain action on a given resource.
+
+
+
+
+
+
+
+                <h2 id="CloseDb">func CloseDb
+
+
+
+                </h2>
+                <pre>func CloseDb()</pre>
+                <p>defines a function to close a database connection
+                    and logs any errors or a success message if the connection is closed successfully.
+
+
+
+
+
+
+
+                <h2 id="ComparePassword">func ComparePassword
+
+
+
+                </h2>
+                <pre>func ComparePassword(hashedPassword []byte, password string) error</pre>
+                <p>defines a function that compares a hashed password stored as a byte slice with a provided password string using the bcrypt library for secure password authentication.
+
+
+
+
+
+
+
+                <h2 id="ConvertPredictionToJSON">func ConvertPredictionToJSON
+
+
+
+                </h2>
+                <pre>func ConvertPredictionToJSON(predictionResult string) (string, error)</pre>
+                <p>Convert prediction result to JSON
+                <p>defines a function that converts a given prediction result string into a JSON format, logging a success message and returning the JSON string or an error.
+
+
+
+
+
+
+
+                <h2 id="CreateScraperEngine">func CreateScraperEngine
+
+
+
+                </h2>
+                <pre>func CreateScraperEngine(engineName, engineDescription string) (string, error)</pre>
+                <p>Function to create a new scraper engine
+                <p>defines a function called &quot;CreateScraperEngine&quot; that creates a scraper engine in a database, and it returns the engine&apos;s ID or an error.
+
+
+
+
+
+
+
+                <h2 id="CreateUser">func CreateUser
+
+
+
+                </h2>
+                <pre>func CreateUser(userName, userLogin, userRole string, userPassword string, activeOrNot bool) (string, error)</pre>
+                <p>CreateUser inserts a new user into the database.
+                <p>it creates a user in a database, logs the user ID if successful, and returns the user&apos;s ID or an error.
+
+
+
+
+
+
+
+                <h2 id="CreateWebCrawler">func CreateWebCrawler</h2>
+                <pre>func CreateWebCrawler(sourceURL string) (string, error)</pre>
+                <p>Function to create a new web crawler
+                <p>It creates a web crawler with a specified source URL and logs the crawler&apos;s ID if successful.
+
+                <h2 id="DeactivateUser">func DeactivateUser</h2>
+                <pre>func DeactivateUser(userID string) error</pre>
+                <p>DeactivateUser marks a user as inactive.
+                <p>It deactivates a user in a database by calling a stored procedure with the provided userID and logs the outcome, handling any errors that may occur.
+
+                <h2 id="DeleteUser">func DeleteUser</h2>
+                <pre>func DeleteUser(userID string) error</pre>
+                <p>DeleteUser removes a user from the database.
+                <p>It defines a function that deletes a user with the given userID from a database using a stored procedure and logs the operation, returning any potential errors.
+
+                <h2 id="EngineIDExists">func EngineIDExists</h2>
+                <pre>func EngineIDExists(engineID string) (bool, error)</pre>
+                <p>Function to check if the engine_id exists in scraper_engine table
+                <p>This function checks if a given engine ID exists in a database table and returns a boolean indicating existence or an error.
+
+                <h2 id="FetchUserIDByName">func FetchUserIDByName</h2>
+                <pre>func FetchUserIDByName(userName string) (string, error)</pre>
+                <p>FetchUserIDByName retrieves a user&apos;s ID using their username.
+                <p>This function retrieves a user&apos;s ID by calling a stored procedure in a database and logs the result, handling any errors that may occur.
+
+                <h2 id="GenerateToken">func GenerateToken</h2>
+                <pre>func GenerateToken(userID string) (string, error)</pre>
+                <p>This code generates a JWT token with a user ID and expiration time, using HMAC-SHA256 for signing.
+
+                <h2 id="GetRandomURL">func GetRandomURL</h2>
+                <pre>func GetRandomURL() (string, error)</pre>
+                <p>Function to fetch a random URL
+                <p>It defines a function that retrieves a random URL from a database, logs the URL, and returns it as a string, handling any potential errors during the database query.
+
+                <h2 id="GetURLTagsAndDomain">func GetURLTagsAndDomain</h2>
+                <pre>func GetURLTagsAndDomain(id string) (map[string]interface{}, string, error)</pre>
+                <p>Function to fetch URL tags and domain by ID
+                <p>It defines a function that retrieves tags and a domain from a database using a specified ID, logs the results, and returns them in a map and a string along with potential errors.
+
+                <h2 id="GetURLsAndTags">func GetURLsAndTags</h2>
+                <pre>func GetURLsAndTags() (map[string]map[string]interface{}, error)</pre>
+                <p>Function to fetch all URLs with their tags
+                <p>It retrieves URL and tag data from a database, processes it into a map of URLs mapped to corresponding tags, and handles potential errors, logging intermediate results.
+
+                <h2 id="GetURLsFromDomain">func GetURLsFromDomain</h2>
+                <pre>func GetURLsFromDomain(domain string) ([]string, error)</pre>
+                <p>Function to fetch URLs from a specific domain
+                <p>Defines a function that queries a database to retrieve URLs associated with a given domain, processes the results, and returns the URLs in a slice while handling potential errors and logging.
+
+                <h2 id="GetURLsOnly">func GetURLsOnly</h2>
+                <pre>func GetURLsOnly() ([]string, error)</pre>
+                <p>Function to fetch all URLs (just the &apos;url&apos; column)
+                <p>Defines a Go function called &quot;GetURLsOnly&quot; that queries a database for URLs and returns them in a slice, handling potential errors along the way.
+
+                <h2 id="GetUUIDFromURLAndDomain">func GetUUIDFromURLAndDomain</h2>
+                <pre>func GetUUIDFromURLAndDomain(url, domain string) (string, error)</pre>
+                <p>Function to fetch UUID from URL and domain
+                <p>This function retrieves a UUID from a database by calling a stored procedure with a given URL and domain, and it logs the result if successful.
+
+                <h2 id="GetUserRole">func GetUserRole</h2>
+                <pre>func GetUserRole(userID string) (string, error)</pre>
+                <p>GetUserRole fetches the role associated with a given user ID.
+                <p>This function retrieves a user&apos;s role from a database using the provided userID and logs the result, handling any potential errors.
+
+                <h2 id="HasPermission">func HasPermission</h2>
+                <pre>func HasPermission(userID, action, resource string) (bool, error)</pre>
+                <p>HasPermission is a higher-level function to check if a user has a specific permission.
+                <p>It defines a function, HasPermission, which checks if a user has a specific permission by first retrieving the user&apos;s role, then verifying the permission for a given action and resource, and logging the result along with potential errors.
+
+                <h2 id="HashPassword">func HashPassword</h2>
+                <pre>func HashPassword(password string) ([]byte, error)</pre>
+                <p>Add the bcrypt hashing utility functions
+                <p>It defines function that hashes a provided password using the bcrypt hashing algorithm with a default cost and returns the hashed password as a byte slice or an error if encountered.
+
+                <h2 id="InitDB">func InitDB</h2>
+                <pre>func InitDB() error</pre>
+                <p>It initializes a database connection using configuration data from a JSON file and logs any errors encountered during the process.
+
+                <h2 id="InsertLog">func InsertLog</h2>
+                <pre>func InsertLog(statusCode, message, goEngineArea string) error</pre>
+                <p>Function to insert a log entry into the database
+                <p>It  inserts a log entry into a database using a SQL stored procedure, handling any errors that may occur during the execution.
+
+                <h2 id="InsertOrUpdateStatusCode">func InsertOrUpdateStatusCode</h2>
+                <pre>func InsertOrUpdateStatusCode(statusCode, statusMessage string) error</pre>
+                <p>It defines a function that executes a SQL stored procedure &quot;insert_or_update_status_code&quot; with provided parameters &quot;statusCode&quot;
+                    and &quot;statusMessage&quot; using the &quot;DB&quot; database connection and returns any potential errors.
+
+                <h2 id="InsertPrediction">func InsertPrediction</h2>
+                <pre>func InsertPrediction(engineID string, predictionInfo string) error</pre>
+                <p>Function to insert a new prediction
+                The function InsertPrediction, that checks the existence of an engineID, logs the result and inserts predictionInfo into a database table if the engineID exists, handling errors along the way</p>
+
+                <h2 id="InsertSampleEngine">func insertSampleEngine</h2>
+                <pre>func InsertSampleEngine(engineID, engineName, engineDescription string) error</pre>
+                <p>Function to insert a sample engine ID into scraper_engine table</p>
+                <p>Function inserts a sample engine&apos;s information into a database table, logs success, and returns any encountered errors</p>
+
+                <h2 id="InsertURL">func InsertURL</h2>
+                <pre>func InsertURL(url, domain string, tags map[string])(string, error)</pre>
+                <p>Function to insert a new URL
+                <p>Function &quot;InsertURL,&quot; inserts a URL into a database along with associated tags and logs the operation, returning the generated ID or an error.
+
+                <h2 id="IsUserActive">func IsUserActive</h2>
+                <pre>func IsUserActive(userID string)(bool, error)</pre>
+                <p>IsUserActive checks if a user is currently marked as active based on their user ID.
+                <p>It defines a function &quot;IsUserActive&quot; that checks the activity status of a user in a database and returns a boolean indicating whether the user is active or not, along with an error if any.
+
+
+                <h2 id="LogoutUser">func LogoutUser
+
+                </h2>
+                <pre>func LogoutUser(userID string) error</pre>
+                <p>This code defines a function called LogoutUser that takes a userID as a parameter and it uses the database connection.
+                    (DB) to execute a SQL stored procedure to log out a user with the specified userID,
+                    returning any potential errors encountered during the database operation.
+
+
+
+                <h2 id="PerformMLPrediction">func PerformMLPrediction
+
+
+
+                </h2>
+                <pre>func PerformMLPrediction(inputData string) string</pre>
+                <p>Simulated ML model prediction function
+                <p>It defines a function that simulates an ML model prediction with a 2-second delay
+                    and logs a success message before returning a prediction result as a formatted string.
+
+
+
+                <h2 id="RefreshToken">func RefreshToken
+
+
+
+                </h2>
+                <pre>func RefreshToken(oldRefreshToken string) (string, string, error)</pre>
+                <p>It defines a function called RefreshToken that takes an old refresh token as input, validates it against a database, generates a new access token and refresh token,
+                    and updates the database with the new refresh token
+
+
+
+
+                <h2 id="RegisterUser">func RegisterUser
+
+
+
+                </h2>
+                <pre>func RegisterUser(username string, login string, role string, password string, active bool) (string, error)</pre>
+                <p>It defines a function &quot;RegisterUser&quot; that securely registers a user by hashing their password
+                    and storing their information in a database, returning a user ID or an error.
+
+
+
+
+                <h2 id="StoreLog">func StoreLog
+
+                </h2>
+                <pre>func StoreLog(status_code string, message string, goEngineArea string) error</pre>
+                <p>This code prepares and executes a SQL statement to store log information in a database, logging the status of the SQL operations during the process
+
+
+
+                <h2 id="UpdateURL">func UpdateURL
+
+
+
+                </h2>
+                <pre>func UpdateURL(id, url, domain string, tags map[string]interface{}) error</pre>
+                <p>Function to update an existing URL
+                <p>It defines a function UpdateURL that updates a URL record in a database, converting tags into JSON format and logging the update action.
+
+
+
+
+                <h2 id="UpdateUser">func UpdateUser
+
+
+                </h2>
+                <pre>func UpdateUser(userID, userName, userLogin, userRole, userPassword string) error</pre>
+                <p>UpdateUser updates the details of a user.
+                <p>It defines a function &quot;UpdateUser&quot; that calls a stored procedure to update a user&apos;s information in a database, logs the user&apos;s ID, and returns any encountered error.
+
+
+
+                <h2 id="UpdateUserRole">func UpdateUserRole
+
+
+
+                </h2>
+                <pre>func UpdateUserRole(userID, newRole string) error</pre>
+                <p>UpdateUserRole allows for changing the role associated with a user.
+                <p>It defines a function UpdateUserRole that updates a user&apos;s role in a database using a stored procedure and logs the outcome, handling potential errors.
+
+
+                <h2 id="ValidateToken">func ValidateToken
+
+
+                </h2>
+                <pre>func ValidateToken(tokenString string) (bool, error)</pre>
+                <p>This code defines a function that validates a JSON Web Token (JWT) by parsing it
+                    verifying its signature using a secret key,
+                    and checking its expiration time
+
+
+
+                <h2 id="WriteLog">func WriteLog
+
+
+
+                </h2>
+                <pre>func WriteLog(logID string, status_code string, message string, goEngineArea string, dateTime time.Time) error</pre>
+                <p>WriteLog writes a log entry to the database
+                <p>This code defines a function WriteLog that validates a status code, inserts a log entry into a database,
+                    and logs the execution process, handling potential errors along the way.
+
+
+                <h2 id="JSON_Data_Connect">type JSON_Data_Connect
+
+                </h2>
+                <p>This code defines a Go struct named &quot;JSON_Data_Connect&quot; with fields for username, password, hostname,
+                    and database, each tagged for JSON serialization.
+
+                <pre>type JSON_Data_Connect struct {
+<span id="JSON_Data_Connect.Username"></span>    Username string `json:&#34;Username&#34;`
+<span id="JSON_Data_Connect.Password"></span>    Password string `json:&#34;Password&#34;`
+<span id="JSON_Data_Connect.Hostname"></span>    Hostname string `json:&#34;Hostname&#34;`
+<span id="JSON_Data_Connect.Database"></span>    Database string `json:&#34;Database&#34;`
+}
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <h2 id="Log">type Log
+
+                </h2>
+                <p>Log struct models the data structure of a log entry in the database
+                <p>This code defines a Go struct named &quot;Log&quot; with fields for
+                    log ID, status code, message, GoEngineArea, and date-time information.
+
+                <pre>type Log struct {
+<span id="Log.LogID"></span>    LogID string
+
+<span id="Log.Message"></span>    Message      string
+<span id="Log.GoEngineArea"></span>    GoEngineArea string
+<span id="Log.DateTime"></span>    DateTime     []uint8
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+                <h3 id="GetLog">func GetLog
+
+                </h3>
+                <pre>func GetLog() ([]Log, error)</pre>
+                <p>GetLog - Reads the log
+                <p>This Go code defines a function, &quot;GetLog,&quot; that prepares and queries a database for logs, logging both successful and failed operations,
+                    and returns a log objects along with potential errors.
+
+
+
+
+
+                <h3 id="GetSuccess">func GetSuccess
+
+
+
+                </h3>
+                <pre>func GetSuccess() ([]Log, error)</pre>
+                <p>GetSuccess - Uses a Procedure to gather all the &apos;Success&apos; rows in the DB
+                <p>The code defines a function GetSuccess that retrieves log entries with a &quot;Success&quot; status code from a database, logs various status messages.
+
+
+
+
+
+
+
+
+
+                <h2 id="LogStatusCodes">type LogStatusCodes
+
+                </h2>
+                <p>This code defines a Go struct named LogStatusCodes with two fields, &quot;StatusCode&quot; and
+                    &quot;StatusMessage,&quot; to represent status code and associated status messages.
+
+                <pre>type LogStatusCodes struct {
+<span id="LogStatusCodes.StatusCode"></span>    StatusCode    string
+<span id="LogStatusCodes.StatusMessage"></span>    StatusMessage string
+}
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <h2 id="Permission">type Permission
+
+
+
+                </h2>
+                <p>Permission represents a user&apos;s permission to perform an action on a resource.
+                <p>The code defines a struct named &quot;Permission&quot; with two fields, &quot;Action&quot; and &quot;Resource,&quot; to represent permissions for actions on specific resources.
+
+                <pre>type Permission struct {
+<span id="Permission.Action"></span>    Action   string
+<span id="Permission.Resource"></span>    Resource string
+}
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+                <h3 id="GetPermissionsForRole">func GetPermissionsForRole
+
+
+
+                </h3>
+                <pre>func GetPermissionsForRole(userRole string) ([]Permission, error)</pre>
+                <p>GetPermissionsForRole fetches all permissions associated with a given user role.
+                <p>This code defines a function that retrieves permissions for a given user role from a database using a stored procedure
+                    and returns them as a slice of Permission objects while handling potential errors.
+
+
+
+
+
+                <h3 id="NewPermission">func NewPermission
+
+
+
+                </h3>
+                <pre>func NewPermission(action, resource string) Permission</pre>
+                <p>NewPermission creates a new Permission object.
+                <p>This code defines a Go function named &quot;NewPermission&quot; that creates
+                    and returns a new &quot;Permission&quot; struct with provided &quot;action&quot; and &quot;resource&quot; strings.
+
+
+
+
+
+                <h2 id="Prediction">type Prediction
+
+
+
+                </h2>
+                <p>Prediction struct models the data structure of a prediction in the database
+                <p>This code defines a struct named &quot;Prediction&quot; with fields for PredictionID, EngineID, InputData, PredictionInfo, and PredictionTime.
+
+                <pre>type Prediction struct {
+<span id="Prediction.PredictionID"></span>    PredictionID  string
+<span id="Prediction.EngineID"></span>    EngineID      string
+<span id="Prediction.InputData"></span>    InputData      string
+<span id="Prediction.PredictionInfo"></span>    PredictionInfo string
+<span id="Prediction.PredictionTime"></span>    PredictionTime string
+}
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <h2 id="User">type User
+
+
+
+                </h2>
+                <p>This code defines a struct called &quot;User&quot; with fields representing userID, name, login, role, password, active status, and date added.
+
+                <pre>type User struct {
+
+<span id="User.UserID"></span>    UserID        string
+<span id="User.UserName"></span>    UserName      string
+<span id="User.UserLogin"></span>    UserLogin    string
+<span id="User.UserRole"></span>    UserRole      string
+<span id="User.UserPassword"></span>    UserPassword  []byte
+<span id="User.ActiveOrNot"></span>    ActiveOrNot   bool
+<span id="User.UserDateAdded"></span>    UserDateAdded string
+}
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+                <h3 id="GetAllUsers">func GetAllUsers
+
+
+
+                </h3>
+                <pre>func GetAllUsers() ([]*User, error)</pre>
+                <p>GetAllUsers retrieves all registered users.
+                <p>This code defines a function, GetAllUsers, that retrieves user data from a database, processes it,
+                    and returns a  user objects while handling potential errors and resource cleanup.
+
+
+
+
+
+                <h3 id="GetUserByID">func GetUserByID
+
+
+
+                </h3>
+                <pre>func GetUserByID(userID string) (*User, error)</pre>
+                <p>GetUserByID retrieves a specific user by their ID.
+                <p>This code defines a function called GetUserByID that retrieves a user&apos;s information from a database by their ID
+                    and returns a pointer to a User struct along with an error.
+
+
+
+
+
+                <h3 id="GetUserByLogin">func GetUserByLogin
+
+
+
+                </h3>
+                <pre>func GetUserByLogin(userLogin string) (*User, error)</pre>
+                <p>This code defines a function that retrieves a user from a database using a stored procedure based on a given user login, and returns the user&apos;s information or an error.
+
+
+
+
+
+                <h3 id="GetUsersByRole">func GetUsersByRole
+
+
+
+                </h3>
+                <pre>func GetUsersByRole(role string) ([]*User, error)</pre>
+                <p>GetUsersByRole fetches all users with a specific role.
+                <p>This code defines a function that queries a database to retrieve a list of users by their role and logs various steps in the process,
+                    returning the list of users and any encountered errors.
+
+
+                <div id="footer">
+                    Build version go1.21.1.<br>
+                    Except as <a href="https://developers.google.com/site-policies#restrictions">noted</a>,
+                    the content of this page is licensed under the
+                    Creative Commons Attribution 3.0 License,
+                    and code is licensed under a <a href="/LICENSE">BSD license</a>.<br>
+                    <a href="https://golang.org/doc/tos.html">Terms of Service</a> |
+                    <a href="https://www.google.com/intl/en/policies/privacy/">Privacy Policy</a>
+                </div>
+
+            </div><!-- .container -->
+        </div><!-- #page -->
+{{/*        </body>*/}}
+{{/*        </html>*/}}
+    </div>
+{{ end }}
+<!--lol-->

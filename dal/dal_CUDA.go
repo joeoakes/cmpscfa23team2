@@ -2,6 +2,7 @@ package dal
 
 // Import required packages
 import (
+	"database/sql"
 	"encoding/json"                    // For JSON handling
 	"fmt"                              // For formatted I/O
 	_ "github.com/go-sql-driver/mysql" // Import mysql driver
@@ -88,16 +89,28 @@ func EngineIDExists(engineID string) (bool, error) {
 //		}
 //		return nil
 //	}
-func InsertPrediction(fileName, predictionInfo string) error {
+func InsertPrediction(algorithm, queryIdentifier, fileName, predictionInfo string) error {
 	// Generate a new UUID for the prediction
 	newUUID := uuid.New().String()
 
-	query := "INSERT INTO predictions (prediction_id, input_data, prediction_info) VALUES (?, ?, ?)"
-	_, err := DB.Exec(query, newUUID, fileName, predictionInfo)
-	if err != nil {
-		return fmt.Errorf("Error storing prediction: %v", err)
+	var query string
+	switch algorithm {
+	case "KNN":
+		query = "INSERT INTO knn_predictions (prediction_id, query_identifier, input_data, prediction_info) VALUES (?, ?, ?, ?)"
+	case "LinearRegression":
+		query = "INSERT INTO linear_regression_predictions (prediction_id, query_identifier, input_data, prediction_info) VALUES (?, ?, ?, ?)"
+	case "NaiveBayes":
+		query = "INSERT INTO naive_bayes_predictions (prediction_id, query_identifier, input_data, prediction_info) VALUES (?, ?, ?, ?)"
+	default:
+		return fmt.Errorf("Unrecognized algorithm: %v", algorithm)
 	}
-	log.Printf("Successfully inserted prediction with ID %s.", newUUID)
+
+	_, err := DB.Exec(query, newUUID, queryIdentifier, fileName, predictionInfo)
+	if err != nil {
+		return fmt.Errorf("Error storing prediction for %v: %v", algorithm, err)
+	}
+
+	log.Printf("Successfully inserted prediction with ID %s for %v algorithm.", newUUID, algorithm)
 	return nil
 }
 
@@ -126,4 +139,37 @@ func ConvertPredictionToJSON(predictionResult string) (string, error) {
 		log.Println("Successfully converted prediction to JSON.")
 	}
 	return string(predictionJSON), nil
+}
+func FetchPredictionData(query, domain string) (PredictionData, error) {
+	var tableName string
+
+	// Determine the table name based on the domain
+	switch domain {
+	case "E-commerce (Price Prediction)":
+		tableName = "linear_regression_predictions"
+	case "RealEstate":
+		tableName = "knn_predictions"
+	case "Job Market (Industry Trend Analysis)":
+		tableName = "naive_bayes_predictions"
+	default:
+		return PredictionData{}, fmt.Errorf("unrecognized domain: %s", domain)
+	}
+
+	// Fetch data from the determined table
+	var data PredictionData
+	queryStr := fmt.Sprintf("SELECT prediction_info FROM %s WHERE query_identifier = ?", tableName)
+	err := DB.QueryRow(queryStr, query).Scan(&data.PredictionInfo)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return PredictionData{}, fmt.Errorf("no prediction data found for query: %s", query)
+		}
+		return PredictionData{}, err
+	}
+
+	return data, nil
+}
+
+// PredictionData represents the structure of the prediction data
+type PredictionData struct {
+	PredictionInfo string `json:"prediction_info"`
 }

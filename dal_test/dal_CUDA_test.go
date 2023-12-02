@@ -57,27 +57,38 @@ import (
 //			dal.InsertLog("200", "Successfully inserted prediction", "TestInsertPrediction()")
 //		}
 //	}
+
+// TestInsertPrediction tests inserting various types of predictions for different algorithms.
 func TestInsertPrediction(t *testing.T) {
-	// Mock file name and text-based prediction data
-	mockFileName := "sampleTextFile.txt"
-	mockTextPrediction := "This is a sample text-based prediction."
+	// Sample query identifier
+	queryIdentifier := "sample_query_id"
 
-	// Call the InsertPrediction function with text-based prediction and file name
-	err := dal.InsertPrediction(mockFileName, mockTextPrediction)
-	if err != nil {
-		t.Errorf("InsertPrediction with text failed: %v", err)
+	// Test cases for KNN algorithm, keep the same path format if you want to add pictures
+	if err := dal.InsertPrediction("KNN", "Real Estate Query 1 Philadelphia", "realEstateQuery1Pic.png", "LinearRegression/realEstateQuery1Pic.png"); err != nil {
+		t.Errorf("Failed to insert text prediction for KNN: %v", err)
+	}
+	if err := dal.InsertPrediction("KNN", "Real Estate Query 2 New York", "newyork.txt", "Text prediction for New york"); err != nil {
+		t.Errorf("Failed to insert image path prediction for KNN: %v", err)
 	}
 
-	// Mock image file name and file path prediction data
-	mockImageFileName := "predictedImage.png"
-	mockImageFilePath := "/path/to/predicted/image.png"
-
-	// Call the InsertPrediction function with image file path and file name
-	err = dal.InsertPrediction(mockImageFileName, mockImageFilePath)
-	if err != nil {
-		t.Errorf("InsertPrediction with image file path failed: %v", err)
+	// Test cases for Linear Regression algorithm
+	if err := dal.InsertPrediction("LinearRegression", queryIdentifier, "text_prediction_lr.txt", "Sample text prediction for Linear Regression"); err != nil {
+		t.Errorf("Failed to insert text prediction for Linear Regression: %v", err)
+	}
+	if err := dal.InsertPrediction("LinearRegression", queryIdentifier, "image_lr.png", "/path/to/image_lr.png"); err != nil {
+		t.Errorf("Failed to insert image path prediction for Linear Regression: %v", err)
 	}
 
-	// Additional validation checks can be added here if necessary
-	// For example, querying the database to ensure data was inserted correctly
+	// Test cases for Naive Bayes algorithm
+	if err := dal.InsertPrediction("NaiveBayes", queryIdentifier, "text_prediction_nb.txt", "Sample text prediction for Naive Bayes"); err != nil {
+		t.Errorf("Failed to insert text prediction for Naive Bayes: %v", err)
+	}
+	if err := dal.InsertPrediction("NaiveBayes", queryIdentifier, "image_nb.png", "/path/to/image_nb.png"); err != nil {
+		t.Errorf("Failed to insert image path prediction for Naive Bayes: %v", err)
+	}
+
+	// Test case for an invalid algorithm
+	if err := dal.InsertPrediction("InvalidAlgorithm", queryIdentifier, "invalid_data.txt", "This should fail"); err == nil {
+		t.Error("Expected an error for an unrecognized algorithm, but got none")
+	}
 }

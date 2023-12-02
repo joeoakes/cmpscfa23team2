@@ -152,12 +152,33 @@ CREATE TABLE IF NOT EXISTS webcrawlers (
 -- );
 
 -- Table for predictions
-CREATE TABLE IF NOT EXISTS predictions (
-                                           prediction_id CHAR(36) PRIMARY KEY, -- Using CHAR(36) for UUID
-                                           input_data TEXT,
-                                           prediction_info TEXT,
-                                           prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+-- Table for K-Nearest Neighbors Predictions
+CREATE TABLE IF NOT EXISTS knn_predictions (
+                                               prediction_id VARCHAR(36) PRIMARY KEY,
+                                               query_identifier VARCHAR(255),
+                                               input_data VARCHAR(255),
+                                               prediction_info VARCHAR(255),
+                                               prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
+
+-- Table for Linear Regression Predictions
+CREATE TABLE IF NOT EXISTS linear_regression_predictions (
+                                                             prediction_id VARCHAR(36) PRIMARY KEY,
+                                                             query_identifier VARCHAR(255),
+                                                             input_data VARCHAR(255),
+                                                             prediction_info VARCHAR(255),
+                                                             prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+);
+
+-- Table for Naive Bayes Predictions
+CREATE TABLE IF NOT EXISTS naive_bayes_predictions (
+                                                       prediction_id VARCHAR(36) PRIMARY KEY,
+                                                       query_identifier VARCHAR(255),
+                                                       input_data VARCHAR(255),
+                                                       prediction_info VARCHAR(255),
+                                                       prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+);
+
 
 
 CREATE TABLE IF NOT EXISTS user_sessions (
@@ -242,16 +263,16 @@ DELIMITER ;
 -- SECTION: CUDA SPROCS
 -- ================================================
 
-DELIMITER //
-CREATE PROCEDURE create_prediction(
-    IN p_prediction_id CHAR(36),        -- UUID parameter
-    IN p_prediction_info JSON
-)
-BEGIN
-    INSERT INTO predictions (prediction_id,prediction_info)
-    VALUES (p_prediction_id, p_prediction_info);
-END //
-DELIMITER ;
+# DELIMITER //
+# CREATE PROCEDURE create_prediction(
+#     IN p_prediction_id CHAR(36),        -- UUID parameter
+#     IN p_prediction_info JSON
+# )
+# BEGIN
+#     INSERT INTO predictions (prediction_id,prediction_info)
+#     VALUES (p_prediction_id, p_prediction_info);
+# END //
+# DELIMITER ;
 
 -- Stored Procedure to add a new machine learning model
 DELIMITER //

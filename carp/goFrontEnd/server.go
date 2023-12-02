@@ -7,6 +7,7 @@ package main
 
 import (
 	"cmpscfa23team2/dal"
+	"encoding/json"
 	"html/template"
 	"log"
 	"net/http"
@@ -18,6 +19,8 @@ type PageData struct {
 	Title        string
 	Content      string
 	ErrorMessage string
+	Username     string // Add Username field
+	Email        string // Add Email field
 }
 
 func main() {
@@ -59,12 +62,12 @@ func setupRoutes(tmpl *template.Template) {
 	http.HandleFunc("/home", makeHandler(tmpl, "home"))
 	http.HandleFunc("/about", makeHandler(tmpl, "about"))
 	http.HandleFunc("/contributors", makeHandler(tmpl, "contributors"))
-	http.HandleFunc("/login", makeHandler(tmpl, "login"))
+	//http.HandleFunc("/login", makeHandler(tmpl, "login"))
 	http.HandleFunc("/register", makeHandler(tmpl, "register"))
 	http.HandleFunc("/documentation", makeHandler(tmpl, "documentation"))
 	http.HandleFunc("/dashboard", requireAdmin(makeHandler(tmpl, "dashboard")))
 	http.HandleFunc("/settings", requireAdmin(makeHandler(tmpl, "settings")))
-
+	http.HandleFunc("/api/predictions", predictionHandler)
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 }
@@ -157,22 +160,14 @@ func renderLoginTemplate(tmpl *template.Template, w http.ResponseWriter, errorMe
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
-
 func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-
 	switch r.Method {
 	case "GET":
-		data := RegistrationPageData{Title: "Register"}
-		err := tmpl.ExecuteTemplate(w, "register", data)
-		if err != nil {
-			log.Printf("Error executing register template: %v", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
+		// Render the registration form with initial data
+		data := PageData{Title: "Register"}
+		tmpl.ExecuteTemplate(w, "register", data)
 
 	case "POST":
-
 		// Parse form values
 		if err := r.ParseForm(); err != nil {
 			http.Error(w, "Error parsing form", http.StatusBadRequest)
@@ -187,10 +182,7 @@ func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Req
 
 		// Check if passwords match
 		if password != confirmPassword {
-			tmpl.ExecuteTemplate(w, "register", RegistrationPageData{
-				Title:        "Register",
-				ErrorMessage: "Passwords do not match",
-			})
+			renderRegistrationTemplate(tmpl, w, "Passwords do not match", username, email)
 			return
 		}
 
@@ -201,10 +193,7 @@ func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Req
 		// Call DAL function to register user
 		_, err := dal.RegisterUser(username, email, defaultRole, password, active)
 		if err != nil {
-			tmpl.ExecuteTemplate(w, "register", RegistrationPageData{
-				Title:        "Register",
-				ErrorMessage: "Registration failed: " + err.Error(),
-			})
+			renderRegistrationTemplate(tmpl, w, "Registration failed: "+err.Error(), username, email)
 			return
 		}
 
@@ -214,4 +203,48 @@ func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Req
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+func renderRegistrationTemplate(tmpl *template.Template, w http.ResponseWriter, errorMessage string, username string, email string) {
+	data := PageData{
+		Title:        "Register",
+		ErrorMessage: errorMessage,
+		Username:     username, // Set the Username field
+		Email:        email,    // Set the Email field
+	}
+	data.Content = "register"
+	err := tmpl.ExecuteTemplate(w, "register", data)
+	if err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
+func predictionHandler(w http.ResponseWriter, r *http.Request) {
+	// Only allow GET requests for this endpoint
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Extract query parameters for 'domain' and 'queryType'
+	domain := r.URL.Query().Get("domain")
+	query_identifier := r.URL.Query().Get("queryType") // Changed from 'query' to 'queryType'
+
+	// Check if both 'domain' and 'queryType' parameters are provided
+	if domain == "" || query_identifier == "" {
+		http.Error(w, "Missing domain or queryType parameter", http.StatusBadRequest)
+		return
+	}
+
+	// Fetch prediction data
+	predictionData, err := dal.FetchPredictionData(query_identifier, domain)
+	if err != nil {
+		log.Printf("Error fetching prediction data: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with the fetched prediction data
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(predictionData)
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	_ "github.com/mattn/go-sqlite3"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"
@@ -10,18 +11,69 @@ import (
 	"image/color"
 	"log"
 	"math"
-	"math/rand"
 	"os"
 	"sort"
 	"strconv"
-	"time"
+	"strings"
 )
 
+//// AirfareData represents the structure of each item in the JSON data for airfare
+//type AirfareData struct {
+//	Title          string            `json:"title"`
+//	Year           string            `json:"year"`
+//	Location       string            `json:"location"`
+//	Features       []string          `json:"features"`
+//	AdditionalInfo AirfareAdditional `json:"additional_info"`
+//	Metadata       AirfareMetadata   `json:"metadata"`
+//}
+//
+//// AirfareDataList represents a list of airfare data
+//type AirfareDataList struct {
+//	AirfareData []AirfareData `json:"airfare_data"`
+//}
+//
+//// AirfareAdditional represents additional information for airfare data
+//type AirfareAdditional struct {
+//	Country    string         `json:"country"`
+//	MonthsData []AirfareMonth `json:"months_data"`
+//}
+//
+//// AirfareMonth represents each month's data for airfare
+//type AirfareMonth struct {
+//	Month string `json:"month"`
+//	Rate  string `json:"rate"`
+//	Year  string `json:"year"`
+//}
+//
+//// AirfareMetadata represents metadata for airfare data
+//type AirfareMetadata struct {
+//	Source    string `json:"source"`
+//	Timestamp string `json:"timestamp"`
+//}
+
+// GasolineData represents the structure of each item in the JSON data for gas
 type GasolineData struct {
-	Year                          string `json:"year"`
-	AverageGasolinePrices         string `json:"average_gasoline_prices"`
-	AverageAnnualCPIForGas        string `json:"average_annual_cpi_for_gas"`
-	GasPricesAdjustedForInflation string `json:"gas_prices_adjusted_for_inflation"`
+	Year                     string `json:"year"`
+	AverageGasolinePrices    string `json:"average_gasoline_prices"`
+	AverageAnnualCPIForGas   string `json:"average_annual_cpi_for_gas"`
+	GasPricesAdjustedForInfl string `json:"gas_prices_adjusted_for_inflation"`
+}
+
+// Item represents the structure of each item in the JSON data
+type Item struct {
+	Title       string `json:"title"`
+	URL         string `json:"url"`
+	Description string `json:"description"`
+	Price       string `json:"price"`
+	Metadata    struct {
+		Source    string `json:"source"`
+		Timestamp string `json:"timestamp"`
+	} `json:"metadata"`
+}
+
+type BookData struct {
+	Domain string `json:"domain"`
+	Data   []Item `json:"data"`
 }
 
 // Point represents a data point in 2D space
@@ -61,8 +113,15 @@ func (a ByDistance) Less(i, j int) bool {
 func KNN(k int, data []Point, target Point) string {
 	sort.Sort(ByDistance{Points: data, Target: target, DistFunc: EuclideanDistance})
 
+	// Ensure there are enough points in the data slice
+	if len(data) < k {
+		fmt.Println("Error: Not enough data points for k-nearest neighbors")
+		return ""
+	}
+
 	labelVotes := make(map[string]int)
 
+	// Access the first k elements of the sorted data slice
 	for _, p := range data[:k] {
 		labelVotes[p.Label]++
 	}
@@ -79,31 +138,64 @@ func KNN(k int, data []Point, target Point) string {
 	return predictedLabel
 }
 
-// NumFeatures creating a fixed length for feature slices so there is no mismatch in EuclideanDistance
-const NumFeatures = 10
+//// ConvertAirfareDataToPoints converts airfare data to points
+//func ConvertAirfareDataToPoints(airfareData []AirfareData) []Point {
+//	var data []Point
+//	for _, entry := range airfareData {
+//		features := []float64{
+//			parseFloat(entry.Year),
+//			parseFloat(entry.Location),
+//		}
+//
+//		label := "airfare"
+//		data = append(data, Point{Features: features, Label: label})
+//	}
+//	return data
+//}
 
+// ConvertGasolineDataToPoints converts gasoline data to points
 func ConvertGasolineDataToPoints(gasolineData []GasolineData) []Point {
 	var data []Point
 	for _, entry := range gasolineData {
 		features := []float64{
+			parseFloat(entry.Year),
 			parseFloat(entry.AverageGasolinePrices),
 			parseFloat(entry.AverageAnnualCPIForGas),
 		}
 
-		for len(features) < NumFeatures {
-			features = append(features, 0.0)
-		}
-		features = features[:NumFeatures]
-
-		label := "gas-prices"
+		label := "gas"
 		data = append(data, Point{Features: features, Label: label})
 	}
 	return data
 }
 
+// ConvertBookDataToPoints converts book data to points
+func ConvertBookDataToPoints(bookData BookData) []Point {
+	var data []Point
+	for _, entry := range bookData.Data {
+		// Exclude timestamp from features
+		features := []float64{
+			parseFloat(entry.Price),
+			// Add two more features (assuming they are available in your dataset)
+			0.0, // Placeholder for the second feature
+			0.0, // Placeholder for the third feature
+		}
+
+		label := "books"
+		data = append(data, Point{Features: features, Label: label})
+	}
+	return data
+}
+
+// parseFloat parses a string to float64, handling special cases
 func parseFloat(s string) float64 {
+	// Remove currency symbols, if any
+	s = strings.TrimPrefix(s, "£")
+
+	// Parse float
 	value, err := strconv.ParseFloat(s, 64)
 	if err != nil {
+		// Log an error message and return 0.0 for non-numeric values
 		fmt.Printf("Error parsing float: %v\n", err)
 		return 0.0
 	}
@@ -111,10 +203,12 @@ func parseFloat(s string) float64 {
 }
 
 var colorMap = map[string]color.Color{
-	"gas-prices": color.RGBA{R: 0, G: 0, B: 255, A: 255}, // Blue
-	"target":     color.RGBA{R: 255, G: 165, A: 255},     // Orange
+	"airfare": color.RGBA{R: 0, G: 0, B: 255, A: 255}, // Blue
+	"gas":     color.RGBA{R: 255, G: 0, B: 0, A: 255}, // Red
+	"books":   color.RGBA{R: 0, G: 255, B: 0, A: 255}, // Green
 }
 
+// createScatterPlot function with corrections
 func createScatterPlot(data []Point, target Point, predictedLabel, xLabel, yLabel string) error {
 	p := plot.New()
 
@@ -131,100 +225,171 @@ func createScatterPlot(data []Point, target Point, predictedLabel, xLabel, yLabe
 	}
 
 	// Plot the filtered data
-	for _, point := range filteredData {
-		pts := make(plotter.XYs, 1)
-		pts[0].X = point.Features[0]
-		pts[0].Y = point.Features[1]
-
-		s, err := plotter.NewScatter(pts)
-		if err != nil {
-			log.Panic(err)
-		}
-		s.GlyphStyle.Color = colorMap[point.Label]
-		p.Add(s)
+	pts := make(plotter.XYs, len(filteredData))
+	for i, point := range filteredData {
+		pts[i].X = point.Features[0]
+		pts[i].Y = point.Features[1]
 	}
 
-	// Plot the target point
-	targetPts := make(plotter.XYs, 1)
-	targetPts[0].X = target.Features[0]
-	targetPts[0].Y = target.Features[1]
-	targetScatter, err := plotter.NewScatter(targetPts)
+	scatter, err := plotter.NewScatter(pts)
 	if err != nil {
-		log.Panic(err)
-	}
-	targetScatter.GlyphStyle.Shape = draw.PyramidGlyph{}
-	targetScatter.GlyphStyle.Color = colorMap["target"]
-	p.Add(targetScatter)
-
-	// Add target point to the legend
-	p.Legend.Add("target", targetScatter)
-
-	// Save the plot to a PNG file.
-	if err := p.Save(10*vg.Inch, 6*vg.Inch, "knn_scatter_plot.png"); err != nil {
-		log.Panic(err)
+		return err
 	}
 
+	scatter.Color = colorMap[predictedLabel]
+	p.Add(scatter)
+
+	// Plot the target point with the predicted label
+	pts = make(plotter.XYs, 1)
+	pts[0].X = target.Features[0]
+	pts[0].Y = target.Features[1]
+
+	scatter, err = plotter.NewScatter(pts)
+	if err != nil {
+		return err
+	}
+
+	scatter.GlyphStyle.Shape = draw.CircleGlyph{}
+	scatter.GlyphStyle.Radius = vg.Points(3) // Set the radius to a suitable value
+	scatter.Color = colorMap[predictedLabel] // Use the predicted label's color
+	p.Add(scatter)
+
+	// Save the plot to a PNG file
+	filename := fmt.Sprintf("%s_scatter_plot.png", strings.ToLower(predictedLabel))
+	if err := p.Save(6*vg.Inch, 4*vg.Inch, filename); err != nil {
+		return err
+	}
+
+	fmt.Printf("Scatter plot created and saved as '%s'\n", filename)
 	return nil
 }
 
-func calculateCentroid(points []Point) Point {
-	if len(points) == 0 {
-		return Point{}
+func main() {
+	//// Load airfare data
+	//airfareFilePath := "airfare_data_price.json"
+	//airfareDataList := loadAirfareData(airfareFilePath)
+	//airfareData := airfareDataList.AirfareData
+
+	// Load gasoline data
+	gasolineFilePath := "gasoline_data.json"
+	gasolineData := loadGasolineData(gasolineFilePath)
+
+	// Load book data
+	booksFilePath := "books_data.json"
+	bookData := loadBookData(booksFilePath)
+
+	// Convert data to points
+	//airfarePoints := ConvertAirfareDataToPoints(airfareData)
+	gasolinePoints := ConvertGasolineDataToPoints(gasolineData)
+	bookPoints := ConvertBookDataToPoints(bookData)
+
+	// Example values for Year, Location, Average Gasoline Prices
+	target := Point{
+		// Use the same number of features as other cases
+		Features: []float64{2023, 0, 0},
+		// The label will be predicted
+		Label: "",
 	}
 
-	numFeatures := len(points[0].Features)
-	meanFeatures := make([]float64, numFeatures)
-	for _, point := range points {
-		for i, feature := range point.Features {
-			meanFeatures[i] += feature
+	// Check the number of features in the target
+	targetFeaturesCount := len(target.Features)
+
+	//// Check the number of features in airfarePoints
+	//for _, point := range airfarePoints {
+	//	if len(point.Features) != targetFeaturesCount {
+	//		fmt.Println("Error: Features lengths mismatch in airfarePoints")
+	//		return
+	//	}
+	//}
+
+	// Check the number of features in gasolinePoints
+	for _, point := range gasolinePoints {
+		if len(point.Features) != targetFeaturesCount {
+			fmt.Println("Error: Features lengths mismatch in gasolinePoints")
+			return
 		}
 	}
 
-	for i := range meanFeatures {
-		meanFeatures[i] /= float64(len(points))
+	// Check the number of features in bookPoints
+	for _, point := range bookPoints {
+		if len(point.Features) != targetFeaturesCount {
+			fmt.Println("Error: Features lengths mismatch in bookPoints")
+			return
+		}
 	}
 
-	return Point{Features: meanFeatures}
+	// Perform KNN predictions for each domain
+	k := 1 // Number of neighbors to consider
+	//predictedLabelAirfare := KNN(k, airfarePoints, target)
+	predictedLabelGasoline := KNN(k, gasolinePoints, target)
+	predictedLabelBooks := KNN(k, bookPoints, target)
+
+	//fmt.Printf("Predicted Label for Airfare: %s\n", predictedLabelAirfare)
+	fmt.Printf("Predicted Label for Gasoline: %s\n", predictedLabelGasoline)
+	fmt.Printf("Predicted Label for Books: %s\n", predictedLabelBooks)
+
+	// Create scatter plots
+	//err := createScatterPlot(airfarePoints, target, predictedLabelAirfare, "Year", "Location")
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+
+	err := createScatterPlot(gasolinePoints, target, predictedLabelGasoline, "Year", "Average Gasoline Prices")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = createScatterPlot(bookPoints, target, predictedLabelBooks, "Timestamp", "Price")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
-func main() {
-	// Read data from JSON file
-	file, err := os.ReadFile("gasoline_data.json")
+//// Function to load airfare data
+//func loadAirfareData(filePath string) AirfareDataList {
+//	file, err := os.Open(filePath)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	defer file.Close()
+//
+//	var data AirfareDataList
+//	decoder := json.NewDecoder(file)
+//	err = decoder.Decode(&data)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	return data
+//}
+
+func loadGasolineData(filePath string) []GasolineData {
+	file, err := os.Open(filePath)
 	if err != nil {
-		fmt.Printf("Error reading JSON file: %v\n", err)
-		return
+		log.Fatal(err)
 	}
+	defer file.Close()
 
-	// Unmarshal JSON data
-	var gasolineData []GasolineData
-	err = json.Unmarshal(file, &gasolineData)
+	var data []GasolineData
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&data)
 	if err != nil {
-		fmt.Printf("Error unmarshalling JSON: %v\n", err)
-		return
+		log.Fatal(err)
 	}
+	return data
+}
 
-	// Convert gasoline data to points
-	data := ConvertGasolineDataToPoints(gasolineData)
-
-	// Seed the random number generator
-	rand.Seed(time.Now().UnixNano())
-
-	// Choose a random target item
-	targetIndex := rand.Intn(len(gasolineData))
-	targetItem := gasolineData[targetIndex]
-	target := ConvertGasolineDataToPoints([]GasolineData{targetItem})[0]
-
-	// Number of nearest neighbors for KNN
-	k := 1
-
-	// Perform KNN on the data
-	predictedLabel := KNN(k, data, target)
-	fmt.Printf("Label predicted for target is '%s'\n", predictedLabel)
-
-	// Create and save the scatter plot
-	err = createScatterPlot(data, target, predictedLabel, "Average Gasoline Prices", "Average Annual CPI for Gas")
+func loadBookData(filePath string) BookData {
+	file, err := os.Open(filePath)
 	if err != nil {
-		fmt.Println("Error creating scatter plot:", err)
-		return
+		log.Fatal(err)
 	}
+	defer file.Close()
+
+	var data BookData
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return data
 }

@@ -68,11 +68,11 @@ func readAirfareJSON(filePath string) AirfareData {
 	return data.Data
 }
 
-// extractPricesYearsAndMonths extracts numerical values from AirfareData and returns prices, months, and year
-func extractPricesYearsAndMonths(data AirfareData) ([]float64, []string, string) {
+// extractPricesYearsAndCPIAirfare extracts numerical values from AirfareData and returns prices, months, and years
+func extractPricesYearsAndMonths(data AirfareData) ([]float64, []string, []string) {
 	var prices []float64
 	var months []string
-	var year = data.Year
+	var years []string
 
 	for _, monthData := range data.AdditionalInfo.MonthsData {
 		priceStr := strings.ReplaceAll(monthData.Rate, "$", "")
@@ -84,8 +84,10 @@ func extractPricesYearsAndMonths(data AirfareData) ([]float64, []string, string)
 
 		prices = append(prices, price)
 		months = append(months, monthData.Month)
+		years = append(years, data.Year)
 	}
-	return prices, months, year
+
+	return prices, months, years
 }
 
 // for gas: -------------------------------------------------------------------------------------
@@ -386,79 +388,62 @@ func main() {
 		filePath := "airfare_data_price.json"
 		airfareData := readAirfareJSON(filePath)
 
-		//// Extract prices, months, and inflation rate values
-		//prices, months, year := extractPricesYearsAndMonths(airfareData)
-		//
-		//// Convert months to numeric values
-		//var numericMonths []float64
-		//for i := 0; i < len(months); i++ {
-		//	numericMonths = append(numericMonths, float64(i+1))
-		//}
-		//
-		//// Convert years to numeric values
-		//var numericYears []float64
-		//for i := 0; i < len(year); i++ {
-		//	numericYears = append(numericYears, float64(i+1))
-		//}
-		//
-		//// Perform linear regression
-		//indices := make([]float64, len(months))
-		//for i := 0; i < len(months); i++ {
-		//	indices[i] = float64(i + 1)
-		//}
+		// Extract prices, months, and inflation rate values
+		prices, months, years := extractPricesYearsAndMonths(airfareData)
 
-		//// Extract prices, months, and inflation rate values
-		prices, months, year := extractPricesYearsAndMonths(airfareData)
-
-		// Convert months to numeric values
-		var numericMonths []float64
+		// Perform linear regression
+		indices := make([]float64, len(months))
 		for i := 0; i < len(months); i++ {
-			numericMonths = append(numericMonths, float64(i+1))
+			indices[i] = float64(i + 1)
 		}
 
 		// Convert years to numeric values
 		var numericYears []float64
-		for i := 0; i < len(year); i++ {
+		for i := 0; i < len(years); i++ {
 			numericYears = append(numericYears, float64(i+1))
 		}
 
-		// Ensure all slices have the same length
-		minLength := min(len(prices), min(len(numericMonths), len(numericYears)))
-		prices = prices[:minLength]
-		numericMonths = numericMonths[:minLength]
-		numericYears = numericYears[:minLength]
-
 		// Perform linear regression
-		a, b, c := linearRegressionThreeVariables(prices, numericMonths, numericYears)
+		a, b, c := linearRegressionThreeVariables(indices, prices, numericYears)
 
-		// Extend the time range for prediction (next year and 12 months of following year)
-		var newMonths []string
-		var newYears []float64
+		// Output the prediction for new x values (months)
+		// Example new x values for prediction
+		newX := indices
 
-		for i := 0; i < 13; i++ {
-			newMonths = append(newMonths, fmt.Sprintf("Month %d", i+1))
-			newYears = append(newYears, float64(len(months))+1+float64(i))
-		}
-
-		//// Predict y based on the regression model for the extended x values
-		//var newY []float64
-		//for _, xVal := range newYears {
-		//	//yVal := a*xVal + b*c + c // Predict y based on the regression model
-		//	yVal := a*xVal + b*numericMonths[len(numericMonths)-1] + c // Predict y based on the regression model
-		//	newY = append(newY, yVal)
-		//}
-
-		// Predict y based on the regression model for the extended x values
 		var newY []float64
-		for _, xVal := range newYears {
-			yVal := a*xVal + b*float64(len(months)+1) + c*float64(len(numericMonths)) // Predict y based on the regression model
+		for _, xVal := range numericYears {
+			yVal := a*xVal + b*float64(len(newX)+1) + c*float64(len(newX)) // Predict y based on the regression model
 			newY = append(newY, yVal)
 		}
 
-		// Output the prediction for the 12 months of the following year (2024)
-		fmt.Println("Predicted Values for 2024:")
-		for i := 0; i < 12; i++ {
-			fmt.Printf("%s: %.2f\n", newMonths[i], newY[i])
+		// Connect to the database
+		db, err := sql.Open("mysql", "root:Pane1901.@tcp(127.0.0.1:3306)/goengine")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
+
+		// Collect input data from previous months
+		var inputDataStrings []string
+		for i := 0; i < len(indices); i++ {
+			inputDataString := fmt.Sprintf("(%f, %f, %f)", indices[i], numericYears[i], prices[i])
+			inputDataStrings = append(inputDataStrings, inputDataString)
+		}
+
+		// Combine input data strings into a single string
+		inputData := strings.Join(inputDataStrings, ",")
+
+		// Convert the numeric prediction_info value to a JSON-formatted string
+		predictionInfo, err := json.Marshal(newY)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Insert the prediction into the "predictions" table, including input_data
+		insertStatement := "INSERT INTO predictions (prediction_id, input_data, prediction_info) VALUES (?, ?, ?)"
+		_, err = db.Exec(insertStatement, 2, inputData, predictionInfo)
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		// Create and save the scatter plot with the extended x values
@@ -466,7 +451,7 @@ func main() {
 		filename := "airfare_scatter_plot.png"
 		xLabel := "Month"
 		yLabel := "Average Airfare Prices"
-		createScatterPlot(newYears, prices, a, b, title, filename, xLabel, yLabel)
+		createScatterPlot(indices, prices, a, b, title, filename, xLabel, yLabel)
 
 	// case books __________________________________________________________________________________
 	case "books":

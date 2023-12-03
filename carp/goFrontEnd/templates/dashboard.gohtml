@@ -1,6 +1,6 @@
 {{ define "dashboard"}}
     <div class="container mt-4">
-        <h2>System Settings</h2>
+        <h2>Predict AI Dashboard</h2>
         <ul class="nav nav-pills" id="settingsTabs" role="tablist">
             <li class="nav-item">
                 <a class="nav-link active" id="crab-tab" data-toggle="pill" href="#crab" role="tab" aria-controls="crab" aria-selected="true">CRAB</a>
@@ -16,20 +16,79 @@
             <div class="tab-pane fade show active" id="crab" role="tabpanel" aria-labelledby="crab-tab">
                 <button class="btn btn-primary btn-settings" data-target="crab-crawler-start">Start Crawler</button>
                 <button class="btn btn-secondary btn-settings" data-target="crab-crawler-stop">Stop Crawler</button>
-                <button class="btn btn-info btn-settings" data-target="crab-crawler-viewlog">View Logs</button>
+                <button class="btn btn-info btn-settings" data-target="crab-crawler-queries">View Logs</button>
             </div>
             <div id="crab-crawler-start" class="content-container" style="display:none;">
-                <h4>CRAB Status</h4>
-                <p>"wow amazing"</p>
+                <br><br>
+                <h4>CRAB Status: Crawler Initiated</h4>
+                <p>
+                    The CRAB Crawler is now active! It's scouring the web, intelligently navigating through pages and gathering data. Our sophisticated scraper is simultaneously extracting relevant information based on predefined criteria. Here's what you can expect:
+                <ul>
+                    <li><strong>Targeted Data Extraction:</strong> The scraper is configured to identify and retrieve specific data types, ensuring high relevance and quality of information.</li>
+                    <li><strong>Efficient Navigation:</strong> Leveraging advanced algorithms, the crawler efficiently moves through websites, minimizing resource usage and optimizing data collection.</li>
+                    <li><strong>Real-Time Updates:</strong> As the crawler progresses, you'll receive real-time updates and insights right here, keeping you informed of the crawler's journey and discoveries.</li>
+                    <li><strong>Customizable Parameters:</strong> Tailor the scraping process according to your needs. Adjust the settings to refine the data extraction process to suit your specific requirements.</li>
+                </ul>
+                Stay tuned for live updates and insights as the CRAB works its magic!
+                </p>
             </div>
+
             <div id="crab-crawler-stop" class="content-container" style="display:none;">
-                <h4>CRAB Status</h4>
-                <p>"wow amazing stop"</p>
+                <br><br>
+                <h4>CRAB Status: Crawler Stopped</h4>
+                <p>
+                    The CRAB Crawler has been successfully halted. Here's what's happening now:
+                <ul>
+                    <li><strong>Data Preservation:</strong> All data collected up to this point is safely stored. You can access and review the gathered information at any time.</li>
+                    <li><strong>Stopping Processes:</strong> Active crawling and scraping processes are being gracefully terminated to ensure data integrity and system stability.</li>
+                    <li><strong>Cleanup Operations:</strong> The system is performing necessary cleanup operations, ensuring no residual processes are left running.</li>
+                    <li><strong>Report Generation:</strong> A summary report of the crawling session, including statistics and insights, is being compiled and will be available shortly.</li>
+                </ul>
+                You can restart the crawler at any time to resume data collection. Your previous configurations and preferences have been saved for easy setup.
+                </p>
             </div>
-            <div id="crab-crawler-viewlog" class="content-container" style="display:none;">
-                <h4>CRAB Status</h4>
-                <p>"wow amazing viewlog"</p>
+
+            <div id="crab-crawler-queries" class="content-container" style="display:none;">
+                <br><br>
+                <h4>CRAB Status: Viewing Logs</h4>
+                <p>
+                    Below is a table showcasing the recent query logs for gas prices, airfare, and jobs. This log provides insights into the data collected, query frequencies, and latest updates from these specific categories:
+                </p>
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Query Category</th>
+                        <th>Last Run</th>
+                        <th>Results Obtained</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Gas Prices</td>
+                        <td>[Last Run Date/Time for Gas Prices]</td>
+                        <td>[Number of Results for Gas Prices]</td>
+                        <td>[Status for Gas Prices]</td>
+                    </tr>
+                    <tr>
+                        <td>Airfare</td>
+                        <td>[Last Run Date/Time for Airfare]</td>
+                        <td>[Number of Results for Airfare]</td>
+                        <td>[Status for Airfare]</td>
+                    </tr>
+                    <tr>
+                        <td>Jobs</td>
+                        <td>[Last Run Date/Time for Jobs]</td>
+                        <td>[Number of Results for Jobs]</td>
+                        <td>[Status for Jobs]</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <p>
+                    Each entry in the table represents the latest activity in its respective category. The 'Last Run' column indicates the most recent execution of the query, while 'Results Obtained' shows the volume of data fetched. The 'Status' column provides a quick overview of the current state of each query, such as 'Active', 'Completed', or 'Pending'.
+                </p>
             </div>
+
 
 
 
@@ -41,17 +100,51 @@
                 <button class="btn btn-info btn-settings" data-target="cuda-monitor-performance">Monitor Performance</button>
             </div>
             <div id="cuda-initialize-swarm" class="content-container" style="display:none;">
-                <h4>CUDA Status</h4>
-                <p>"wow amazing swarmm"</p>
+                <br><br>
+                <h4>CUDA Status: Swarm Initialization</h4>
+                <p>
+                    The CUDA Swarm is now initializing! This powerful feature leverages the parallel processing capabilities of CUDA to handle complex, resource-intensive tasks with unprecedented efficiency. Here's what's happening:
+                <ul>
+                    <li><strong>Parallel Task Deployment:</strong> Multiple processing tasks are being deployed simultaneously, ensuring optimal use of computational resources.</li>
+                    <li><strong>Efficiency Maximization:</strong> The swarm intelligently allocates tasks across available CUDA cores, maximizing processing speed and minimizing resource wastage.</li>
+                    <li><strong>Dynamic Adaptation:</strong> The system dynamically adjusts task distribution based on real-time performance data to maintain peak efficiency at all times.</li>
+                    <li><strong>Real-Time Monitoring:</strong> Keep track of the swarm's progress with real-time monitoring tools, providing insights into task completion, resource usage, and more.</li>
+                </ul>
+                This initialization sets the stage for robust and efficient processing. Whether it's data analysis, complex simulations, or other intensive tasks, the CUDA Swarm is gearing up to handle it all with ease.
+                </p>
             </div>
+
             <div id="cuda-tasks" class="content-container" style="display:none;">
-                <h4>CUDA Status</h4>
-                <p>"wow amazing TasKS"</p>
+                <br><br>
+                <h4>CUDA Status: Task Management</h4>
+                <p>
+                    Welcome to the CUDA Task Management Panel! This interface provides a comprehensive overview of the computational tasks being handled by the CUDA system. Here, you can track task performance, manage execution priorities, and gain insights into the overall efficiency of the system. Key features include:
+                <ul>
+                    <li><strong>Task Scheduling:</strong> View and manage the scheduling of tasks. Prioritize tasks based on urgency, complexity, or resource requirements.</li>
+                    <li><strong>Execution Monitoring:</strong> Monitor the real-time execution of tasks. Get detailed performance metrics such as execution time, resource usage, and progress.</li>
+                    <li><strong>Resource Allocation:</strong> Adjust resource allocation on-the-fly to optimize task execution. Balance the load across CUDA cores to ensure maximum efficiency.</li>
+                    <li><strong>Task History:</strong> Access a detailed history of past tasks, including execution logs, performance data, and outcomes. Use this data for analysis and optimization of future tasks.</li>
+                </ul>
+                The Task Management Panel is your command center for overseeing all CUDA-related activities. It empowers you to make informed decisions to optimize performance and resource usage, ensuring the smooth and efficient operation of your CUDA-enabled systems.
+                </p>
             </div>
+
             <div id="cuda-monitor-performance" class="content-container" style="display:none;">
-                <h4>CUDA Status</h4>
-                <p>"wow amazing pErForManCe"</p>
+                <br><br>
+                <h4>CUDA Status: Performance Monitoring</h4>
+                <p>
+                    You're now in the Performance Monitoring section of the CUDA system! This is where you can observe and analyze the performance of your CUDA-enabled applications and processes in real time. This powerful tool offers detailed insights and helps in optimizing your operations. Key aspects include:
+                <ul>
+                    <li><strong>Real-Time Analytics:</strong> Gain instant access to real-time performance data, including processing speeds, memory usage, and throughput rates.</li>
+                    <li><strong>Customizable Dashboards:</strong> Customize your monitoring dashboard to display the metrics most relevant to your needs. Easily track and compare different performance indicators.</li>
+                    <li><strong>Historical Data Analysis:</strong> Review historical performance data to identify trends, patterns, and potential areas for optimization.</li>
+                    <li><strong>Alerts and Notifications:</strong> Set up alerts to be notified of any performance anomalies or threshold breaches, allowing for prompt responses to potential issues.</li>
+                    <li><strong>Comprehensive Reporting:</strong> Generate detailed reports summarizing performance over selectable periods. Use these reports for in-depth analysis and strategic planning.</li>
+                </ul>
+                This Performance Monitoring tool is designed to help you maximize the efficiency and effectiveness of your CUDA-based applications, providing a wealth of information at your fingertips for informed decision-making.
+                </p>
             </div>
+
 
 
 
@@ -110,14 +203,38 @@
                 </div>
             </div>
             <div id="carp-tasks" class="content-container" style="display:none;">
+                <br><br>
                 <h4>CARP Update Distribution Lists</h4>
-                <p>"wow amazing Listss"</p>
+                <p>
+                    Welcome to the CARP Distribution List Management! This tool is designed to streamline the process of organizing and updating your distribution lists. Whether it's for marketing, communication, or data dissemination, here's how CARP enhances your list management:
+                <ul>
+                    <li><strong>Easy Organization:</strong> Sort and categorize your contacts into lists with ease. Use filters and tags to manage your lists efficiently.</li>
+                    <li><strong>Dynamic Updates:</strong> Add or remove contacts dynamically. Changes to your lists are updated in real-time, ensuring accuracy and timeliness.</li>
+                    <li><strong>Customization:</strong> Tailor your distribution lists to meet specific needs. Customize fields, add notes, and set preferences for each list.</li>
+                    <li><strong>Integration:</strong> Seamlessly integrate with other systems to synchronize your contacts and lists across platforms, ensuring consistency and reducing manual work.</li>
+                    <li><strong>Analytics:</strong> Track the performance of your distribution lists. Get insights into open rates, engagement levels, and other relevant metrics to optimize your outreach.</li>
+                </ul>
+                CARP's Distribution List Management is your go-to tool for maintaining comprehensive and effective lists, making your communication and marketing efforts more targeted and impactful.
+                </p>
             </div>
 
+
             <div id="carp-monitor-performance" class="content-container" style="display:none;">
+                <br><br>
                 <h4>CARP Analyze Traffic</h4>
-                <p>"wow amazing Traffic"</p>
+                <p>
+                    Welcome to the CARP Traffic Analysis Tool! This powerful feature provides in-depth insights into your network's traffic patterns. It's designed to help you monitor, analyze, and optimize the flow of data across your network. Here’s what you can do with this tool:
+                <ul>
+                    <li><strong>Real-Time Monitoring:</strong> Track network traffic in real-time. Get instant visibility into bandwidth usage, source and destination of traffic, and peak usage times.</li>
+                    <li><strong>Detailed Traffic Analysis:</strong> Dive deep into your network data. Analyze traffic by type, source, destination, and more, to identify patterns and potential bottlenecks.</li>
+                    <li><strong>Customizable Alerts:</strong> Set up custom alerts for unusual traffic patterns or threshold breaches, enabling quick responses to potential issues.</li>
+                    <li><strong>Historical Data Reports:</strong> Access historical traffic data for trend analysis and long-term planning. Compare current performance against past data to measure improvements.</li>
+                    <li><strong>Optimization Strategies:</strong> Use the insights gained to develop strategies for optimizing network performance, such as reallocating bandwidth or upgrading infrastructure.</li>
+                </ul>
+                The CARP Traffic Analysis Tool is your essential resource for understanding and improving your network’s performance, ensuring efficient and smooth operation of your digital infrastructure.
+                </p>
             </div>
+
 
         </div>
 

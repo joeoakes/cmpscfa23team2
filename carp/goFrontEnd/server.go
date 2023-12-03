@@ -1,4 +1,4 @@
-package dal
+package main
 
 // The errors: the file does not see the other methods from the middleware
 // change the configurations of the build to: from 'file' to 'directory' goFrontEnd
@@ -19,6 +19,7 @@ type PageData struct {
 	Title        string
 	Content      string
 	ErrorMessage string
+	Users        []*dal.User
 }
 
 func main() {
@@ -249,6 +250,7 @@ func predictionHandler(w http.ResponseWriter, r *http.Request) {
 	// Respond with the fetched prediction data
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(predictionData)
+}
 
 // renderDashboardTemplate renders the dashboard with a potential error message.
 func renderDashboardTemplate(tmpl *template.Template, w http.ResponseWriter, users []*dal.User, errorMessage string) {

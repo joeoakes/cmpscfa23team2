@@ -1,7 +1,9 @@
 {{ define "dashboard"}}
     <div class="container mt-4">
-        <h2>Predict AI Dashboard</h2>
-        <ul class="nav nav-pills" id="settingsTabs" role="tablist">
+        <div class="jumbotron text-center">
+            <h2>Predict AI Dashboard</h2>
+        </div>
+        <ul class="nav nav-pills justify-content-center" id="settingsTabs" role="tablist">
             <li class="nav-item">
                 <a class="nav-link active" id="crab-tab" data-toggle="pill" href="#crab" role="tab" aria-controls="crab" aria-selected="true">CRAB</a>
             </li>
@@ -13,10 +15,12 @@
             </li>
         </ul>
         <div class="tab-content" id="settingsTabsContent">
-            <div class="tab-pane fade show active" id="crab" role="tabpanel" aria-labelledby="crab-tab">
-                <button class="btn btn-primary btn-settings" data-target="crab-crawler-start">Start Crawler</button>
-                <button class="btn btn-secondary btn-settings" data-target="crab-crawler-stop">Stop Crawler</button>
-                <button class="btn btn-info btn-settings" data-target="crab-crawler-queries">View Logs</button>
+            <div class="tab-pane fade show active text-center" id="crab" role="tabpanel" aria-labelledby="crab-tab">
+                <div class="d-flex justify-content-center mb-3">
+                    <button class="btn btn-primary btn-settings mx-1" data-target="crab-crawler-start">Start Crawler</button>
+                    <button class="btn btn-secondary btn-settings mx-1" data-target="crab-crawler-stop">Stop Crawler</button>
+                    <button class="btn btn-info btn-settings mx-1" data-target="crab-crawler-queries">View Logs</button>
+                </div>
             </div>
             <div id="crab-crawler-start" class="content-container" style="display:none;">
                 <br><br>
@@ -93,11 +97,12 @@
 
 
 
-            <div class="tab-pane fade" id="cuda" role="tabpanel" aria-labelledby="cuda-tab">
-                <!-- CUDA Settings -->
-                <button class="btn btn-primary btn-settings" data-target="cuda-initialize-swarm">Initialize Swarm</button>
-                <button class="btn btn-secondary btn-settings" data-target="cuda-tasks">Distribute Tasks</button>
-                <button class="btn btn-info btn-settings" data-target="cuda-monitor-performance">Monitor Performance</button>
+            <div class="tab-pane fade text-center" id="cuda" role="tabpanel" aria-labelledby="cuda-tab">
+                <div class="d-flex justify-content-center mb-3">
+                    <button class="btn btn-primary btn-settings mx-1" data-target="cuda-initialize-swarm">Initialize Swarm</button>
+                    <button class="btn btn-secondary btn-settings mx-1" data-target="cuda-tasks">Distribute Tasks</button>
+                    <button class="btn btn-info btn-settings mx-1" data-target="cuda-monitor-performance">Monitor Performance</button>
+                </div>
             </div>
             <div id="cuda-initialize-swarm" class="content-container" style="display:none;">
                 <br><br>
@@ -151,11 +156,12 @@
 
 
 
-            <div class="tab-pane fade" id="carp" role="tabpanel" aria-labelledby="carp-tab">
-                <!-- CARP Settings -->
-                <button class="btn btn-primary btn-settings" data-target="carp-manage-subscriptions" >Manage Subscriptions</button>
-                <button class="btn btn-secondary btn-settings" data-target="carp-tasks">Update Distribution Lists</button>
-                <button class="btn btn-info btn-settings" data-target="carp-monitor-performance">Analyze Traffic</button>
+            <div class="tab-pane fade text-center" id="carp" role="tabpanel" aria-labelledby="carp-tab">
+                <div class="d-flex justify-content-center mb-3">
+                    <button class="btn btn-primary btn-settings mx-1" data-target="carp-manage-subscriptions">Manage Subscriptions</button>
+                    <button class="btn btn-secondary btn-settings mx-1" data-target="carp-tasks">Update Distribution Lists</button>
+                    <button class="btn btn-info btn-settings mx-1" data-target="carp-monitor-performance">Analyze Traffic</button>
+                </div>
             </div>
             <div id="carp-manage-subscriptions" class="content-container" style="display:none;">
                 <div class="container">

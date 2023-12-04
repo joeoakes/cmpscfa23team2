@@ -165,7 +165,7 @@ CREATE TABLE IF NOT EXISTS knn_predictions (
 CREATE TABLE IF NOT EXISTS linear_regression_predictions (
                                                              prediction_id VARCHAR(36) PRIMARY KEY,
                                                              query_identifier VARCHAR(255),
-                                                             input_data VARCHAR(255),
+                                                             input_data TEXT(255),
                                                              prediction_info VARCHAR(255),
                                                              prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );

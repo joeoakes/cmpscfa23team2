@@ -183,8 +183,6 @@ func ConvertBookDataToPoints(bookData BookData) []Point {
 		// Exclude timestamp from features
 		features := []float64{
 			parseFloat(entry.Price),
-			0.0, // Placeholder for the second feature
-			0.0, // Placeholder for the third feature
 		}
 
 		label := "books"
@@ -214,7 +212,7 @@ var colorMap = map[string]color.Color{
 	"books":   color.RGBA{R: 0, G: 255, B: 0, A: 255}, // Green
 }
 
-// createScatterPlot function with corrections
+// createScatterPlot function for multi-dimensional plot
 func createScatterPlot(data []Point, target Point, predictedLabel string) error {
 	p := plot.New()
 
@@ -223,23 +221,21 @@ func createScatterPlot(data []Point, target Point, predictedLabel string) error 
 	// Set suitable x and y labels based on the selected dataset
 	var xLabel, yLabel string
 	switch predictedLabel {
+	case "books":
+		xLabel = "Book Index"
+		yLabel = "Price"
+
 	case "gas":
 		xLabel = "Year"
 		yLabel = "Average Gasoline Prices"
 
-	case "books":
-		xLabel = "Book Index"
-		yLabel = "Price" // Change this to the appropriate label for books
-
 	case "airfare":
 		xLabel = "Month"
-		yLabel = "Average Airfare Prices" // Change this to the appropriate label for airfare
+		yLabel = "Average Airfare Prices"
 
 	default:
 		log.Fatal("Invalid dataset choice")
 	}
-	// set the minimum value of the y-axis to 0
-	p.Y.Min = 0.0
 
 	p.X.Label.Text = xLabel
 	p.Y.Label.Text = yLabel
@@ -255,8 +251,23 @@ func createScatterPlot(data []Point, target Point, predictedLabel string) error 
 	// Plot the filtered data
 	pts := make(plotter.XYs, len(filteredData))
 	for i, point := range filteredData {
-		pts[i].X = point.Features[0]
-		pts[i].Y = point.Features[1]
+		switch predictedLabel {
+		case "books":
+			if len(point.Features) < 1 {
+				log.Printf("Skipping data point with insufficient features: %v\n", point)
+				continue
+			}
+			pts[i].X = float64(i) // X-coordinate is the index of the book in the dataset
+			pts[i].Y = point.Features[0]
+
+		case "gas", "airfare":
+			if len(point.Features) < 2 {
+				log.Printf("Skipping data point with insufficient features: %v\n", point)
+				continue
+			}
+			pts[i].X = point.Features[0]
+			pts[i].Y = point.Features[1]
+		}
 	}
 
 	scatter, err := plotter.NewScatter(pts)
@@ -269,8 +280,19 @@ func createScatterPlot(data []Point, target Point, predictedLabel string) error 
 
 	// Plot the target point with the predicted label
 	pts = make(plotter.XYs, 1)
-	pts[0].X = target.Features[0]
-	pts[0].Y = target.Features[1]
+	if len(target.Features) < 1 {
+		log.Printf("Skipping target point with insufficient features: %v\n", target)
+	} else {
+		switch predictedLabel {
+		case "books":
+			pts[0].X = float64(len(data)) // Place the target point at the end of the dataset
+			pts[0].Y = target.Features[0]
+
+		case "gas", "airfare":
+			pts[0].X = target.Features[0]
+			pts[0].Y = target.Features[1]
+		}
+	}
 
 	fmt.Printf("Target Point: X=%v, Y=%v\n", pts[0].X, pts[0].Y)
 
@@ -352,22 +374,33 @@ func main() {
 
 	switch selectedDataset {
 	case "gas":
-		target.Features[2] = 2023
+		// 3 features (0, 1, 2)
+		target.Features = []float64{1, 2, 2023}
 
 	case "books":
-		target.Features[0] = 100
+		target.Features = []float64{20}
 
 	case "airfare":
-		target.Features[0] = 2023
+		target.Features = []float64{1, 2023}
 
 	default:
 		log.Fatal("Invalid dataset choice")
 	}
 
-	k := 5
+	k := 3
 	predictedLabel := KNN(k, allPoints, target)
 
-	// Calculate the dynamic middle value for the second feature based on the predicted label
+	// Create and save scatter plot only if the selected dataset is "books"
+	if selectedDataset == "books" {
+		err := createScatterPlot(allPoints, target, predictedLabel)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		fmt.Println("Scatter plot is only supported for the 'books' dataset.")
+	}
+
+	// Calculate the dynamic middle value for each feature based on the predicted label
 	for i := range target.Features {
 		var sumFeature float64
 		count := 0
@@ -379,6 +412,8 @@ func main() {
 		}
 		if count > 0 {
 			target.Features[i] = sumFeature / float64(count)
+		} else {
+			fmt.Printf("No data points with label %s for feature %d\n", predictedLabel, i)
 		}
 	}
 

@@ -17,39 +17,39 @@ import (
 	"strings"
 )
 
-//// AirfareData represents the structure of each item in the JSON data for airfare
-//type AirfareData struct {
-//	Title          string            `json:"title"`
-//	Year           string            `json:"year"`
-//	Location       string            `json:"location"`
-//	Features       []string          `json:"features"`
-//	AdditionalInfo AirfareAdditional `json:"additional_info"`
-//	Metadata       AirfareMetadata   `json:"metadata"`
-//}
-//
-//// AirfareDataList represents a list of airfare data
-//type AirfareDataList struct {
-//	AirfareData []AirfareData `json:"airfare_data"`
-//}
-//
-//// AirfareAdditional represents additional information for airfare data
-//type AirfareAdditional struct {
-//	Country    string         `json:"country"`
-//	MonthsData []AirfareMonth `json:"months_data"`
-//}
-//
-//// AirfareMonth represents each month's data for airfare
-//type AirfareMonth struct {
-//	Month string `json:"month"`
-//	Rate  string `json:"rate"`
-//	Year  string `json:"year"`
-//}
-//
-//// AirfareMetadata represents metadata for airfare data
-//type AirfareMetadata struct {
-//	Source    string `json:"source"`
-//	Timestamp string `json:"timestamp"`
-//}
+// AirfareData represents the structure of each item in the JSON data for airfare
+type AirfareData struct {
+	Title          string            `json:"title"`
+	Year           string            `json:"year"`
+	Location       string            `json:"location"`
+	Features       []string          `json:"features"`
+	AdditionalInfo AirfareAdditional `json:"additional_info"`
+	Metadata       AirfareMetadata   `json:"metadata"`
+}
+
+// AirfareDataList represents a list of airfare data
+type AirfareDataList struct {
+	AirfareData []AirfareData `json:"airfare_data_price"`
+}
+
+// AirfareAdditional represents additional information for airfare data
+type AirfareAdditional struct {
+	Country    string         `json:"country"`
+	MonthsData []AirfareMonth `json:"months_data"`
+}
+
+// AirfareMonth represents each month's data for airfare
+type AirfareMonth struct {
+	Month string `json:"month"`
+	Rate  string `json:"rate"`
+	Year  string `json:"year"`
+}
+
+// AirfareMetadata represents metadata for airfare data
+type AirfareMetadata struct {
+	Source    string `json:"source"`
+	Timestamp string `json:"timestamp"`
+}
 
 // GasolineData represents the structure of each item in the JSON data for gas
 type GasolineData struct {
@@ -138,31 +138,38 @@ func KNN(k int, data []Point, target Point) string {
 	return predictedLabel
 }
 
-//// ConvertAirfareDataToPoints converts airfare data to points
-//func ConvertAirfareDataToPoints(airfareData []AirfareData) []Point {
-//	var data []Point
-//	for _, entry := range airfareData {
-//		features := []float64{
-//			parseFloat(entry.Year),
-//			parseFloat(entry.Location),
-//		}
-//
-//		label := "airfare"
-//		data = append(data, Point{Features: features, Label: label})
-//	}
-//	return data
-//}
+// ConvertAirfareDataToPoints converts airfare data to points
+func ConvertAirfareDataToPoints(airfareData AirfareData) []Point {
+	var data []Point
+	for _, monthData := range airfareData.AdditionalInfo.MonthsData {
+		// Assuming the structure of AirfareMonth, adjust the field names accordingly
+		features := []float64{
+			parseFloat(monthData.Year),
+			parseFloat(monthData.Rate),
+			// Add more features as needed
+		}
+
+		label := "airfare"
+		data = append(data, Point{Features: features, Label: label})
+	}
+	return data
+}
 
 // ConvertGasolineDataToPoints converts gasoline data to points
 func ConvertGasolineDataToPoints(gasolineData []GasolineData) []Point {
 	var data []Point
 	for _, entry := range gasolineData {
-		features := []float64{
-			parseFloat(entry.Year),
-			parseFloat(entry.AverageGasolinePrices),
-			parseFloat(entry.AverageAnnualCPIForGas),
+		// Check for missing values and handle them appropriately
+		year := parseFloat(entry.Year)
+		avgGas := parseFloat(entry.AverageGasolinePrices)
+		avgCPI := parseFloat(entry.AverageAnnualCPIForGas)
+
+		// Skip the entry if any of the required values is missing
+		if math.IsNaN(year) || math.IsNaN(avgGas) || math.IsNaN(avgCPI) {
+			continue
 		}
 
+		features := []float64{year, avgGas, avgCPI}
 		label := "gas"
 		data = append(data, Point{Features: features, Label: label})
 	}
@@ -176,7 +183,6 @@ func ConvertBookDataToPoints(bookData BookData) []Point {
 		// Exclude timestamp from features
 		features := []float64{
 			parseFloat(entry.Price),
-			// Add two more features (assuming they are available in your dataset)
 			0.0, // Placeholder for the second feature
 			0.0, // Placeholder for the third feature
 		}
@@ -209,10 +215,32 @@ var colorMap = map[string]color.Color{
 }
 
 // createScatterPlot function with corrections
-func createScatterPlot(data []Point, target Point, predictedLabel, xLabel, yLabel string) error {
+func createScatterPlot(data []Point, target Point, predictedLabel string) error {
 	p := plot.New()
 
 	p.Title.Text = "KNN Scatter Plot"
+
+	// Set suitable x and y labels based on the selected dataset
+	var xLabel, yLabel string
+	switch predictedLabel {
+	case "gas":
+		xLabel = "Year"
+		yLabel = "Average Gasoline Prices"
+
+	case "books":
+		xLabel = "Book Index"
+		yLabel = "Price" // Change this to the appropriate label for books
+
+	case "airfare":
+		xLabel = "Month"
+		yLabel = "Average Airfare Prices" // Change this to the appropriate label for airfare
+
+	default:
+		log.Fatal("Invalid dataset choice")
+	}
+	// set the minimum value of the y-axis to 0
+	p.Y.Min = 0.0
+
 	p.X.Label.Text = xLabel
 	p.Y.Label.Text = yLabel
 
@@ -244,6 +272,8 @@ func createScatterPlot(data []Point, target Point, predictedLabel, xLabel, yLabe
 	pts[0].X = target.Features[0]
 	pts[0].Y = target.Features[1]
 
+	fmt.Printf("Target Point: X=%v, Y=%v\n", pts[0].X, pts[0].Y)
+
 	scatter, err = plotter.NewScatter(pts)
 	if err != nil {
 		return err
@@ -265,131 +295,100 @@ func createScatterPlot(data []Point, target Point, predictedLabel, xLabel, yLabe
 }
 
 func main() {
-	//// Load airfare data
-	//airfareFilePath := "airfare_data_price.json"
-	//airfareDataList := loadAirfareData(airfareFilePath)
-	//airfareData := airfareDataList.AirfareData
+	// Get user input for selecting the dataset
+	var selectedDataset string
+	fmt.Print("Choose a dataset (gas, books, airfare): ")
+	fmt.Scanln(&selectedDataset)
 
-	// Load gasoline data
-	gasolineFilePath := "gasoline_data.json"
-	gasolineData := loadGasolineData(gasolineFilePath)
+	// Load the selected dataset
+	var allPoints []Point
+	switch selectedDataset {
+	case "gas":
+		gasolineDataFile, err := os.ReadFile("gasoline_data.json")
+		if err != nil {
+			log.Fatal(err)
+		}
+		var gasolineData []GasolineData
+		err = json.Unmarshal(gasolineDataFile, &gasolineData)
+		if err != nil {
+			log.Fatal(err)
+		}
+		allPoints = ConvertGasolineDataToPoints(gasolineData)
 
-	// Load book data
-	booksFilePath := "books_data.json"
-	bookData := loadBookData(booksFilePath)
+	case "books":
+		bookDataFile, err := os.ReadFile("books_data.json")
+		if err != nil {
+			log.Fatal(err)
+		}
+		var bookData BookData
+		err = json.Unmarshal(bookDataFile, &bookData)
+		if err != nil {
+			log.Fatal(err)
+		}
+		allPoints = ConvertBookDataToPoints(bookData)
 
-	// Convert data to points
-	//airfarePoints := ConvertAirfareDataToPoints(airfareData)
-	gasolinePoints := ConvertGasolineDataToPoints(gasolineData)
-	bookPoints := ConvertBookDataToPoints(bookData)
+	case "airfare":
+		airfareDataFile, err := os.ReadFile("airfare_data_price.json")
+		if err != nil {
+			log.Fatal(err)
+		}
+		var airfareDataList AirfareDataList
+		err = json.Unmarshal(airfareDataFile, &airfareDataList)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, airfareData := range airfareDataList.AirfareData {
+			allPoints = append(allPoints, ConvertAirfareDataToPoints(airfareData)...)
+		}
 
-	// Example values for Year, Location, Average Gasoline Prices
+	default:
+		log.Fatal("Invalid dataset choice")
+	}
+
+	// Example usage of KNN
 	target := Point{
-		// Use the same number of features as other cases
-		Features: []float64{2023, 0, 0},
-		// The label will be predicted
-		Label: "",
+		Features: make([]float64, len(allPoints[0].Features)),
 	}
 
-	// Check the number of features in the target
-	targetFeaturesCount := len(target.Features)
+	switch selectedDataset {
+	case "gas":
+		target.Features[2] = 2023
 
-	//// Check the number of features in airfarePoints
-	//for _, point := range airfarePoints {
-	//	if len(point.Features) != targetFeaturesCount {
-	//		fmt.Println("Error: Features lengths mismatch in airfarePoints")
-	//		return
-	//	}
-	//}
+	case "books":
+		target.Features[0] = 100
 
-	// Check the number of features in gasolinePoints
-	for _, point := range gasolinePoints {
-		if len(point.Features) != targetFeaturesCount {
-			fmt.Println("Error: Features lengths mismatch in gasolinePoints")
-			return
+	case "airfare":
+		target.Features[0] = 2023
+
+	default:
+		log.Fatal("Invalid dataset choice")
+	}
+
+	k := 5
+	predictedLabel := KNN(k, allPoints, target)
+
+	// Calculate the dynamic middle value for the second feature based on the predicted label
+	for i := range target.Features {
+		var sumFeature float64
+		count := 0
+		for _, p := range allPoints[:k] {
+			if p.Label == predictedLabel {
+				sumFeature += p.Features[i]
+				count++
+			}
+		}
+		if count > 0 {
+			target.Features[i] = sumFeature / float64(count)
 		}
 	}
 
-	// Check the number of features in bookPoints
-	for _, point := range bookPoints {
-		if len(point.Features) != targetFeaturesCount {
-			fmt.Println("Error: Features lengths mismatch in bookPoints")
-			return
-		}
-	}
+	fmt.Printf("Predicted Label: %s\n", predictedLabel)
+	fmt.Printf("Predicted Features: %v\n", target.Features)
 
-	// Perform KNN predictions for each domain
-	k := 1 // Number of neighbors to consider
-	//predictedLabelAirfare := KNN(k, airfarePoints, target)
-	predictedLabelGasoline := KNN(k, gasolinePoints, target)
-	predictedLabelBooks := KNN(k, bookPoints, target)
-
-	//fmt.Printf("Predicted Label for Airfare: %s\n", predictedLabelAirfare)
-	fmt.Printf("Predicted Label for Gasoline: %s\n", predictedLabelGasoline)
-	fmt.Printf("Predicted Label for Books: %s\n", predictedLabelBooks)
-
-	// Create scatter plots
-	//err := createScatterPlot(airfarePoints, target, predictedLabelAirfare, "Year", "Location")
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-
-	err := createScatterPlot(gasolinePoints, target, predictedLabelGasoline, "Year", "Average Gasoline Prices")
+	// Create and save scatter plot
+	err := createScatterPlot(allPoints, target, predictedLabel)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = createScatterPlot(bookPoints, target, predictedLabelBooks, "Timestamp", "Price")
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-//// Function to load airfare data
-//func loadAirfareData(filePath string) AirfareDataList {
-//	file, err := os.Open(filePath)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	defer file.Close()
-//
-//	var data AirfareDataList
-//	decoder := json.NewDecoder(file)
-//	err = decoder.Decode(&data)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	return data
-//}
-
-func loadGasolineData(filePath string) []GasolineData {
-	file, err := os.Open(filePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	var data []GasolineData
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&data)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return data
-}
-
-func loadBookData(filePath string) BookData {
-	file, err := os.Open(filePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	var data BookData
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&data)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return data
 }

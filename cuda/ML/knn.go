@@ -378,6 +378,7 @@ func main() {
 		target.Features = []float64{1, 2, 2023}
 
 	case "books":
+		// one feature for books (price)
 		target.Features = []float64{20}
 
 	case "airfare":

@@ -273,6 +273,9 @@ func createScatterPlot(x, y []float64, a, b float64, title, filename, xLabel, yL
 	p.X.Label.Text = xLabel
 	p.Y.Label.Text = yLabel
 
+	// Print statements for debugging
+	fmt.Println("Creating scatter plot...")
+
 	pts := make(plotter.XYs, len(x))
 	for i := range x {
 		pts[i].X = x[i]
@@ -281,7 +284,7 @@ func createScatterPlot(x, y []float64, a, b float64, title, filename, xLabel, yL
 
 	scatter, err := plotter.NewScatter(pts)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error creating scatter plot: %v", err)
 	}
 	p.Add(scatter)
 
@@ -293,9 +296,12 @@ func createScatterPlot(x, y []float64, a, b float64, title, filename, xLabel, yL
 	p.Add(line)
 
 	// Save the plot to a PNG file.
+	fmt.Printf("Saving plot to file: %s\n", filename)
 	if err := p.Save(6*vg.Inch, 4*vg.Inch, filename); err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error saving plot: %v", err)
 	}
+
+	fmt.Println("Scatter plot created and saved successfully.")
 }
 
 func min(a, b int) int {
@@ -340,7 +346,8 @@ func main() {
 		year2023 := 2023.0
 		cpi2023 := 349.189
 		price2023 := (0.10 * (a*year2023 + b*cpi2023 + c))
-
+		// Format prediction output with descriptive text
+		descriptivePrediction := fmt.Sprintf("The prediction for gas prices in the year 2023 is: $%.2f", price2023)
 		// Collect input data from previous years
 		var inputDataStrings []string
 		for i := 0; i < len(years); i++ {
@@ -352,21 +359,16 @@ func main() {
 		inputData := strings.Join(inputDataStrings, ",")
 
 		// Connect to the database
-		db, err := sql.Open("mysql", "root:Pane1901.@tcp(127.0.0.1:3306)/goengine")
+		db, err := sql.Open("mysql", "root:Matthew@1499.@tcp(127.0.0.1:3306)/goengine")
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer db.Close()
 
-		// Convert the numeric prediction_info value to a JSON-formatted string
-		prediction_info, err := json.Marshal(price2023)
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		// Insert the prediction into the "predictions" table, including input_data
-		insertStatement := "INSERT INTO predictions (prediction_id, input_data, prediction_info) VALUES (?, ?, ?)"
-		_, err = db.Exec(insertStatement, 1, inputData, prediction_info)
+		insertStatement := "INSERT INTO linear_regression_predictions (prediction_id,query_identifier, input_data, prediction_info) VALUES (?,?, ?, ?)"
+		// Insert the prediction with descriptive text into the database
+		_, err = db.Exec(insertStatement, 1, "Gas Prices Query 1", inputData, descriptivePrediction)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -378,7 +380,7 @@ func main() {
 
 		// Create and save the scatter plot with the extended x values
 		title := "Gas Price Prediction Scatter Plot (Extended)"
-		filename := "gas_scatter_plot_extended.png"
+		filename := "Gas Prices Query 1_scatter_plot.png"
 		xLabel := "Year"
 		yLabel := "Average Gasoline Prices"
 		createScatterPlot(append(years, newX...), prices, a, b, title, filename, xLabel, yLabel)
@@ -417,7 +419,7 @@ func main() {
 		}
 
 		// Connect to the database
-		db, err := sql.Open("mysql", "root:Pane1901.@tcp(127.0.0.1:3306)/goengine")
+		db, err := sql.Open("mysql", "root:Matthew@1499.@tcp(127.0.0.1:3306)/goengine")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -440,8 +442,8 @@ func main() {
 		}
 
 		// Insert the prediction into the "predictions" table, including input_data
-		insertStatement := "INSERT INTO predictions (prediction_id, input_data, prediction_info) VALUES (?, ?, ?)"
-		_, err = db.Exec(insertStatement, 2, inputData, predictionInfo)
+		insertStatement := "INSERT INTO linear_regression_predictions (prediction_id,query_identifier, input_data, prediction_info) VALUES (?,?, ?, ?)"
+		_, err = db.Exec(insertStatement, 3, "Airefare infaltion rate query 1", inputData, predictionInfo)
 		if err != nil {
 			log.Fatal(err)
 		}

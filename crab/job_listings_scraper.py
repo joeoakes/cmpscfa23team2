@@ -175,31 +175,33 @@ def __extract_job_description(wait):
         capture = False
 
         # Define the keywords and bullet point indicators
-        keywords = [r'qualifications:', r'experience', r'requirements:', r'responsibilities',
+        keywords = [r'qualifications:', r'experience', r'requirements:', r'requirements', r'responsibilities',
                     r'desired skills:', r'minimum qualifications', r'recruitment requirements:', r'experience:',
                     r'skills:', r'Recruitment Requirements:', r'responsibilities:', r'required experience',
                     r'position requirements:', r'skills', r'Skills and Abilities', r'Abilities',
-                    r'Qualifications', r'RECRUITMENT REQUIREMENTS:']
+                    r'Qualifications', r'RECRUITMENT REQUIREMENTS:', r'Certification:']
         bullet_indicators = ['-', '•', '*']  # Add more indicators if needed
 
         for element in soup.find_all(['p', 'li']):
             text = element.get_text(strip=True)
             lower_text = text.lower()
 
+            # Check if the element is a keyword
             if any(re.search(keyword, lower_text, re.IGNORECASE) for keyword in keywords):
                 capture = True
 
             if capture:
-                if element.name == 'li' or any(text.startswith(indicator) for indicator in bullet_indicators):
+                # Check if the element starts with a bullet point indicator or is a list item
+                if element.name == 'li' or any(text.lstrip().startswith(indicator) for indicator in bullet_indicators):
                     description_texts.append(text)
-                elif not any(text.startswith(indicator) for indicator in bullet_indicators) and not any(re.search(keyword, lower_text, re.IGNORECASE) for keyword in keywords):
-                    # Stop capturing on encountering a non-bullet point line and not a keyword line
-                    capture = False
+                elif not any(text.lstrip().startswith(indicator) for indicator in bullet_indicators):
+                    capture = False  # Stop capturing when encountering a non-bullet point line
 
         return '\n'.join(description_texts).strip()
     except Exception as e:
         print(f"Error in extracting job description: {e}")
         return "Not Available"
+
 
 
 def get_web_driver():
@@ -231,7 +233,7 @@ def get_web_driver():
 def scrape(location_search_keyword='', num_pages=1, scrape_option=0) -> None:
     driver = get_web_driver()
 
-    domains = ['Healthcare', 'Business', 'Cybersecurity']
+    domains = ['Healthcare', 'Business', 'Software Engineer']
     all_data = []
 
     for domain in domains:

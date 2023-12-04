@@ -1,4 +1,4 @@
-package dal
+package main
 
 import (
 	"cmpscfa23team2/dal"

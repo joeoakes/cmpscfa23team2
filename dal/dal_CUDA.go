@@ -26,19 +26,19 @@ type Prediction struct {
 // Function to check if the engine_id exists in scraper_engine table
 //
 // This function checks if a given engine ID exists in a databse table and returns a boolean indicating existence or an error.
-func EngineIDExists(engineID string) (bool, error) {
-	var exists bool
-	query := "SELECT EXISTS(SELECT 1 FROM scraper_engine WHERE engine_id=?)"
-	err := DB.QueryRow(query, engineID).Scan(&exists)
-	if err != nil {
-		InsertLog("400", "Error checking engine ID existence: "+err.Error(), "EngineIDExists()")
-		return false, err
-	} else {
-		InsertLog("200", "Successfully checked if engine ID exists.", "EngineIDExists()")
-		log.Println("Successfully checked if engine ID exists.")
-	}
-	return exists, nil
-}
+//func EngineIDExists(engineID string) (bool, error) {
+//	var exists bool
+//	query := "SELECT EXISTS(SELECT 1 FROM scraper_engine WHERE engine_id=?)"
+//	err := DB.QueryRow(query, engineID).Scan(&exists)
+//	if err != nil {
+//		InsertLog("400", "Error checking engine ID existence: "+err.Error(), "EngineIDExists()")
+//		return false, err
+//	} else {
+//		InsertLog("200", "Successfully checked if engine ID exists.", "EngineIDExists()")
+//		log.Println("Successfully checked if engine ID exists.")
+//	}
+//	return exists, nil
+//}
 
 // Function to insert a new prediction
 // The function InsertPrediction, that checks the existence of an engineID, logs the result, and inserts predictionInfo into a database table if the engineID exists, handling errors along the way.
@@ -141,30 +141,39 @@ func ConvertPredictionToJSON(predictionResult string) (string, error) {
 	return string(predictionJSON), nil
 }
 func FetchPredictionData(query, domain string) (PredictionData, error) {
-	var tableName string
+	var (
+		data     PredictionData
+		queryStr string
+		err      error
+	)
 
-	// Determine the table name based on the domain
 	switch domain {
 	case "E-commerce (Price Prediction)":
-		tableName = "linear_regression_predictions"
+		queryStr = "SELECT prediction_info FROM linear_regression_predictions WHERE query_identifier = ?"
+	case "GasPrices (Industry Trend Analysis)":
+		queryStr = "SELECT prediction_info FROM linear_regression_predictions WHERE query_identifier = ?"
 	case "RealEstate":
-		tableName = "knn_predictions"
+		queryStr = "SELECT prediction_info FROM knn_predictions WHERE query_identifier = ?"
 	case "Job Market (Industry Trend Analysis)":
-		tableName = "naive_bayes_predictions"
+		queryStr = "SELECT prediction_info FROM naive_bayes_predictions WHERE query_identifier = ?"
 	default:
 		return PredictionData{}, fmt.Errorf("unrecognized domain: %s", domain)
 	}
 
-	// Fetch data from the determined table
-	var data PredictionData
-	queryStr := fmt.Sprintf("SELECT prediction_info FROM %s WHERE query_identifier = ?", tableName)
-	err := DB.QueryRow(queryStr, query).Scan(&data.PredictionInfo)
+	err = DB.QueryRow(queryStr, query).Scan(&data.PredictionInfo)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return PredictionData{}, fmt.Errorf("no prediction data found for query: %s", query)
 		}
 		return PredictionData{}, err
 	}
+	// Construct the image path
+	imagePath := fmt.Sprintf("/static/Assets/MachineLearning/LinearRegression/%s_scatter_plot.png", query)
+
+	// Log the generated image path
+	log.Printf("Generated image path: %s\n", imagePath)
+	// Include the image path in the response
+	data.ImagePath = imagePath
 
 	return data, nil
 }
@@ -172,4 +181,5 @@ func FetchPredictionData(query, domain string) (PredictionData, error) {
 // PredictionData represents the structure of the prediction data
 type PredictionData struct {
 	PredictionInfo string `json:"prediction_info"`
+	ImagePath      string `json:"image_path"` // New field for the image path
 }

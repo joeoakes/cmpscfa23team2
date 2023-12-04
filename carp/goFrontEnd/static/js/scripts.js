@@ -1,8 +1,9 @@
 // Mapping of domains to queries
 const domainToQueries = {
-  "E-commerce": ["E-commerce Query 1 Used car", "E-commerce Query 2 Gold Price", "E-commerce Query 3 Silver Price"],
-  RealEstate: ["Real Estate Query 1 Philadelphia", "Real Estate Query 2 New York", "Real Estate Query 3 California"],
+  "E-commerce (Price Prediction)": ["E-commerce Query 1 Used car", "E-commerce Query 2 Gold Price", "E-commerce Query 3 Silver Price"],
+  "GasPrices (Industry Trend Analysis)": ["Gas Prices Query 1", "Gas Prices Query 2", "Gas Prices Query 3"],
   JobMarket: ["Job Market Query 1", "Job Market Query 2", "Job Market Query 3"],
+  GasPrices: ["Gas Prices Query 1", "Gas Prices Query 2", "Gas Prices Query 3"],
   // Add other domains and queries as necessary
 };
 
@@ -80,18 +81,33 @@ $(document).ready(function() {
       url: '/api/predictions?domain=' + encodeURIComponent(domain) + '&queryType=' + encodeURIComponent(queryType),
       type: 'GET',
       success: function(response) {
-        // Check if the response contains valid prediction info
+        console.log("Response received:", response);
+        // Clear previous results
+        $('#predictionResult').empty();
+
+        // Check if the response contains valid prediction info and image path
         if (response && response.prediction_info) {
           var predictionInfo = response.prediction_info;
-          // Check if the prediction info is a file path
-          if (/\.(jpg|png|gif)$/.test(predictionInfo)) {
-            // Display the image
-            var imagePath = 'static/Assets/MachineLearning/' + predictionInfo;
-            $('#predictionResult').html('<img src="' + imagePath + '" alt="Prediction Result" style="max-width: 100%; height: auto;">');
-          } else {
-            // Display text prediction
-            $('#predictionResult').text(predictionInfo);
-          }
+          var predictionText = $('<p>').text(predictionInfo);
+          $('#predictionResult').append(predictionText);
+        }
+
+        if (response && response.image_path) {
+          var imagePath = response.image_path;
+          console.log("Image path:", imagePath);
+          var image = $('<img>', {
+            src: imagePath,
+            alt: 'Prediction Result',
+            style: 'max-width: 100%; height: auto;'
+          });
+
+          // Error handling for the image
+          image.on('error', function() {
+            console.error('Error loading image:', imagePath);
+            $('#predictionResult').append($('<p>').text("Error loading prediction image."));
+          });
+
+          $('#predictionResult').append(image);
         } else {
           // Handle missing or invalid prediction info
           $('#predictionResult').text("No prediction data available for the selected query.");

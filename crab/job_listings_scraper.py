@@ -175,27 +175,31 @@ def __extract_job_description(wait):
         capture = False
 
         # Define the keywords and bullet point indicators
-        keywords = [r'qualifications:', r'experience', r'requirements:', r'requirements', r'responsibilities',
-                    r'desired skills:', r'minimum qualifications', r'recruitment requirements:', r'experience:',
-                    r'skills:', r'Recruitment Requirements:', r'responsibilities:', r'required experience',
-                    r'position requirements:', r'skills', r'Skills and Abilities', r'Abilities',
-                    r'Qualifications', r'RECRUITMENT REQUIREMENTS:', r'Certification:']
+        keywords = [r'qualifications', r'experience', r'requirements', r'responsibilities',
+                    r'desired skills', r'minimum qualifications', r'recruitment requirements', r'experience',
+                    r'skills', r'Recruitment Requirements', r'required experience',
+                    r'position requirements', r'Skills and Abilities', r'Abilities',
+                    r'Qualifications', r'RECRUITMENT REQUIREMENTS', r'Certification']
         bullet_indicators = ['-', '•', '*']  # Add more indicators if needed
 
-        for element in soup.find_all(['p', 'li']):
+        for element in soup.find_all(['p', 'li', 'ul', 'b']):
             text = element.get_text(strip=True)
             lower_text = text.lower()
 
-            # Check if the element is a keyword
+            # Check if the element is a keyword in any format
             if any(re.search(keyword, lower_text, re.IGNORECASE) for keyword in keywords):
                 capture = True
+                continue  # Skip the keyword itself
 
             if capture:
-                # Check if the element starts with a bullet point indicator or is a list item
-                if element.name == 'li' or any(text.lstrip().startswith(indicator) for indicator in bullet_indicators):
+                if element.name == 'li' or (element.name == 'p' and any(text.lstrip().startswith(indicator) for indicator in bullet_indicators)):
                     description_texts.append(text)
-                elif not any(text.lstrip().startswith(indicator) for indicator in bullet_indicators):
-                    capture = False  # Stop capturing when encountering a non-bullet point line
+                elif element.name == 'ul':
+                    # Capture all list items within the ul
+                    for li in element.find_all('li'):
+                        description_texts.append(li.get_text(strip=True))
+                elif element.name == 'p' and not any(text.lstrip().startswith(indicator) for indicator in bullet_indicators):
+                    capture = False  # Stop capturing when encountering a non-bullet point paragraph
 
         return '\n'.join(description_texts).strip()
     except Exception as e:
@@ -233,27 +237,29 @@ def get_web_driver():
 def scrape(location_search_keyword='', num_pages=1, scrape_option=0) -> None:
     driver = get_web_driver()
 
-    domains = ['Healthcare', 'Business', 'Software Engineer']
-    all_data = []
-
-    for domain in domains:
-        domain_data = __scrape_domain(driver, domain, location_search_keyword, num_pages)
-        all_data.append(domain_data)
-
-    driver.quit()
+    domains = ['Law', 'Business', 'Software Engineer']
 
     if not os.path.exists('output'):
         os.makedirs('output')
-    file_path = os.path.join('output', 'combined_jobs.json')
-    with open(file_path, 'w', encoding='utf-8') as f:
-        json.dump(all_data, f, ensure_ascii=False, indent=4)
+
+    for domain in domains:
+        domain_data = __scrape_domain(driver, domain, location_search_keyword, num_pages)
+
+        # Create a separate file for each domain
+        file_path = os.path.join('output', f'{domain}_jobs.json')
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(domain_data, f, ensure_ascii=False, indent=4)
+        print(f'Scraped data for {domain} domain saved to {file_path}.')
+
+    driver.quit()
 
     print('Scraping Complete.')
 
 
+
 def main():
     print("Script started.")
-    scrape('Philadelphia', num_pages=1, scrape_option=1)
+    scrape('Pennsylvania', num_pages=3, scrape_option=1)
           
 if __name__ == "__main__":
     main()

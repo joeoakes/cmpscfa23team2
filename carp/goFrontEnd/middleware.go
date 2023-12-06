@@ -1,30 +1,35 @@
 package main
 
 import (
-	"cmpscfa23team2/dal"
-	"errors"
-	"github.com/dgrijalva/jwt-go"
-	"html/template"
-	"log"
-	"net/http"
-	"strings"
+	"cmpscfa23team2/dal"          // Import the data access layer package
+	"errors"                      // Import the errors package for error handling
+	"github.com/dgrijalva/jwt-go" // Import the jwt-go package for JWT authentication
+	"html/template"               // Import the template package for HTML templating
+	"log"                         // Import the log package for logging
+	"net/http"                    // Import the net/http package for HTTP server and client
+	"strings"                     // Import the strings package for string manipulation
 )
 
+// AuthData struct represents the authentication data structure.
 type AuthData struct {
-	Title      string
-	Action     string
-	ShowLogout bool
-	Username   string
-	Success    bool
-	Error      string
-	LoggedIn   bool // Added field to track user login status
+	Title      string // Title of the page
+	Action     string // Action to be performed (like 'login')
+	ShowLogout bool   // Flag to show logout option
+	Username   string // Username of the logged-in user
+	Success    bool   // Flag to indicate successful operation
+	Error      string // Error message if any
+	LoggedIn   bool   // Added field to track user login status
 }
 
+// RegistrationPageData struct represents the registration page data structure.
 type RegistrationPageData struct {
-	Title        string
-	ErrorMessage string
+	Title        string // Title of the page
+	ErrorMessage string // Error message to display on the page
 }
 
+// serveTemplate returns an HTTP handler function that renders a template.
+// content: the content to be displayed
+// loggedIn: a boolean indicating if the user is logged in or not
 func serveTemplate(content string, loggedIn bool) http.HandlerFunc {
 	emptyData := &AuthData{
 		LoggedIn: loggedIn,
@@ -34,6 +39,10 @@ func serveTemplate(content string, loggedIn bool) http.HandlerFunc {
 	}
 }
 
+// renderTemplate renders the specified HTML template.
+// w: the response writer
+// tmpl: the path to the template file
+// data: data to be passed to the template
 func renderTemplate(w http.ResponseWriter, tmpl string, data *AuthData) {
 	t, err := template.ParseFiles("path/to/" + tmpl)
 	if err != nil {
@@ -51,12 +60,16 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data *AuthData) {
 	}
 }
 
+// handleLogin processes login requests.
+// w: the response writer
+// r: the HTTP request
 func handleLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		// Render the login template for GET requests
 		data := AuthData{Action: "login"}
 		renderTemplate(w, "path/to/login.gohtml", &data)
 	} else if r.Method == "POST" {
+		// Process POST request for login
 		r.ParseForm()
 		username := r.FormValue("email") // Update to match the form input name
 		password := r.FormValue("password")
@@ -90,8 +103,11 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// requireAdmin middleware ensures that the user is an admin before proceeding.
+// next: the next handler to call if the user is an admin
 func requireAdmin(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Placeholder for admin check
 		isAdmin := true
 		if !isAdmin {
 			http.Error(w, "Forbidden", http.StatusForbidden)
@@ -101,35 +117,46 @@ func requireAdmin(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// logoutHandler handles user logout requests.
+// w: the response writer
+// r: the HTTP request
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	// Extract the user ID from the token
 	userID, err := extractUserIDFromToken(r)
 	if err != nil {
 		http.Error(w, "Logout failed", http.StatusInternalServerError)
 		return
 	}
 
+	// Call the DAL function to log out the user
 	err = dal.LogoutUser(userID)
 	if err != nil {
 		http.Error(w, "Logout failed", http.StatusInternalServerError)
 		return
 	}
 
+	// Send a successful logout response
 	w.Write([]byte("Logout successful"))
 }
 
+// extractUserIDFromToken extracts the user ID from the JWT token in the request.
+// r: the HTTP request
+// Returns the user ID and any error encountered
 func extractUserIDFromToken(r *http.Request) (string, error) {
+	// Extract the Authorization header
 	header := r.Header.Get("Authorization")
 	if header == "" {
 		return "", errors.New("Authorization header not found")
 	}
 
+	// Split the token from the header
 	splitToken := strings.Split(header, "Bearer ")
 	if len(splitToken) != 2 {
 		return "", errors.New("Invalid Authorization header format")
 	}
 
+	// Parse the JWT token
 	tokenString := strings.TrimSpace(splitToken[1])
-
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte(dal.SECRET_KEY), nil
 	})
@@ -137,11 +164,11 @@ func extractUserIDFromToken(r *http.Request) (string, error) {
 		return "", err
 	}
 
+	// Extract the user ID from the token claims
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return "", errors.New("Failed to parse token claims")
 	}
-
 	userID, ok := claims["sub"].(string)
 	if !ok {
 		return "", errors.New("User ID not found in token claims")
@@ -149,120 +176,3 @@ func extractUserIDFromToken(r *http.Request) (string, error) {
 
 	return userID, nil
 }
-
-/*
-Backend:
-Data Retrieval:
-Implement functions in your DAL that retrieve the necessary data to populate the dashboard and settings page. (Already done in DAL)
-This may include user data, system configurations, etc.
-
-Data Update:
-Create functions in your DAL to handle updates to the system configurations. (Already done in DAL)
-These will be used when the settings form is submitted.
-
-API Endpoints:
-Define API endpoints in your Go server to handle GET requests for loading data into
-the dashboard and POST requests for updating settings.
-*/
-
-/*
-Frontend:
-
-Settings Form:
-Ensure the settings form is correctly linked to your backend.
-Use name attributes in your form inputs to capture the data in your Go backend.
-
-Dynamic Data Loading:
-Use JavaScript or this file go methods to dynamically load data into the dashboard if needed.
-
-Form Submission Handling: Write JavaScript to handle the form submission asynchronously (AJAX) to provide a smoother user experience without reloading the page.
-*/
-
-// Example for GET handler to load dashboard data
-//http.HandleFunc("/api/dashboard", func(w http.ResponseWriter, r *http.Request) {
-//	users := dal.GetUsers() // Assuming you have a function to get user data
-//	jsonResponse, _ := json.Marshal(users)
-//	w.Header().Set("Content-Type", "application/json")
-//	w.Write(jsonResponse)
-//})
-
-// Example for POST handler to update settings
-//http.HandleFunc("/settings", func(w http.ResponseWriter, r *http.Request) {
-//	if r.Method == "POST" {
-//		// Parse form values
-//		r.ParseForm()
-//		crawlingRules := r.FormValue("crawlingRules")
-//		dataMapping := r.FormValue("dataMapping")
-//
-//		// Update settings in DAL
-//		dal.UpdateCrawlingRules(crawlingRules)
-//		dal.UpdateDataMapping(dataMapping)
-//
-//		// Redirect or send a success response
-//		http.Redirect(w, r, "/settings", http.StatusFound)
-//	}
-//})
-
-// Updated requireAdmin middleware to use DAL function
-//func requireAdmin(next http.HandlerFunc) http.HandlerFunc {
-//	return func(w http.ResponseWriter, r *http.Request) {
-//		// Extract token from the Authorization header
-//		header := r.Header.Get("Authorization")
-//		if header == "" {
-//			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-//			return
-//		}
-//
-//		// Extract token from "Bearer <token>"
-//		splitToken := strings.Split(header, "Bearer ")
-//		if len(splitToken) != 2 {
-//			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-//			return
-//		}
-//
-//		tokenString := strings.TrimSpace(splitToken[1])
-//
-//		// Validate the token using the DAL function
-//		valid, err := dal.ValidateToken(tokenString)
-//		if err != nil || !valid {
-//			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-//			return
-//		}
-//
-//		next.ServeHTTP(w, r)
-//	}
-//}
-
-// Old method to test the dashboard.
-// Authentication Middleware to check if the user is logged in and has admin role
-//func requireAdmin(next http.HandlerFunc) http.HandlerFunc {
-//	return func(w http.ResponseWriter, r *http.Request) {
-//		// Placeholder for actual authentication and role check
-//		// You should replace this with a call to your DAL methods to check for a valid admin session/token
-//		// For example: isAdmin, err := dal.IsUserAdmin(session.UserID)
-//		isAdmin := true // For demonstration purposes, assign false to see the difference
-//
-//		if !isAdmin {
-//			http.Error(w, "Forbidden", http.StatusForbidden)
-//			return
-//		}
-//		next.ServeHTTP(w, r)
-//	}
-//}
-
-//http.HandleFunc("/start-crawler", func(w http.ResponseWriter, r *http.Request) {
-//	if r.Method != "POST" {
-//		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-//		return
-//	}
-//	// Call the StartCrawler function from your dal package
-//	err := dal.StartCrawler()
-//	if err != nil {
-//		http.Error(w, "Failed to start crawler", http.StatusInternalServerError)
-//		return
-//	}
-//	// Respond with a success message
-//	json.NewEncoder(w).Encode(map[string]string{"message": "Crawler started"})
-//})
-
-// Define similar handlers for stopping the crawler, viewing logs, etc.

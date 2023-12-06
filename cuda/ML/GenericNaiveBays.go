@@ -6,7 +6,6 @@ import (
 	"github.com/jdkato/prose/v2"
 	"io"
 	"math"
-	"math/rand"
 	"os"
 	"regexp"
 	"sort"
@@ -522,50 +521,50 @@ func (nbc *NaiveBayesClassifier) TrainWithTFIDF(data []GenericTextData) {
 //			topWords = append(topWords, sortedWords[i].Word)
 //		}
 //		return topWords
+////	}
+//func main2() {
+//	startTime := time.Now()
+//
+//	jsonFiles := []string{
+//		"C:\\Users\\Public\\GoLandProjects\\PredictAi\\crab\\output\\combined_jobs.json",
 //	}
-func main2() {
-	startTime := time.Now()
-
-	jsonFiles := []string{
-		"C:\\Users\\mathe\\GolandProjects\\cmpscfa23team2\\crab\\output\\combined_jobs.json",
-	}
-
-	// Load data
-	combinedData, err := LoadDataFromMultipleJSONFiles(jsonFiles)
-	if err != nil {
-		fmt.Println("Error loading data:", err)
-		os.Exit(1)
-	}
-
-	// Split data into training and testing
-	trainDataSize := int(float64(len(combinedData)) * 0.7)
-	trainData := combinedData[:trainDataSize]
-	testData := combinedData[trainDataSize:]
-
-	// Train classifier
-	classifier := NewNaiveBayesClassifier()
-	classifier.TrainWithTFIDF(trainData)
-
-	// Test classifier
-	TestModel(classifier, testData)
-
-	elapsedTime := time.Since(startTime)
-	fmt.Printf("Execution time: %s\n", elapsedTime)
-}
-func extractSkillsAndQualifications(description string) []string {
-	// Define a regular expression to identify skills and qualifications
-	skillRegexp := regexp.MustCompile(`[a-zA-Z+#]+`) // Modify this regex according to your needs
-
-	matches := skillRegexp.FindAllString(description, -1)
-
-	var skills []string
-	for _, match := range matches {
-		if !isStopWord(match) {
-			skills = append(skills, match)
-		}
-	}
-	return skills
-}
+//
+//	// Load data
+//	combinedData, err := LoadDataFromMultipleJSONFiles(jsonFiles)
+//	if err != nil {
+//		fmt.Println("Error loading data:", err)
+//		os.Exit(1)
+//	}
+//
+//	// Split data into training and testing
+//	trainDataSize := int(float64(len(combinedData)) * 0.7)
+//	trainData := combinedData[:trainDataSize]
+//	testData := combinedData[trainDataSize:]
+//
+//	// Train classifier
+//	classifier := NewNaiveBayesClassifier()
+//	classifier.TrainWithTFIDF(trainData)
+//
+//	// Test classifier
+//	TestModel(classifier, testData)
+//
+//	elapsedTime := time.Since(startTime)
+//	fmt.Printf("Execution time: %s\n", elapsedTime)
+//}
+//func extractSkillsAndQualifications(description string) []string {
+//	// Define a regular expression to identify skills and qualifications
+//	skillRegexp := regexp.MustCompile(`[a-zA-Z+#]+`) // Modify this regex according to your needs
+//
+//	matches := skillRegexp.FindAllString(description, -1)
+//
+//	var skills []string
+//	for _, match := range matches {
+//		if !isStopWord(match) {
+//			skills = append(skills, match)
+//		}
+//	}
+//	return skills
+//}
 
 // ExtractSkillsAndQualifications function to extract specific skills
 func ExtractSkillsAndQualifications(description string) []string {
@@ -602,7 +601,7 @@ func CalculateSkillDemand(data []GenericTextData) map[string]map[string]int {
 func main() {
 	startTime := time.Now()
 
-	jsonFiles := []string{"C:\\Users\\mathe\\GolandProjects\\cmpscfa23team2\\crab\\output\\combined_jobs.json"} // Update the path to your JSON file
+	jsonFiles := []string{"C:\\Users\\Public\\GoLandProjects\\PredictAi\\crab\\output\\combined_jobs.json"} // Update the path to your JSON file
 
 	// Load and combine data from all JSON files
 	combinedData, err := LoadDataFromMultipleJSONFiles(jsonFiles)
@@ -655,85 +654,86 @@ func getTopNSkills(skillMap map[string]int, n int) map[string]int {
 	return topSkills
 }
 
-func main3() {
-	startTime := time.Now()
-
-	jsonFiles := []string{
-		"C:\\Users\\mathe\\GolandProjects\\cmpscfa23team2\\crab\\output\\combined_jobs.json",
-	}
-
-	// Load and combine data from all JSON files
-	combinedData, err := LoadDataFromMultipleJSONFiles(jsonFiles)
-	if err != nil {
-		fmt.Println("Error loading data:", err)
-		os.Exit(1)
-	}
-
-	// Debugging: Print the size of the combined data
-	fmt.Println("Total data size before shuffle and split:", len(combinedData))
-
-	// Shuffle and split data
-	// Creating a new random source for reproducible sequences
-	src := rand.NewSource(time.Now().UnixNano())
-	rnd := rand.New(src)
-
-	// Shuffle and split data using the new random source
-	rnd.Shuffle(len(combinedData), func(i, j int) { combinedData[i], combinedData[j] = combinedData[j], combinedData[i] })
-	trainDataSize := int(float64(len(combinedData)) * 0.7)
-	// Assuming trainDataSize is the size of your training data
-	trainData := combinedData[trainDataSize:]
-
-	// Debugging: Print the size of the training data
-	fmt.Println("Training data size after split:", len(trainData))
-
-	// Train classifier
-	classifier := NewNaiveBayesClassifier()
-	classifier.TrainWithTFIDF(trainData)
-
-	//testSkillsSets := [][]string{
-	//	{"cybersecurity", "encryption", "network security"}, // Cybersecurity skills
-	//	{"patient care", "nursing", "medical diagnosis"},    // Healthcare skills
-	//	{"financial analysis", "business development"},      // Business skills
-	//	// Add more skill sets as needed
-	//}
-
-	// Use the getMostFrequentWords function to generate dynamic skill sets
-	topSkills := getMostFrequentWords(trainData, 3) // Get top 5 frequent skills from training data
-	for _, job := range combinedData {
-		if job.Description != nil {
-			skills := extractSkillsAndQualifications(*job.Description)
-			fmt.Printf("Job Title: %s, Extracted Skills: %v\n", *job.Title, skills)
-		}
-	}
-	// Test the classifier with dynamically generated skills
-	for _, skill := range topSkills {
-		if _, isStopWord := stopWords[skill]; !isStopWord {
-			testSkills := []string{skill}
-			sortedCategories := classifier.PredictWithProbabilities(testSkills)
-
-			for _, categoryProb := range sortedCategories {
-				fmt.Printf("Job titles relevant to '%s' skill in the '%s' category:\n", skill, categoryProb.Category)
-				count := 0
-				uniqueTitles := make(map[string]bool) // Map to keep track of unique titles
-
-				for _, job := range combinedData {
-					if job.Category == categoryProb.Category && job.Title != nil {
-						title := *job.Title
-						if strings.Contains(strings.ToLower(*job.Description), skill) && !uniqueTitles[title] {
-							fmt.Printf("Title: %s\n", title)
-							uniqueTitles[title] = true
-							count++
-							if count >= 3 { // Limit to top 3 unique job titles
-								break
-							}
-						}
-					}
-				}
-				fmt.Println()
-			}
-		}
-	}
-
-	elapsedTime := time.Since(startTime)
-	fmt.Printf("Execution time: %s\n", elapsedTime)
-}
+//
+//func main() {
+//	startTime := time.Now()
+//
+//	jsonFiles := []string{
+//		"C:\\Users\\mathe\\GolandProjects\\cmpscfa23team2\\crab\\output\\combined_jobs.json",
+//	}
+//
+//	// Load and combine data from all JSON files
+//	combinedData, err := LoadDataFromMultipleJSONFiles(jsonFiles)
+//	if err != nil {
+//		fmt.Println("Error loading data:", err)
+//		os.Exit(1)
+//	}
+//
+//	// Debugging: Print the size of the combined data
+//	fmt.Println("Total data size before shuffle and split:", len(combinedData))
+//
+//	// Shuffle and split data
+//	// Creating a new random source for reproducible sequences
+//	src := rand.NewSource(time.Now().UnixNano())
+//	rnd := rand.New(src)
+//
+//	// Shuffle and split data using the new random source
+//	rnd.Shuffle(len(combinedData), func(i, j int) { combinedData[i], combinedData[j] = combinedData[j], combinedData[i] })
+//	trainDataSize := int(float64(len(combinedData)) * 0.7)
+//	// Assuming trainDataSize is the size of your training data
+//	trainData := combinedData[trainDataSize:]
+//
+//	// Debugging: Print the size of the training data
+//	fmt.Println("Training data size after split:", len(trainData))
+//
+//	// Train classifier
+//	classifier := NewNaiveBayesClassifier()
+//	classifier.TrainWithTFIDF(trainData)
+//
+//	//testSkillsSets := [][]string{
+//	//	{"cybersecurity", "encryption", "network security"}, // Cybersecurity skills
+//	//	{"patient care", "nursing", "medical diagnosis"},    // Healthcare skills
+//	//	{"financial analysis", "business development"},      // Business skills
+//	//	// Add more skill sets as needed
+//	//}
+//
+//	// Use the getMostFrequentWords function to generate dynamic skill sets
+//	topSkills := getMostFrequentWords(trainData, 3) // Get top 5 frequent skills from training data
+//	for _, job := range combinedData {
+//		if job.Description != nil {
+//			skills := extractSkillsAndQualifications(*job.Description)
+//			fmt.Printf("Job Title: %s, Extracted Skills: %v\n", *job.Title, skills)
+//		}
+//	}
+//	// Test the classifier with dynamically generated skills
+//	for _, skill := range topSkills {
+//		if _, isStopWord := stopWords[skill]; !isStopWord {
+//			testSkills := []string{skill}
+//			sortedCategories := classifier.PredictWithProbabilities(testSkills)
+//
+//			for _, categoryProb := range sortedCategories {
+//				fmt.Printf("Job titles relevant to '%s' skill in the '%s' category:\n", skill, categoryProb.Category)
+//				count := 0
+//				uniqueTitles := make(map[string]bool) // Map to keep track of unique titles
+//
+//				for _, job := range combinedData {
+//					if job.Category == categoryProb.Category && job.Title != nil {
+//						title := *job.Title
+//						if strings.Contains(strings.ToLower(*job.Description), skill) && !uniqueTitles[title] {
+//							fmt.Printf("Title: %s\n", title)
+//							uniqueTitles[title] = true
+//							count++
+//							if count >= 3 { // Limit to top 3 unique job titles
+//								break
+//							}
+//						}
+//					}
+//				}
+//				fmt.Println()
+//			}
+//		}
+//	}
+//
+//	elapsedTime := time.Since(startTime)
+//	fmt.Printf("Execution time: %s\n", elapsedTime)
+//}

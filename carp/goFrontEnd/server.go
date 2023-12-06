@@ -81,8 +81,6 @@ func setupRoutes(tmpl *template.Template) {
 	http.HandleFunc("/dashboard", func(w http.ResponseWriter, r *http.Request) {
 		dashHandler(tmpl, w, r) // Custom handler for dashboard
 	})
-	http.HandleFunc("/settings", requireAdmin(makeHandler(tmpl, "settings")))
-	http.HandleFunc("/api/predictions", predictionHandler)
 
 	// Serve static files from the 'static' directory
 	fs := http.FileServer(http.Dir("static"))

@@ -359,7 +359,7 @@ func main() {
 		inputData := strings.Join(inputDataStrings, ",")
 
 		// Connect to the database
-		db, err := sql.Open("mysql", "root:Matthew@1499.@tcp(127.0.0.1:3306)/goengine")
+		db, err := sql.Open("mysql", "root:FJALkalim123@tcp(127.0.0.1:3306)/goengine")
 		if err != nil {
 			log.Fatal(err)
 		}

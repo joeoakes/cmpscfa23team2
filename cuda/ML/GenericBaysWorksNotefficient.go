@@ -1,4 +1,5 @@
 package main
+
 //
 //import (
 //	"encoding/json"
@@ -25,13 +26,13 @@ package main
 //
 //// GenericTextData represents any text data with an associated category.
 //type GenericTextData struct {
-//	Title       string `json:"title"`
-//	URL         string `json:"url"`
-//	Description string `json:"description"`
-//	Salary      string `json:"salary"`
-//	Company     string `json:"company"`
-//	Location    string `json:"location"`
-//	Category    string `json:"domain"` // Added Category field
+//	Title       *string `json:"title"`
+//	URL         *string `json:"url"`
+//	Description *string `json:"description"`
+//	Salary      *string `json:"salary"` // Changed from Price to Salary
+//	Category    string  `json:"domain"`
+//	Company     *string `json:"company"`  // Added Company
+//	Location    *string `json:"location"` // Added Location
 //}
 //
 //// NaiveBayesClassifier struct to hold model data.
@@ -116,7 +117,7 @@ package main
 //	uniqueWords := make(map[string]bool)
 //
 //	for _, item := range data {
-//		text := item.Title + " " + item.Description
+//		text := *item.Title + " " + *item.Description
 //		words, err := preprocessText(text)
 //		if err != nil {
 //			fmt.Println("Error preprocessing text:", err)

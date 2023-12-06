@@ -1,5 +1,6 @@
 package main
 
+
 //
 //import (
 //	"encoding/json"
@@ -102,6 +103,91 @@ package main
 ////}
 //
 //// preprocessText preprocesses the text by converting it to lower case and excluding stop words and special characters.
+
+// import (
+// 	"encoding/json"
+// 	"fmt"
+// 	"github.com/jdkato/prose/v2"
+// 	"io"
+// 	"math"
+// 	"os"
+// 	"regexp"
+// 	"sort"
+// 	"strings"
+// 	"time"
+// )
+
+// var stopWords = map[string]bool{
+// 	"and": true, "or": true, "the": true, "in": true,
+// 	"of": true, "a": true, "is": true, "to": true,
+// 	"with": true, "for": true, "s": true, "you": true,
+// 	"required": true, "then": true, "so": true, "our": true,
+// 	"your": true, "their": true, "'s": true, "her": true,
+// 	"him": true, "its": true, "he": true, "be": true,
+// 	"we": true, "as": true, "on": true,
+// 	// More stop words can be added here
+// }
+
+// // GenericTextData represents any text data with an associated category.
+// type GenericTextData struct {
+// 	Title       *string `json:"title"`
+// 	URL         *string `json:"url"`
+// 	Description *string `json:"description"`
+// 	Salary      *string `json:"salary"` // Changed from Price to Salary
+// 	Category    string  `json:"domain"`
+// 	Company     *string `json:"company"`  // Added Company
+// 	Location    *string `json:"location"` // Added Location
+// }
+
+// // NaiveBayesClassifier struct to hold model data.
+// type NaiveBayesClassifier struct {
+// 	wordFrequencies  map[string]map[string]float64
+// 	categoryCounts   map[string]int
+// 	totalWords       int
+// 	totalUniqueWords int
+// }
+
+// // Define categoryProb struct
+// type categoryProb struct {
+// 	Category string
+// 	Prob     float64
+// }
+
+// // JSONData structure to match your data format
+// type JSONData struct {
+// 	Domain string `json:"domain"`
+// 	URL    string `json:"url"`
+// 	Data   []struct {
+// 		Title       string `json:"title"`
+// 		URL         string `json:"url"`
+// 		Description string `json:"description"`
+// 		Company     string `json:"company"`
+// 		Location    string `json:"location"`
+// 		Salary      string `json:"salary"`
+// 	} `json:"data"`
+// 	Metadata struct {
+// 		Source    string `json:"source"`
+// 		Timestamp string `json:"timestamp"`
+// 	} `json:"metadata"`
+// }
+
+// // NewNaiveBayesClassifier creates a new Naive Bayes Classifier.
+// func NewNaiveBayesClassifier() *NaiveBayesClassifier {
+// 	return &NaiveBayesClassifier{
+// 		wordFrequencies:  make(map[string]map[string]float64),
+// 		categoryCounts:   make(map[string]int),
+// 		totalWords:       0,
+// 		totalUniqueWords: 0,
+// 	}
+// }
+
+// func isStopWord(word string) bool {
+// 	// stopWords is a map of common words to be excluded from the analysis.
+// 	return stopWords[word]
+// }
+
+//// preprocessText preprocesses the text by converting it to lower case and excluding stop words.
+
 //func preprocessText(text string) ([]string, error) {
 //	doc, err := prose.NewDocument(text)
 //	if err != nil {
@@ -577,7 +663,7 @@ package main
 //	for _, match := range matches {
 //		if !isStopWord(match) {
 //			skills = append(skills, match)
-//		}
+
 //	}
 //	return skills
 //}
@@ -606,12 +692,25 @@ package main
 //	jsonFiles := []string{"C:\\Users\\mathe\\GolandProjects\\cmpscfa23team2\\crab\\output\\combined_jobs.json"} // Update the path to your JSON file
 //
 //	// Load and combine data from all JSON files
+
+//		return topWords
+////	}
+//func main2() {
+//	startTime := time.Now()
+//
+//	jsonFiles := []string{
+//		"C:\\Users\\Public\\GoLandProjects\\PredictAi\\crab\\output\\combined_jobs.json",
+//	}
+//
+//	// Load data
+
 //	combinedData, err := LoadDataFromMultipleJSONFiles(jsonFiles)
 //	if err != nil {
 //		fmt.Println("Error loading data:", err)
 //		os.Exit(1)
 //	}
 //
+
 //	// Calculate the demand for skills in each category
 //	skillDemand := CalculateSkillDemand(combinedData)
 //
@@ -624,11 +723,24 @@ package main
 //			fmt.Printf("Skill: %s, Demand: %d\n", skill, count)
 //		}
 //		fmt.Println()
-//	}
+
+//	// Split data into training and testing
+//	trainDataSize := int(float64(len(combinedData)) * 0.7)
+//	trainData := combinedData[:trainDataSize]
+//	testData := combinedData[trainDataSize:]
+//
+//	// Train classifier
+//	classifier := NewNaiveBayesClassifier()
+//	classifier.TrainWithTFIDF(trainData)
+//
+//	// Test classifier
+//	TestModel(classifier, testData)
+
 //
 //	elapsedTime := time.Since(startTime)
 //	fmt.Printf("Execution time: %s\n", elapsedTime)
 //}
+
 //
 //// getTopNSkills returns the top N skills based on demand
 //func getTopNSkills(skillMap map[string]int, n int) map[string]int {
@@ -657,6 +769,113 @@ package main
 //}
 //
 //func main3() {
+
+//func extractSkillsAndQualifications(description string) []string {
+//	// Define a regular expression to identify skills and qualifications
+//	skillRegexp := regexp.MustCompile(`[a-zA-Z+#]+`) // Modify this regex according to your needs
+//
+//	matches := skillRegexp.FindAllString(description, -1)
+//
+//	var skills []string
+//	for _, match := range matches {
+//		if !isStopWord(match) {
+//			skills = append(skills, match)
+//		}
+//	}
+//	return skills
+//}
+
+// // ExtractSkillsAndQualifications function to extract specific skills
+// func ExtractSkillsAndQualifications(description string) []string {
+// 	skillRegexp := regexp.MustCompile(`[a-zA-Z+#]+`)
+// 	matches := skillRegexp.FindAllString(description, -1)
+
+// 	var skills []string
+// 	for _, match := range matches {
+// 		if !isStopWord(match) {
+// 			skills = append(skills, match)
+// 		}
+// 	}
+// 	return skills
+// }
+
+// // Function to calculate the demand for skills in each category
+// func CalculateSkillDemand(data []GenericTextData) map[string]map[string]int {
+// 	skillDemand := make(map[string]map[string]int)
+
+// 	for _, job := range data {
+// 		if job.Description != nil {
+// 			skills := ExtractSkillsAndQualifications(*job.Description)
+// 			if skillDemand[job.Category] == nil {
+// 				skillDemand[job.Category] = make(map[string]int)
+// 			}
+// 			for _, skill := range skills {
+// 				skillDemand[job.Category][skill]++
+// 			}
+// 		}
+// 	}
+// 	return skillDemand
+// }
+
+// func main() {
+// 	startTime := time.Now()
+
+// 	jsonFiles := []string{"C:\\Users\\Public\\GoLandProjects\\PredictAi\\crab\\output\\combined_jobs.json"} // Update the path to your JSON file
+
+// 	// Load and combine data from all JSON files
+// 	combinedData, err := LoadDataFromMultipleJSONFiles(jsonFiles)
+// 	if err != nil {
+// 		fmt.Println("Error loading data:", err)
+// 		os.Exit(1)
+// 	}
+
+// 	// Calculate the demand for skills in each category
+// 	skillDemand := CalculateSkillDemand(combinedData)
+
+// 	// Print the demand for top 5 skills in each category
+// 	for category, skills := range skillDemand {
+// 		fmt.Printf("Category: %s\n", category)
+// 		// Sort and pick top 5 skills
+// 		topSkills := getTopNSkills(skills, 5)
+// 		for skill, count := range topSkills {
+// 			fmt.Printf("Skill: %s, Demand: %d\n", skill, count)
+// 		}
+// 		fmt.Println()
+// 	}
+
+// 	elapsedTime := time.Since(startTime)
+// 	fmt.Printf("Execution time: %s\n", elapsedTime)
+// }
+
+// // getTopNSkills returns the top N skills based on demand
+// func getTopNSkills(skillMap map[string]int, n int) map[string]int {
+// 	type kv struct {
+// 		Key   string
+// 		Value int
+// 	}
+
+// 	var ss []kv
+// 	for k, v := range skillMap {
+// 		ss = append(ss, kv{k, v})
+// 	}
+
+// 	sort.Slice(ss, func(i, j int) bool {
+// 		return ss[i].Value > ss[j].Value
+// 	})
+
+// 	topSkills := make(map[string]int)
+// 	for i, kv := range ss {
+// 		if i < n {
+// 			topSkills[kv.Key] = kv.Value
+// 		}
+// 	}
+
+// 	return topSkills
+// }
+
+//
+//func main() {
+
 //	startTime := time.Now()
 //
 //	jsonFiles := []string{

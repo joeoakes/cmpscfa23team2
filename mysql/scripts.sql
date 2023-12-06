@@ -1,8 +1,8 @@
 /*
 ---------------------------------------------------
 -- Produced By: 4Tekies LLC and Penn State Abington - CMPSC 488 Course
--- Author: Mahir Khan, Joshua Ferrell & Joseph Oakes and Team 2 Members
--- Date: 6/27/2023, 09/28/2023
+-- Author: Mahir Khan, Joshua Ferrell, Joseph Oakes and Team 2 Members
+-- Date: 12/05/2023
 -- Purpose: OurGo holds all necessary mysql code needed to establish the database
 ---------------------------------------------------
 */
@@ -56,20 +56,6 @@ CREATE TABLE IF NOT EXISTS log (
                                    date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Periodically clean the log (anything older than 30 days)
--- Temporarily disable safe update mode
-# SET SQL_SAFE_UPDATES = 0;
-# DELETE FROM log
-# WHERE date_time < DATE_SUB(NOW(), INTERVAL 30 DAY);
-#
-# -- Retrieve logs from the start of the day
-# SELECT* FROM log
-# WHERE date_time >= CURDATE();
-#
-# -- get logs from the start of the week
-# SELECT* FROM log
-# WHERE date_time >= SUBDATE(CURDATE(), DAYOFWEEK(CURDATE()) - 1);
-
 
 -- Creates the webservice table
 CREATE TABLE IF NOT EXISTS web_service(
@@ -89,21 +75,6 @@ CREATE TABLE IF NOT EXISTS urls (
                                     domain LONGTEXT, --
                                     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP() -- The timestamp of when the URL was created/added
 );
-
--- Stored Procedure to add a new prediction
--- DELIMITER //
--- CREATE PROCEDURE create_prediction(
--- 	IN p_engine_id CHAR(36),
--- 	IN p_prediction_info JSON
--- )
--- BEGIN
--- 	DECLARE v_prediction_id CHAR(36);
---     -- generate a unique identifier for the prediction and assign it to v_prediction_id
---     SET v_prediction_id = UUID();
---     INSERT INTO prerdictions (prediction_id, engine_id, prediction_info)
---     VALUES (v_prediction_id, p_engine_id, p_prediction_info);
--- END //
--- DELIMITER;
 
 CREATE TABLE scrapedData (
                              id INT AUTO_INCREMENT PRIMARY KEY,
@@ -143,13 +114,6 @@ CREATE TABLE IF NOT EXISTS webcrawlers (
                                            created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
--- -- Table for the scraper engine
--- CREATE TABLE IF NOT EXISTS scraper_engine (
---                                               engine_id CHAR(36) PRIMARY KEY,
---                                               engine_name NVARCHAR(50),
---                                               engine_description VARCHAR(250),
---                                               time_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
--- );
 
 -- Table for predictions
 -- Table for K-Nearest Neighbors Predictions
@@ -263,16 +227,6 @@ DELIMITER ;
 -- SECTION: CUDA SPROCS
 -- ================================================
 
-# DELIMITER //
-# CREATE PROCEDURE create_prediction(
-#     IN p_prediction_id CHAR(36),        -- UUID parameter
-#     IN p_prediction_info JSON
-# )
-# BEGIN
-#     INSERT INTO predictions (prediction_id,prediction_info)
-#     VALUES (p_prediction_id, p_prediction_info);
-# END //
-# DELIMITER ;
 
 -- Stored Procedure to add a new machine learning model
 DELIMITER //
@@ -531,22 +485,7 @@ BEGIN
     VALUES (v_crawler_id, p_source_url);
     SELECT v_crawler_id;
 END //
-DELIMITER ;
 
--- Stored Procedure to add a new scraper engine
--- DELIMITER //
--- CREATE PROCEDURE create_scraper_engine(
---     IN p_engine_name NVARCHAR(50),
---     IN p_engine_description VARCHAR(250)
--- )
--- BEGIN
---     DECLARE v_engine_id CHAR(36);
---     -- Generating a unique identifier and assigning it to v_engine_id
---     SET v_engine_id = UUID();
---     INSERT INTO scraper_engine(engine_id, engine_name, engine_description)
---     VALUES (v_engine_id, p_engine_name, p_engine_description);
---     SELECT v_engine_id;
--- END //
 DELIMITER ;
 
 -- SPROC to insert URL records into the URLs table
@@ -996,12 +935,12 @@ VALUES
     ('USR', 'User'),
     ('DEV', 'Developer');
 
--- Inserting sample users into the users table
-INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
-VALUES
-    (UUID(), 'Joesph Oakes', 'jxo19', 'ADM', 'admin123', TRUE, CURRENT_TIMESTAMP()),
-    (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', 'dev789', TRUE, CURRENT_TIMESTAMP()),
-    (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', 'std447', TRUE, CURRENT_TIMESTAMP());
+# -- Inserting sample users into the users table
+# INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
+# VALUES
+#     (UUID(), 'Joesph Oakes', 'jxo19', 'ADM', 'admin123', TRUE, CURRENT_TIMESTAMP()),
+#     (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', 'dev789', TRUE, CURRENT_TIMESTAMP()),
+#     (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', 'std447', TRUE, CURRENT_TIMESTAMP());
 
 -- Inserting sample users into the users table
 INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
@@ -1010,6 +949,18 @@ VALUES
     ('a2eb8427-8d78-11ee-b6e0-4c796ed97681', 'test2', 'test2@test.com', 'USR', '$2a$10$M8s0NhMKr24C6bSwlWBfY.4pPSnWtHIAAVY5qKRPfnoXZAFvzcmgW', TRUE, '2023-11-27 17:59:36'),
     (UUID(), 'hansi', 'hansi@hansi.com', 'USR', '$2a$10$C4ZoMvNpBqJ8MB9LMLzQye2uXvQKPujw1SXccnuLJ/frYoG6GUOZy', TRUE, CURRENT_TIMESTAMP());
 
+-- Inserting admin users into the users table with a hashed password
+INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
+VALUES
+    (UUID(), 'Matthew Assali', 'mfa5498@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Hansi Seitaj', 'hjs5684@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Eni Vejseli', 'emv5319@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Sara Becker', 'sqb6198@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Emily Carpenter', 'esc5316@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Matthew Finn', 'mkf5480@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Evan M Green', 'emg5555@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Binh Thanh Hoang', 'bth5241@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Shiv Patel', 'sbp5769@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP());
 
 
 -- Inserting sample URLs into the URLs table

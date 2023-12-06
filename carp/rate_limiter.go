@@ -1,5 +1,0 @@
-package dal
-
-func main() {
-
-}

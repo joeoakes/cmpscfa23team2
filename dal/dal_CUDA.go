@@ -150,7 +150,7 @@ func FetchPredictionData(query, domain string) (PredictionData, error) {
 	switch domain {
 	case "E-commerce (Price Prediction)":
 		queryStr = "SELECT prediction_info FROM linear_regression_predictions WHERE query_identifier = ?"
-	case "GasPrices (Industry Trend Analysis)":
+	case "Gas Prices (Industry Trend Analysis)":
 		queryStr = "SELECT prediction_info FROM linear_regression_predictions WHERE query_identifier = ?"
 	case "RealEstate":
 		queryStr = "SELECT prediction_info FROM knn_predictions WHERE query_identifier = ?"

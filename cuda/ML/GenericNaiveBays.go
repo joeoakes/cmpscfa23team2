@@ -1,6 +1,5 @@
 package main
 
-
 //
 //import (
 //	"encoding/json"
@@ -941,6 +940,7 @@ package main
 //						title := *job.Title
 //						if strings.Contains(strings.ToLower(*job.Description), skill) && !uniqueTitles[title] {
 //							fmt.Printf("Title: %s\n", title)
+//							uniqueTitles[title] = true
 //							uniqueTitles[title] = true
 //							count++
 //							if count >= 3 { // Limit to top 3 unique job titles

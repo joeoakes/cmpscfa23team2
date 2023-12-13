@@ -8,8 +8,11 @@ import (
 	_ "github.com/go-sql-driver/mysql" // Import mysql driver
 	"github.com/google/uuid"
 	_ "github.com/google/uuid"
-	"log"  // For logging
-	"time" // For simulating machine learning model processing time
+	"io/ioutil"
+	"log" // For logging
+	"os"
+	"reflect"
+	"testing"
 )
 
 // Prediction struct models the data structure of a prediction in the database
@@ -23,73 +26,45 @@ type Prediction struct {
 	PredictionTime string
 }
 
-// Function to check if the engine_id exists in scraper_engine table
-//
-// This function checks if a given engine ID exists in a databse table and returns a boolean indicating existence or an error.
-//func EngineIDExists(engineID string) (bool, error) {
-//	var exists bool
-//	query := "SELECT EXISTS(SELECT 1 FROM scraper_engine WHERE engine_id=?)"
-//	err := DB.QueryRow(query, engineID).Scan(&exists)
-//	if err != nil {
-//		InsertLog("400", "Error checking engine ID existence: "+err.Error(), "EngineIDExists()")
-//		return false, err
-//	} else {
-//		InsertLog("200", "Successfully checked if engine ID exists.", "EngineIDExists()")
-//		log.Println("Successfully checked if engine ID exists.")
-//	}
-//	return exists, nil
-//}
+// PredictionData represents the structure of the prediction data
+type PredictionData struct {
+	PredictionInfo string    `json:"prediction_info"`
+	InputData      string    `json:"input_data"`
+	ImagePath      string    `json:"image_path"`
+	Skills         string    `json:"skills"`
+	JobListings    []JobData `json:"job_listings"`
+	SpecificJob    *JobData  `json:"specific_job,omitempty"` // Add this line
+}
 
-// Function to insert a new prediction
-// The function InsertPrediction, that checks the existence of an engineID, logs the result, and inserts predictionInfo into a database table if the engineID exists, handling errors along the way.
+// JobData represents a single job entry.
+type JobData struct {
+	Title       string `json:"title"`
+	URL         string `json:"url"`
+	Description string `json:"description"`
+	Salary      string `json:"salary"`
+	Company     string `json:"company"`
+	Location    string `json:"location"`
+}
 
-//func InsertPrediction(engineID string, predictionInfo string) error {
-//	exists, err := EngineIDExists(engineID)
-//	if err != nil {
-//		InsertLog("400", "Error checking engine ID: "+err.Error(), "InsertPrediction()")
-//		return fmt.Errorf("Error checking engine ID: %v", err)
-//	} else {
-//		InsertLog("200", "Successfully checked if engine ID exists.", "InsertPrediction()")
-//		log.Println("Successfully checked if engine ID exists.")
-//	}
-//	if !exists {
-//		InsertLog("400", "engine_id does not exist", "InsertPrediction()")
-//		return fmt.Errorf("engine_id %s does not exist", engineID)
-//	} else {
-//		InsertLog("200", "Engine ID exists.", "InsertPrediction()")
-//		log.Println("Engine ID exists.")
-//	}
-//
-//	query := "INSERT INTO predictions (prediction_id, input_data, prediction_info) VALUES (?, ?, ?)"
-//	_, err := DB.Exec(query, newUUID, fileName, predictionInfo)
-//	if err != nil {
-//		InsertLog("400", "Error storing prediction: "+err.Error(), "InsertPrediction()")
-//		return fmt.Errorf("Error storing prediction: %v", err)
-//
-//	} else {
-//		InsertLog("200", "Successfully inserted prediction.", "InsertPrediction()")
-//		log.Println("Successfully inserted prediction.")
-//	}
-//	return nil
-//}
+// JobDataContainer represents the structure of your JSON file.
+type JobDataContainer struct {
+	Domain   string    `json:"domain"`
+	URL      string    `json:"url"`
+	Data     []JobData `json:"data"`
+	Metadata struct {
+		Source    string `json:"source"`
+		Timestamp string `json:"timestamp"`
+	} `json:"metadata"`
+}
 
-// Function to insert a sample engine ID into scraper_engine table
-//
-// Function inserts a sample engine's information into a database table, logs success, and returns any encountered errors.
-//
-//	func InsertSampleEngine(engineID, engineName, engineDescription string) error {
-//		query := "INSERT INTO scraper_engine (engine_id, engine_name, engine_description) VALUES (?, ?, ?)"
-//		_, err := DB.Exec(query, engineID, engineName, engineDescription)
-//		if err != nil {
-//			InsertLog("400", "Error inserting sample engine: "+err.Error(), "InsertSampleEngine()")
-//			return fmt.Errorf("Error inserting sample engine: %v", err)
-//		} else {
-//			InsertLog("200", "Successfully inserted sample engine.", "InsertSampleEngine()")
-//			log.Println("Successfully inserted sample engine.")
-//		}
-//		return nil
-//	}
-func InsertPrediction(algorithm, queryIdentifier, fileName, predictionInfo string) error {
+// SkillData represents the demand for a skill in a category.
+type SkillData struct {
+	Skill   string
+	Demand  int
+	Matches []JobData
+}
+
+func InsertPrediction(algorithm, queryIdentifier, fileName, predictionInfo, skills string) error {
 	// Generate a new UUID for the prediction
 	newUUID := uuid.New().String()
 
@@ -105,7 +80,7 @@ func InsertPrediction(algorithm, queryIdentifier, fileName, predictionInfo strin
 		return fmt.Errorf("Unrecognized algorithm: %v", algorithm)
 	}
 
-	_, err := DB.Exec(query, newUUID, queryIdentifier, fileName, predictionInfo)
+	_, err := DB.Exec(query, newUUID, queryIdentifier, skills, predictionInfo)
 	if err != nil {
 		return fmt.Errorf("Error storing prediction for %v: %v", algorithm, err)
 	}
@@ -118,12 +93,12 @@ func InsertPrediction(algorithm, queryIdentifier, fileName, predictionInfo strin
 //
 // It definesa function that simulates an ML model prediction with a 2-second delay
 // and logs a success message before returning a prediction result as a formatted string.
-func PerformMLPrediction(inputData string) string {
-	// Simulate some delay for ML model prediction
-	time.Sleep(2 * time.Second)
-	log.Println("Successfully performed ML prediction.")
-	return fmt.Sprintf("Prediction result for %s", inputData)
-}
+//func PerformMLPrediction(inputData string) string {
+//	// Simulate some delay for ML model prediction
+//	time.Sleep(2 * time.Second)
+//	log.Println("Successfully performed ML prediction.")
+//	return fmt.Sprintf("Prediction result for %s", inputData)
+//}
 
 // Convert prediction result to JSON
 //
@@ -140,46 +115,219 @@ func ConvertPredictionToJSON(predictionResult string) (string, error) {
 	}
 	return string(predictionJSON), nil
 }
-func FetchPredictionData(query, domain string) (PredictionData, error) {
-	var (
-		data     PredictionData
-		queryStr string
-		err      error
-	)
 
-	switch domain {
-	case "E-commerce (Price Prediction)":
-		queryStr = "SELECT prediction_info FROM linear_regression_predictions WHERE query_identifier = ?"
-	case "Gas Prices (Industry Trend Analysis)":
-		queryStr = "SELECT prediction_info FROM linear_regression_predictions WHERE query_identifier = ?"
-	case "RealEstate":
-		queryStr = "SELECT prediction_info FROM knn_predictions WHERE query_identifier = ?"
-	case "Job Market (Industry Trend Analysis)":
-		queryStr = "SELECT prediction_info FROM naive_bayes_predictions WHERE query_identifier = ?"
-	default:
-		return PredictionData{}, fmt.Errorf("unrecognized domain: %s", domain)
+// LoadDataFromJSON updated to match the new GenericTextData structure.
+//func LoadDataFromJSON(filename string) ([]JobData, error) {
+//	file, err := ioutil.ReadFile(filename)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	var container JobDataContainer
+//	err = json.Unmarshal(file, &container)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	return container.Data, nil
+//}
+
+// Updated LoadDataFromJSON function
+func LoadDataFromJSON(filename string, specificJobTitle string) ([]JobData, *JobData, error) {
+	file, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, nil, err
 	}
 
-	err = DB.QueryRow(queryStr, query).Scan(&data.PredictionInfo)
+	var container JobDataContainer
+	err = json.Unmarshal(file, &container)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var specificJob *JobData
+	for _, job := range container.Data {
+		if job.Title == specificJobTitle {
+			specificJob = &job
+			break
+		}
+	}
+
+	return container.Data, specificJob, nil
+}
+
+type jobMatch struct {
+	job           JobData
+	count         int
+	matchedSkills []string
+}
+
+func constructImagePath(queryIdentifier, domain string) string {
+	// This is just an example. You need to modify it based on your actual file structure and requirements.
+	basePath := "/static/images/"
+	return basePath + domain + "/" + queryIdentifier + ".png"
+}
+
+// FetchPredictionData function
+//
+//	func FetchPredictionData(queryIdentifier, domain string) (PredictionData, error) {
+//		var data PredictionData
+//		var predictionPath string
+//
+//		queryStr := "SELECT input_data, prediction_info FROM naive_bayes_predictions WHERE query_identifier = ?"
+//		err := DB.QueryRow(queryStr, queryIdentifier).Scan(&data.Skills, &predictionPath)
+//		if err != nil {
+//			if err == sql.ErrNoRows {
+//				return PredictionData{}, fmt.Errorf("no prediction data found for query identifier: %s", queryIdentifier)
+//			}
+//			return PredictionData{}, err
+//		}
+//
+//		// Read JSON file from the prediction path
+//		file, err := ioutil.ReadFile(predictionPath)
+//		if err != nil {
+//			return PredictionData{}, fmt.Errorf("error reading JSON file: %s", err)
+//		}
+//
+//		var container JobDataContainer
+//		if err := json.Unmarshal(file, &container); err != nil {
+//			return PredictionData{}, fmt.Errorf("error parsing JSON data: %s", err)
+//		}
+//
+//		// Update data struct
+//		data.JobListings = container.Data
+//
+//		// Example: Search for a specific job title (this can be dynamic based on user input)
+//		specificJobTitle := "Software Release DevOps Engineer" // Replace with dynamic input as needed
+//		data.SpecificJob = SearchJobByTitle(container.Data, specificJobTitle)
+//
+//		// Construct the image path (if applicable)
+//		//data.ImagePath = constructImagePath(queryIdentifier, domain) // Implement this function as needed
+//
+//		return data, nil
+//	}
+//
+//func FetchPredictionData(queryIdentifier, domain string) (PredictionData, error) {
+//	var data PredictionData
+//	var predictionPath, jobTitle string
+//
+//	// Fetch job title and JSON path from the database
+//	queryStr := "SELECT input_data, prediction_info FROM naive_bayes_predictions WHERE query_identifier = ?"
+//	err := DB.QueryRow(queryStr, queryIdentifier).Scan(&jobTitle, &predictionPath)
+//	if err != nil {
+//		if err == sql.ErrNoRows {
+//			return PredictionData{}, fmt.Errorf("no prediction data found for query identifier: %s", queryIdentifier)
+//		}
+//		return PredictionData{}, err
+//	}
+//
+//	// Read and parse the JSON file
+//	file, err := ioutil.ReadFile(predictionPath)
+//	if err != nil {
+//		return PredictionData{}, fmt.Errorf("error reading JSON file: %s", err)
+//	}
+//
+//	var container JobDataContainer
+//	if err := json.Unmarshal(file, &container); err != nil {
+//		return PredictionData{}, fmt.Errorf("error parsing JSON data: %s", err)
+//	}
+//
+//	// Filter job data by the title fetched from the database
+//	var specificJob *JobData
+//	for _, job := range container.Data {
+//		if job.Title == jobTitle {
+//			specificJob = &job
+//			break
+//		}
+//	}
+//
+//	// Update data struct
+//	data.JobListings = container.Data
+//	data.SpecificJob = specificJob // Set the specific job data if a match is found
+//
+//	// Include any additional logic as needed, such as constructing image paths
+//
+//	return data, nil
+//}
+
+func FetchPredictionData(queryIdentifier, domain string) (PredictionData, error) {
+	var data PredictionData
+	var predictionPath, jobTitle string
+
+	// Fetch job title and JSON path from the database
+	queryStr := "SELECT input_data, prediction_info FROM naive_bayes_predictions WHERE query_identifier = ?"
+	err := DB.QueryRow(queryStr, queryIdentifier).Scan(&jobTitle, &predictionPath)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return PredictionData{}, fmt.Errorf("no prediction data found for query: %s", query)
+			return PredictionData{}, fmt.Errorf("no prediction data found for query identifier: %s", queryIdentifier)
 		}
 		return PredictionData{}, err
 	}
-	// Construct the image path
-	imagePath := fmt.Sprintf("/static/Assets/MachineLearning/LinearRegression/%s_scatter_plot.png", query)
 
-	// Log the generated image path
-	log.Printf("Generated image path: %s\n", imagePath)
-	// Include the image path in the response
-	data.ImagePath = imagePath
+	// Check if the JSON file exists
+	if _, err := os.Stat(predictionPath); os.IsNotExist(err) {
+		return PredictionData{}, fmt.Errorf("JSON file not found at path: %s", predictionPath)
+	}
+
+	// Read and parse the JSON file
+	file, err := ioutil.ReadFile(predictionPath)
+	if err != nil {
+		return PredictionData{}, fmt.Errorf("error reading JSON file: %s", err)
+	}
+
+	var container JobDataContainer
+	if err := json.Unmarshal(file, &container); err != nil {
+		return PredictionData{}, fmt.Errorf("error parsing JSON data: %s", err)
+	}
+
+	// Find the specific job using SearchJobByTitle
+	specificJob := SearchJobByTitle(container.Data, jobTitle)
+
+	// Update the data struct
+	data.JobListings = container.Data
+	data.SpecificJob = specificJob
 
 	return data, nil
 }
 
-// PredictionData represents the structure of the prediction data
-type PredictionData struct {
-	PredictionInfo string `json:"prediction_info"`
-	ImagePath      string `json:"image_path"` // New field for the image path
+// SearchJobByTitle searches for a job by its title and returns its details.
+func SearchJobByTitle(data []JobData, title string) *JobData {
+	for _, job := range data {
+		if job.Title == title {
+			return &job
+		}
+	}
+	log.Println("Job title not found:", title)
+	return nil
+}
+
+func TestSearchJobByTitle(t *testing.T) {
+	jobs := []JobData{
+		{Title: "Software Engineer", URL: "url1", Company: "Company1"},
+		{Title: "Software Release DevOps Engineer", URL: "url2", Company: "Company2"},
+		// Add more jobs as needed
+	}
+
+	tests := []struct {
+		title    string
+		expected *JobData
+	}{
+		{"Software Release DevOps Engineer", &jobs[1]},
+		{"Non Existent Job", nil},
+	}
+
+	for _, test := range tests {
+		result := SearchJobByTitle(jobs, test.title)
+		if !reflect.DeepEqual(result, test.expected) {
+			t.Errorf("SearchJobByTitle(%s) = %v; expected %v", test.title, result, test.expected)
+		}
+	}
+}
+
+func formatJobData(job *JobData) string {
+	if job == nil {
+		return "nil"
+	}
+	return fmt.Sprintf("\nTitle: %s\nURL: %s\nCompany: %s\nLocation: %s\nSalary: %s\nDescription: %s\n",
+		job.Title, job.URL, job.Company, job.Location, job.Salary, job.Description)
 }

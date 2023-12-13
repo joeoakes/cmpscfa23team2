@@ -3,7 +3,7 @@
  
 
 <div align="center">
-   <img src="PredictAi/frontend/Assets/PredictAi logo.png" alt=" Design of a modern and sleek logo for a project named 'PredictAI'. The logo features a stylized, abstract brain composed of interconnected nodes."/>
+   <img src="PredictAi/frontend/Assets/logo.jpg" alt=" Design of a modern and sleek logo for a project named 'PredictAI'. The logo features a stylized, abstract brain composed of interconnected nodes."/>
 </div>
 
 Hansi notes: (don't delete)

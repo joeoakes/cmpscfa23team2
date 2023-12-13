@@ -1025,10 +1025,6 @@ INSERT INTO linear_regression_predictions(prediction_id,query_identifier, input_
 # Exposure to data science and Machine learning technologies
 # Understanding of cloud hosting platforms and infrastructure');
 
-# C:\Users\Public\GoLandProjects\JustAFork\Nbc_output\Business_top_jobs.json
-# C:\Users\Public\GoLandProjects\JustAFork\Nbc_output\Law_top_jobs.json
-# C:\Users\Public\GoLandProjects\JustAFork\Nbc_output\SoftwareEng_top_jobs.json
-
 INSERT INTO naive_bayes_predictions (prediction_id, query_identifier, input_data, prediction_info)
 VALUES (
            UUID(),
@@ -1042,7 +1038,7 @@ VALUES (
            UUID(),
            'Top 3 Law Jobs with most demand skills',
            'Law Related Skills', -- Replace with actual skills
-           'C:\\Users\\Public\\GoLandProjects\\JustAFork\\Nbc_output\\Law_top_jobs.json'
+           'C:\\Users\\Public\\GoLandProjects\\JustAFork\\crab\\output\\Law_jobs.json'
        );
 
 INSERT INTO naive_bayes_predictions (prediction_id, query_identifier, input_data, prediction_info)
@@ -1050,7 +1046,7 @@ VALUES (
            UUID(),
            'Top 3 Bus Jobs with most demand skills',
            'Business Related Skills', -- Replace with actual skills
-           'C:\\Users\\Public\\GoLandProjects\\JustAFork\\Nbc_output\\Business_top_jobs.json'
+           'C:\\Users\\Public\\GoLandProjects\\JustAFork\\crab\\output\\Business_jobs.json'
        );
 
 

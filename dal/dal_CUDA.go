@@ -116,6 +116,22 @@ func ConvertPredictionToJSON(predictionResult string) (string, error) {
 	return string(predictionJSON), nil
 }
 
+// LoadDataFromJSON updated to match the new GenericTextData structure.
+//func LoadDataFromJSON(filename string) ([]JobData, error) {
+//	file, err := ioutil.ReadFile(filename)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	var container JobDataContainer
+//	err = json.Unmarshal(file, &container)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	return container.Data, nil
+//}
+
 // Updated LoadDataFromJSON function
 func LoadDataFromJSON(filename string, specificJobTitle string) ([]JobData, *JobData, error) {
 	file, err := ioutil.ReadFile(filename)
@@ -151,6 +167,88 @@ func constructImagePath(queryIdentifier, domain string) string {
 	basePath := "/static/images/"
 	return basePath + domain + "/" + queryIdentifier + ".png"
 }
+
+// FetchPredictionData function
+//
+//	func FetchPredictionData(queryIdentifier, domain string) (PredictionData, error) {
+//		var data PredictionData
+//		var predictionPath string
+//
+//		queryStr := "SELECT input_data, prediction_info FROM naive_bayes_predictions WHERE query_identifier = ?"
+//		err := DB.QueryRow(queryStr, queryIdentifier).Scan(&data.Skills, &predictionPath)
+//		if err != nil {
+//			if err == sql.ErrNoRows {
+//				return PredictionData{}, fmt.Errorf("no prediction data found for query identifier: %s", queryIdentifier)
+//			}
+//			return PredictionData{}, err
+//		}
+//
+//		// Read JSON file from the prediction path
+//		file, err := ioutil.ReadFile(predictionPath)
+//		if err != nil {
+//			return PredictionData{}, fmt.Errorf("error reading JSON file: %s", err)
+//		}
+//
+//		var container JobDataContainer
+//		if err := json.Unmarshal(file, &container); err != nil {
+//			return PredictionData{}, fmt.Errorf("error parsing JSON data: %s", err)
+//		}
+//
+//		// Update data struct
+//		data.JobListings = container.Data
+//
+//		// Example: Search for a specific job title (this can be dynamic based on user input)
+//		specificJobTitle := "Software Release DevOps Engineer" // Replace with dynamic input as needed
+//		data.SpecificJob = SearchJobByTitle(container.Data, specificJobTitle)
+//
+//		// Construct the image path (if applicable)
+//		//data.ImagePath = constructImagePath(queryIdentifier, domain) // Implement this function as needed
+//
+//		return data, nil
+//	}
+//
+//func FetchPredictionData(queryIdentifier, domain string) (PredictionData, error) {
+//	var data PredictionData
+//	var predictionPath, jobTitle string
+//
+//	// Fetch job title and JSON path from the database
+//	queryStr := "SELECT input_data, prediction_info FROM naive_bayes_predictions WHERE query_identifier = ?"
+//	err := DB.QueryRow(queryStr, queryIdentifier).Scan(&jobTitle, &predictionPath)
+//	if err != nil {
+//		if err == sql.ErrNoRows {
+//			return PredictionData{}, fmt.Errorf("no prediction data found for query identifier: %s", queryIdentifier)
+//		}
+//		return PredictionData{}, err
+//	}
+//
+//	// Read and parse the JSON file
+//	file, err := ioutil.ReadFile(predictionPath)
+//	if err != nil {
+//		return PredictionData{}, fmt.Errorf("error reading JSON file: %s", err)
+//	}
+//
+//	var container JobDataContainer
+//	if err := json.Unmarshal(file, &container); err != nil {
+//		return PredictionData{}, fmt.Errorf("error parsing JSON data: %s", err)
+//	}
+//
+//	// Filter job data by the title fetched from the database
+//	var specificJob *JobData
+//	for _, job := range container.Data {
+//		if job.Title == jobTitle {
+//			specificJob = &job
+//			break
+//		}
+//	}
+//
+//	// Update data struct
+//	data.JobListings = container.Data
+//	data.SpecificJob = specificJob // Set the specific job data if a match is found
+//
+//	// Include any additional logic as needed, such as constructing image paths
+//
+//	return data, nil
+//}
 
 func FetchPredictionData(queryIdentifier, domain string) (PredictionData, error) {
 	var data PredictionData

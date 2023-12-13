@@ -58,17 +58,6 @@ $(document).ready(function() {
     });
   });
 
-  // Attach event listeners for settings buttons
-  $('.btn-settings').click(function () {
-    var action = $(this).text().trim();
-    var module = $(this).closest('.tab-pane').attr('id');
-    performAction(module, action);
-  });
-
-  // Logout functionality
-  $('#logoutBtn').click(function () {
-    logout();
-  });
 
   $('#aiPredictionForm').submit(function(event) {
     event.preventDefault();
@@ -81,129 +70,109 @@ $(document).ready(function() {
       type: 'GET',
       success: function(response) {
         console.log("Response received:", response);
-        // Clear previous results
         $('#predictionResult').empty();
 
-        // If the domain is 'Job Market (Industry Trend Analysis)', format the job listings
-        if (domain === 'Job Market (Industry Trend Analysis)' && response.prediction_info) {
-          const jobListings = formatJobListing(response.prediction_info);
-          $('#predictionResult').html(jobListings); // Use .html() to set the HTML content
-        } else {
-          // Handle other predictions
-          if (response.prediction_info) {
-            var predictionText = $('<p>').text(response.prediction_info);
-            $('#predictionResult').append(predictionText);
-          }
+        // Display skills if available
+        if (response.skills) {
+          $('#predictionResult').append($('<h2>').text("Skills: " + response.skills));
         }
 
-        // Handle image path for predictions that include a visual component
+        // Display specific job if available
+        if (response.specificJob) {
+          const specificJob = formatSpecificJob(response.specificJob);
+          $('#predictionResult').append(specificJob);
+        }
+
+        // Display general job listings
+        if (response.job_listings && response.job_listings.length > 0) {
+          const jobListings = formatJobListing(response.job_listings);
+          $('#predictionResult').append(jobListings);
+        } else {
+          $('#predictionResult').append($('<p>').text("No job listings found for the selected query."));
+        }
+
+        // Handle image path
         if (response.image_path) {
           var imagePath = response.image_path;
-          console.log("Image path:", imagePath);
           var image = $('<img>', {
             src: imagePath,
             alt: 'Prediction Result',
             style: 'max-width: 100%; height: auto;'
-          });
-
-          // Add error handling for the image
-          image.on('error', function() {
-            console.error('Error loading image:', imagePath);
+          }).on('error', function() {
             $('#predictionResult').append($('<p>').text("Error loading prediction image."));
           });
-
           $('#predictionResult').append(image);
-        } else {
-          // Display message if no prediction info is available
-          $('#predictionResult').text("No prediction data available for the selected query.");
         }
       },
       error: function(xhr, status, error) {
-        console.error('Error fetching prediction:', error);
-        $('#predictionResult').text("An error occurred while fetching the prediction. Please try again later.");
+        $('#predictionResult').text("An error occurred while fetching the prediction.");
       }
     });
   });
 
-
-  function formatJobListing(predictionInfo) {
-    let formattedListings = '';
-
-    // Handle 'Most Demand Skills' separately
-    if (predictionInfo.includes('Most Demand Skills:')) {
-      formattedListings += `<h2>${predictionInfo.substring(0, predictionInfo.indexOf('Top Jobs for'))}</h2>`;
-    }
-
-    // Split the predictionInfo by job listings
-    const jobListings = predictionInfo.split('Job Title:').slice(1); // Skip the first empty split
-
-    jobListings.forEach(listing => {
-      const parts = listing.split(', ').map(part => part.trim());
-
-      // Extract the job title
-      const jobTitle = parts[0].split('\n')[0];
-
-      // Construct the job listing HTML
-      let listingHTML = `<div class="job-listing"><h3 class="job-title">${jobTitle}</h3>`;
-
-      let isSalaryInfo = false;
-      let isDescription = false;
-
-      // Process other parts of the listing
-      parts.forEach(part => {
-        if (part.startsWith('URL:')) {
-          const url = part.replace('URL:', '').trim().split(' ')[0];
-          listingHTML += `<a href="${url}" target="_blank" class="job-link">View Listing</a>`;
-        } else if (part.startsWith('Company:') || part.startsWith('Location:')) {
-          listingHTML += `<p class="job-info">${part}</p>`;
-        } else if (part.startsWith('Salary:')) {
-          listingHTML += `<p class="job-info">${part}</p>`;
-          isSalaryInfo = true;
-        } else if (isSalaryInfo && !isDescription) {
-          // First line after salary info is the start of the description
-          isDescription = true;
-          listingHTML += `<p class="job-description">${part.replace(/\n/g, '<br>')}</p>`;
-        } else if (isDescription) {
-          // Continue appending description lines
-          listingHTML += `${part.replace(/\n/g, '<br>')}</p>`;
-        }
-      });
-
-      listingHTML += '</div>';
-      formattedListings += listingHTML;
-    });
-
-    return formattedListings;
+  function formatSpecificJob(job) {
+    let jobHTML = `
+    <div class="specific-job">
+      <h3 class="job-title">${job.title}</h3>
+      <p><strong>Company:</strong> ${job.company}</p>
+      <p><strong>Location:</strong> ${job.location}</p>
+      <p><strong>Salary:</strong> ${job.salary}</p>
+      <p><strong>Description:</strong> ${job.description.replace(/\n/g, '<br>')}</p>
+      <a href="${job.url}" target="_blank" class="btn btn-primary">View Listing</a>
+    </div>`;
+    return jobHTML;
   }
 
+  function formatJobListing(jobListings) {
+    let formattedListings = '';
+    jobListings.forEach(listing => {
+      formattedListings += `
+    <div class="job-listing">
+      <h3 class="job-title">${listing.title}</h3>
+      <a href="${listing.url}" target="_blank" class="job-link">View Listing</a>
+      <p class="job-info">Company: ${listing.company}</p>
+      <p class="job-info">Location: ${listing.location}</p>
+      <p class="job-info">Salary: ${listing.salary}</p>
+      <p class="job-description">${listing.description.replace(/\n/g, '<br>')}</p>
+    </div>`;
+    });
+    return formattedListings;
+  }
+});
 
-
-
-
-// Function to handle settings actions
-    function performAction(module, action) {
-      $.ajax({
-        url: '/settings/' + module + '/' + action.toLowerCase(),
-        type: 'POST',
-        success: function (response) {
-          console.log(response.message);
-        },
-        error: function (xhr, status, error) {
-          console.error(module + ' ' + action + ' failed:', error);
-        }
-      });
-    }
-
-// Function to run on login success
-    function onLoginSuccess(token) {
-      $('#loginModal').modal('hide');
-      localStorage.setItem('token', token);
-    }
-
-// Function to logout
-    function logout() {
-      localStorage.removeItem('token');
-      window.location.href = '/';
-    }
-  });
-
+// // Attach event listeners for settings buttons
+// $('.btn-settings').click(function () {
+//   var action = $(this).text().trim();
+//   var module = $(this).closest('.tab-pane').attr('id');
+//   performAction(module, action);
+// });
+//
+// // Logout functionality
+// $('#logoutBtn').click(function () {
+//   logout();
+// });
+// // Function to handle settings actions
+// function performAction(module, action) {
+//   $.ajax({
+//     url: '/settings/' + module + '/' + action.toLowerCase(),
+//     type: 'POST',
+//     success: function (response) {
+//       console.log(response.message);
+//     },
+//     error: function (xhr, status, error) {
+//       console.error(module + ' ' + action + ' failed:', error);
+//     }
+//   });
+// }
+//
+// // Function to run on login success
+// function onLoginSuccess(token) {
+//   $('#loginModal').modal('hide');
+//   localStorage.setItem('token', token);
+// }
+//
+// // Function to logout
+// function logout() {
+//   localStorage.removeItem('token');
+//   window.location.href = '/';
+// }

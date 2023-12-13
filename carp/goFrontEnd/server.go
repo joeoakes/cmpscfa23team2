@@ -69,7 +69,7 @@ func setupRoutes(tmpl *template.Template) {
 		dashHandler(tmpl, w, r) // Invoking dashHandler correctly
 	})
 	//http.HandleFunc("/dashboard", requireAdmin(dashHandler(tmpl)))
-	http.HandleFunc("/settings", requireAdmin(makeHandler(tmpl, "settings")))
+	//http.HandleFunc("/settings", requireAdmin(makeHandler(tmpl, "settings")))
 	http.HandleFunc("/api/predictions", predictionHandler)
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
@@ -222,34 +222,172 @@ func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Req
 	}
 }
 
+//
+//func predictionHandler(w http.ResponseWriter, r *http.Request) {
+//	// Only allow GET requests for this endpoint
+//	if r.Method != http.MethodGet {
+//		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+//		return
+//	}
+//
+//	// Extract query parameters for 'domain' and 'queryType'
+//	domain := r.URL.Query().Get("domain")
+//	query_identifier := r.URL.Query().Get("queryType") // Changed from 'query' to 'queryType'
+//
+//	// Check if both 'domain' and 'queryType' parameters are provided
+//	if domain == "" || query_identifier == "" {
+//		http.Error(w, "Missing domain or queryType parameter", http.StatusBadRequest)
+//		return
+//	}
+//
+//	// Fetch prediction data
+//	predictionData, err := dal.FetchPredictionData(query_identifier, domain)
+//	if err != nil {
+//		log.Printf("Error fetching prediction data: %v", err)
+//		http.Error(w, "Internal server error", http.StatusInternalServerError)
+//		return
+//	}
+//
+//	// Respond with the fetched prediction data
+//	w.Header().Set("Content-Type", "application/json")
+//	json.NewEncoder(w).Encode(predictionData)
+//}
+//
+//func predictionHandler(w http.ResponseWriter, r *http.Request) {
+//	// Only allow GET requests for this endpoint
+//	if r.Method != http.MethodGet {
+//		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+//		return
+//	}
+//
+//	// Extract query parameters for 'domain' and 'queryType'
+//	domain := r.URL.Query().Get("domain")
+//	queryIdentifier := r.URL.Query().Get("queryType")
+//
+//	// Check if both 'domain' and 'queryType' parameters are provided
+//	if domain == "" || queryIdentifier == "" {
+//		http.Error(w, "Missing domain or queryType parameter", http.StatusBadRequest)
+//		return
+//	}
+//
+//	// Fetch prediction data
+//	predictionData, err := dal.FetchPredictionData(queryIdentifier, domain)
+//	if err != nil {
+//		log.Printf("Error fetching prediction data: %v", err)
+//		http.Error(w, "Internal server error", http.StatusInternalServerError)
+//		return
+//	}
+//
+//	// Load job data from the JSON file specified in 'prediction_info'
+//	jobData, err := dal.LoadDataFromJSON(predictionData.PredictionInfo)
+//	if err != nil {
+//		log.Printf("Error loading job data from JSON: %v", err)
+//		http.Error(w, "Internal server error", http.StatusInternalServerError)
+//		return
+//	}
+//
+//	// Create a response object to include both the skills and job listings
+//	response := struct {
+//		Skills      string        `json:"skills"`
+//		JobListings []dal.JobData `json:"job_listings"`
+//	}{
+//		Skills:      predictionData.InputData, // Assuming 'InputData' contains the skills
+//		JobListings: jobData,
+//	}
+//
+//	// Respond with the processed job data
+//	w.Header().Set("Content-Type", "application/json")
+//	json.NewEncoder(w).Encode(response)
+//}
+
+//	func predictionHandler(w http.ResponseWriter, r *http.Request) {
+//		if r.Method != http.MethodGet {
+//			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+//			return
+//		}
+//
+//		domain := r.URL.Query().Get("domain")
+//		queryIdentifier := r.URL.Query().Get("queryType")
+//
+//		if domain == "" || queryIdentifier == "" {
+//			http.Error(w, "Missing domain or queryType parameter", http.StatusBadRequest)
+//			return
+//		}
+//
+//		predictionData, err := dal.FetchPredictionData(queryIdentifier, domain)
+//		if err != nil {
+//			log.Printf("Error fetching prediction data: %v", err)
+//			http.Error(w, "Internal server error", http.StatusInternalServerError)
+//			return
+//		}
+//
+//		jobData, err := dal.LoadDataFromJSON(predictionData.PredictionInfo)
+//		if err != nil {
+//			log.Printf("Error loading job data from JSON: %v", err)
+//			http.Error(w, "Internal server error", http.StatusInternalServerError)
+//			return
+//		}
+//
+//		var specificJob *dal.JobData
+//		// Assuming "Software Release DevOps Engineer" is an example job title you are searching for.
+//		// You can replace it with a dynamic value based on the user's input if required.
+//		specificJobTitle := "Software Release DevOps Engineer"
+//		for _, job := range jobData {
+//			if job.Title == specificJobTitle {
+//				specificJob = &job
+//				break
+//			}
+//		}
+//
+//		response := struct {
+//			Skills      string        `json:"skills"`
+//			JobListings []dal.JobData `json:"job_listings"`
+//			SpecificJob *dal.JobData  `json:"specific_job"`
+//		}{
+//			Skills:      predictionData.Skills,
+//			JobListings: jobData,
+//			SpecificJob: specificJob,
+//		}
+//
+//		w.Header().Set("Content-Type", "application/json")
+//		json.NewEncoder(w).Encode(response)
+//	}
 func predictionHandler(w http.ResponseWriter, r *http.Request) {
-	// Only allow GET requests for this endpoint
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	// Extract query parameters for 'domain' and 'queryType'
 	domain := r.URL.Query().Get("domain")
-	query_identifier := r.URL.Query().Get("queryType") // Changed from 'query' to 'queryType'
+	queryIdentifier := r.URL.Query().Get("queryType")
 
-	// Check if both 'domain' and 'queryType' parameters are provided
-	if domain == "" || query_identifier == "" {
+	if domain == "" || queryIdentifier == "" {
 		http.Error(w, "Missing domain or queryType parameter", http.StatusBadRequest)
 		return
 	}
 
-	// Fetch prediction data
-	predictionData, err := dal.FetchPredictionData(query_identifier, domain)
+	// Fetch the prediction data, which includes the specific job and all job listings
+	predictionData, err := dal.FetchPredictionData(queryIdentifier, domain)
 	if err != nil {
 		log.Printf("Error fetching prediction data: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	// Respond with the fetched prediction data
+	// Prepare the response with the obtained data
+	response := struct {
+		Skills      string        `json:"skills"`
+		JobListings []dal.JobData `json:"job_listings"`
+		SpecificJob *dal.JobData  `json:"specific_job"`
+	}{
+		Skills:      predictionData.Skills,
+		JobListings: predictionData.JobListings,
+		SpecificJob: predictionData.SpecificJob,
+	}
+
+	// Send the response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(predictionData)
+	json.NewEncoder(w).Encode(response)
 }
 
 // renderDashboardTemplate renders the dashboard with a potential error message.

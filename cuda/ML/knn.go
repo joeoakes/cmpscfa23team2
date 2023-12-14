@@ -1,4 +1,4 @@
-package cuda
+package ML
 
 import (
 	"encoding/json"
@@ -372,7 +372,7 @@ func CreateScatterPlot(data []Point, target Point, predictedLabel string) error 
 	return nil
 }
 
-func main() {
+func main1() {
 	// Get user input for selecting the dataset
 	var selectedDataset string
 	fmt.Print("Choose a dataset (gas, books, airfare): ")

@@ -466,7 +466,7 @@ func main() {
 		}
 	}
 
-	// Print the predicted gas
+	// Print the predicted gas target price
 	if selectedDataset == "gas" {
 		// Print the nearest neighbors in a table-like format
 		fmt.Println()

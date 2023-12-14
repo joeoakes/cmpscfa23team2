@@ -250,44 +250,66 @@ func constructImagePath(queryIdentifier, domain string) string {
 //	return data, nil
 //}
 
+// FetchPredictionData fetches prediction data based on the domain and query identifier
 func FetchPredictionData(queryIdentifier, domain string) (PredictionData, error) {
 	var data PredictionData
-	var predictionPath, jobTitle string
+	var queryStr string
+	var err error
 
-	// Fetch job title and JSON path from the database
-	queryStr := "SELECT input_data, prediction_info FROM naive_bayes_predictions WHERE query_identifier = ?"
-	err := DB.QueryRow(queryStr, queryIdentifier).Scan(&jobTitle, &predictionPath)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return PredictionData{}, fmt.Errorf("no prediction data found for query identifier: %s", queryIdentifier)
+	switch domain {
+	case "E-commerce (Price Prediction)", "Gas Prices (Industry Trend Analysis)":
+		queryStr = "SELECT prediction_info FROM linear_regression_predictions WHERE query_identifier = ?"
+		err = DB.QueryRow(queryStr, queryIdentifier).Scan(&data.PredictionInfo)
+		if err != nil {
+			return handleDBError(err, queryIdentifier)
 		}
-		return PredictionData{}, err
+		data.ImagePath = fmt.Sprintf("/static/Assets/MachineLearning/LinearRegression/%s_scatter_plot.png", queryIdentifier)
+
+	case "RealEstate":
+		queryStr = "SELECT prediction_info FROM knn_predictions WHERE query_identifier = ?"
+		err = DB.QueryRow(queryStr, queryIdentifier).Scan(&data.PredictionInfo)
+		if err != nil {
+			return handleDBError(err, queryIdentifier)
+		}
+		data.ImagePath = fmt.Sprintf("/static/Assets/MachineLearning/KNN/%s_scatter_plot.png", queryIdentifier)
+
+	case "Job Market (Industry Trend Analysis)":
+		var predictionPath, jobTitle string
+		queryStr = "SELECT input_data, prediction_info FROM naive_bayes_predictions WHERE query_identifier = ?"
+		err = DB.QueryRow(queryStr, queryIdentifier).Scan(&jobTitle, &predictionPath)
+		if err != nil {
+			return handleDBError(err, queryIdentifier)
+		}
+
+		if _, err := os.Stat(predictionPath); os.IsNotExist(err) {
+			return PredictionData{}, fmt.Errorf("JSON file not found at path: %s", predictionPath)
+		}
+
+		file, err := ioutil.ReadFile(predictionPath)
+		if err != nil {
+			return PredictionData{}, fmt.Errorf("error reading JSON file: %s", err)
+		}
+
+		var container JobDataContainer
+		if err := json.Unmarshal(file, &container); err != nil {
+			return PredictionData{}, fmt.Errorf("error parsing JSON data: %s", err)
+		}
+
+		data.JobListings = container.Data
+		data.SpecificJob = SearchJobByTitle(container.Data, jobTitle)
+
+	default:
+		return PredictionData{}, fmt.Errorf("unrecognized domain: %s", domain)
 	}
-
-	// Check if the JSON file exists
-	if _, err := os.Stat(predictionPath); os.IsNotExist(err) {
-		return PredictionData{}, fmt.Errorf("JSON file not found at path: %s", predictionPath)
-	}
-
-	// Read and parse the JSON file
-	file, err := ioutil.ReadFile(predictionPath)
-	if err != nil {
-		return PredictionData{}, fmt.Errorf("error reading JSON file: %s", err)
-	}
-
-	var container JobDataContainer
-	if err := json.Unmarshal(file, &container); err != nil {
-		return PredictionData{}, fmt.Errorf("error parsing JSON data: %s", err)
-	}
-
-	// Find the specific job using SearchJobByTitle
-	specificJob := SearchJobByTitle(container.Data, jobTitle)
-
-	// Update the data struct
-	data.JobListings = container.Data
-	data.SpecificJob = specificJob
 
 	return data, nil
+}
+
+func handleDBError(err error, queryIdentifier string) (PredictionData, error) {
+	if err == sql.ErrNoRows {
+		return PredictionData{}, fmt.Errorf("no prediction data found for query identifier: %s", queryIdentifier)
+	}
+	return PredictionData{}, err
 }
 
 // SearchJobByTitle searches for a job by its title and returns its details.

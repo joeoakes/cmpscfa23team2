@@ -15,17 +15,14 @@ import (
 	"time"
 )
 
-// begin crawler vars =========================================================================================================
-var (
-	urlQueue = make(chan string, 1000)
-	visited  = make(map[string]bool)
-	//dataChan = make(chan URLData, 1000)//uncomment this use case appears
-)
+// urlQueue is a channel used for queuing URLs to be processed by the scraper.
+var urlQueue = make(chan string, 1000)
 
-//end crawler vars =====================================================================================================
+// visited is a map used for keeping track of URLs that have already been visited by the scraper.
+var visited = make(map[string]bool)
 
-//begin domain configurations ==========================================================================================
-
+// domainConfigurations maps domain names to their respective scraping configurations. Each domain
+// has specific selectors and structures defined for scraping its relevant data.
 var domainConfigurations = map[string]DomainConfig{
 	"airfare": {
 		Name:                "airfare",
@@ -72,9 +69,9 @@ var domainConfigurations = map[string]DomainConfig{
 	},
 }
 
-// begin scrape =========================================================================================================
-
-// begin readcsv =========================================================================================================
+// ReadCSV reads a CSV file from the given file path, parses the data, and returns a slice of PropertyData.
+// It returns an error if it fails to read or parse the CSV file. This function is designed to handle CSV files
+// with a specific format for real estate data.
 func ReadCSV(filePath string) ([]PropertyData, error) {
 	// Open the CSV file
 	file, err := os.Open(filePath)
@@ -128,8 +125,9 @@ func ReadCSV(filePath string) ([]PropertyData, error) {
 	return properties, nil
 }
 
-// end readcsv ===========================================================================================================
-// Scrape performs the scraping based on the provided configuration
+// Scrape performs the web scraping process for a given domain. It takes a URL to start scraping from,
+// a DomainConfig for scraping rules, and a WaitGroup for concurrency control. The function collects
+// scraped data and saves it to a JSON file.
 func Scrape(startingURL string, domainConfig DomainConfig, wg *sync.WaitGroup) {
 	defer wg.Done()
 	c := colly.NewCollector(
@@ -235,7 +233,9 @@ func Scrape(startingURL string, domainConfig DomainConfig, wg *sync.WaitGroup) {
 
 //end scrape ===========================================================================================================
 
-// begin test scrape ====================================================================================================
+// testScrape is a testing function for the scraper. It takes a domain name and triggers the Scrape
+// function using predefined test URLs for the domain. This function helps in validating the scraping logic
+// for different domains.
 func testScrape(domainName string) {
 	domainConfig, exists := domainConfigurations[domainName]
 	if !exists {
@@ -267,10 +267,10 @@ func testScrape(domainName string) {
 	fmt.Printf("Scraping for domain %s completed and data has been saved to JSON files\n", domainName)
 }
 
-//end test scrape ======================================================================================================
-
-// new scrapers =========================================================================================================
-// begin airfare scraper =================================================================================================
+// The following functions (airdatatest, scrapeInflationData, scrapeGasInflationData, scrapeHousingData)
+// are specific scraper implementations for different types of data like airfare, inflation, gasoline prices,
+// and housing data. Each function fetches data from specific URLs and processes it according to predefined
+// scraping rules and selectors, then writes the scraped data to JSON files.
 func airdatatest() {
 	scrapeurl := "https://www.usinflationcalculator.com/inflation/airfare-inflation/"
 	res, err := http.Get(scrapeurl)

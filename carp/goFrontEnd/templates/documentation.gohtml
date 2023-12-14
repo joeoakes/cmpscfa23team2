@@ -89,24 +89,36 @@
 
 {{/*            </div></div>*/}}
 
+        <h2>Package Overview</h2>
+        <ul>
+            <li>
+                <a href="#dal-package">DAL Package</a>
+                <ul>
+                    <li><a href="#dal-package-index">DAL Index</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#crab-package">CRAB Package</a>
+                <ul>
+                    <li><a href="#crab-package-index">CRAB Index</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#carp-package">CARP Package</a>
+                <ul>
+                    <li><a href="#carp-package-index">CARP Index</a></li>
+                </ul>
+            </li>
+        </ul>
 
 
         <div id="page" class="wide">
             <div class="container">
 
 
-                <h2>
-                    Functions for DAL, Authentication, Authorization, and Logging
-                    <span class="text-muted"></span>
-                </h2>
+                <h2 id="dal-package">DAL Package</h2>
+                <p>DAL Package contains functions for Data Access Layer, Authentication, Authorization, and Logging methods.</p>
 
-
-
-
-
-
-
-                <div id="nav"></div>
 
 
                 <!--
@@ -133,26 +145,14 @@
                     {{/*                        <dd><code>import "cmpscfa23team2/DAL"</code></dd>*/}}
                     {{/*                    </dl>*/}}
                     <dl>
-                        <dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
-                        <dd><a href="#pkg-index" class="indexLink">Index</a></dd>
-
 
                     </dl>
                 </div>
-                <!-- The package's Name is printed as title by the top-level template -->
-                <div id="pkg-overview" class="toggleVisible">
+
+                <div id="dal-package-index" class="toggleVisible">
 
                     <div class="expanded">
-                        <h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
-                        <p> Contains the functions of DAL, Authentication, Authorization and Logging methods</p>
-
-                    </div>
-                </div>
-
-                <div id="pkg-index" class="toggleVisible">
-
-                    <div class="expanded">
-                        <h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+                        <h2 class="toggleButton" title="Click to hide Index section">DAL Package Index ▾</h2>
 
                         <!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
                         <div id="manual-nav">
@@ -300,10 +300,10 @@
                                 <dd><a href="#Log">type Log</a></dd>
 
 
-                                <dd>&nbsp; &nbsp; <a href="#GetLog">func GetLog() ([]Log, error)</a></dd>
+                                <dd><a href="#GetLog">func GetLog() ([]Log, error)</a></dd>
 
 
-                                <dd>&nbsp; &nbsp; <a href="#GetSuccess">func GetSuccess() ([]Log, error)</a></dd>
+                                <dd><a href="#GetSuccess">func GetSuccess() ([]Log, error)</a></dd>
 
 
 
@@ -316,10 +316,10 @@
                                 <dd><a href="#Permission">type Permission</a></dd>
 
 
-                                <dd>&nbsp; &nbsp; <a href="#GetPermissionsForRole">func GetPermissionsForRole(userRole string) ([]Permission, error)</a></dd>
+                                <dd><a href="#GetPermissionsForRole">func GetPermissionsForRole(userRole string) ([]Permission, error)</a></dd>
 
 
-                                <dd>&nbsp; &nbsp; <a href="#NewPermission">func NewPermission(action, resource string) Permission</a></dd>
+                                <dd><a href="#NewPermission">func NewPermission(action, resource string) Permission</a></dd>
 
 
 
@@ -332,16 +332,16 @@
                                 <dd><a href="#User">type User</a></dd>
 
 
-                                <dd>&nbsp; &nbsp; <a href="#GetAllUsers">func GetAllUsers() ([]*User, error)</a></dd>
+                                <dd><a href="#GetAllUsers">func GetAllUsers() ([]*User, error)</a></dd>
 
 
-                                <dd>&nbsp; &nbsp; <a href="#GetUserByID">func GetUserByID(userID string) (*User, error)</a></dd>
+                                <dd><a href="#GetUserByID">func GetUserByID(userID string) (*User, error)</a></dd>
 
 
-                                <dd>&nbsp; &nbsp; <a href="#GetUserByLogin">func GetUserByLogin(userLogin string) (*User, error)</a></dd>
+                                <dd><a href="#GetUserByLogin">func GetUserByLogin(userLogin string) (*User, error)</a></dd>
 
 
-                                <dd>&nbsp; &nbsp; <a href="#GetUsersByRole">func GetUsersByRole(role string) ([]*User, error)</a></dd>
+                                <dd><a href="#GetUsersByRole">func GetUsersByRole(role string) ([]*User, error)</a></dd>
 
 
 
@@ -1012,6 +1012,268 @@
                 <p>This code defines a function that queries a database to retrieve a list of users by their role and logs various steps in the process,
                     returning the list of users and any encountered errors.
 
+                    <!-- Documentation for CRAB Package -->
+                <h2 id="crab-package">CRAB Package</h2>
+                <p>Contains functions and types for the CRAB web crawling and scraping module.</p>
+                <!-- Index for CRAB Package -->
+                <div id="crab-package-index" class="toggleVisible">
+                    <div class="expanded">
+                        <h2 class="toggleButton" title="Click to hide Index section">CRAB Package Index ▾</h2>
+                        <div id="manual-nav">
+                            <dl>
+                                <dt>Variables</dt>
+                                <dd><a href="#urlQueue">urlQueue</a></dd>
+                                <dd><a href="#visited">visited</a></dd>
+                                <dd><a href="#domainConfigurations">domainConfigurations</a></dd>
+
+                                <!-- Index for Types -->
+                                <dt>Structs</dt>
+                                <dd><a href="#URLData">type URLData struct</a></dd>
+                                <dd><a href="#MonthData">type MonthData struct</a></dd>
+                                <dd><a href="#AirfareData">type AirfareData struct</a></dd>
+                                <dd><a href="#YearData">type YearData struct</a></dd>
+                                <dd><a href="#GasolineData">type GasolineData struct</a></dd>
+                                <dd><a href="#PropertyData">type PropertyData struct</a></dd>
+                                <dd><a href="#ScraperConfig">type ScraperConfig struct</a></dd>
+                                <dd><a href="#DomainConfig">type DomainConfig struct</a></dd>
+                                <dd><a href="#Metadata">type Metadata struct</a></dd>
+                                <dd><a href="#GenericData">type GenericData struct</a></dd>
+                                <dd><a href="#ItemData">type ItemData struct</a></dd>
+                                <!-- Index for Functions -->
+                                <dt>Functions</dt>
+                                <dd><a href="#InitializeCrawling">func InitializeCrawling()</a></dd>
+                                <dd><a href="#getURLsToCrawl">func getURLsToCrawl() []URLData</a></dd>
+                                <dd><a href="#InsertData">func InsertData(data ItemData, filename string) error</a></dd>
+                                <dd><a href="#crawlURL">func crawlURL(urlData URLData, ch chan<- URLData, wg *sync.WaitGroup)</a></dd>
+                                <dd><a href="#createSiteMap">func createSiteMap(urls []URLData) error</a></dd>
+                                <dd><a href="#isURLAllowedByRobotsTXT">func isURLAllowedByRobotsTXT(urlStr string) bool</a></dd>
+                                <dd><a href="#threadedCrawl">func threadedCrawl(urls []URLData, concurrentCrawlers int)</a></dd>
+                                <dd><a href="#Scrape">func Scrape(startingURL string, domainConfig DomainConfig, wg *sync.WaitGroup)</a></dd>
+                                <dd><a href="#testScrape">func testScrape(domainName string)</a></dd>
+                                <dd><a href="#airdatatest">func airdatatest()</a></dd>
+                                <dd><a href="#scrapeInflationData">func scrapeInflationData()</a></dd>
+                                <dd><a href="#scrapeGasInflationData">func scrapeGasInflationData()</a></dd>
+                                <dd><a href="#scrapeHousingData">func scrapeHousingData()</a></dd>
+                                <dd><a href="#GetRandomUserAgent">func GetRandomUserAgent() string</a></dd>
+
+                            </dl>
+                        </div><!-- #manual-nav -->
+                    </div><!-- .expanded -->
+                </div><!-- #crab-package-index -->
+
+                <h3 id="CRAB Variables">Variables in CRAB</h3>
+                <h2 id="urlQueue">urlQueue</h2>
+                <pre>var urlQueue = make(chan string, 1000)</pre>
+                <p>Channel used for queuing URLs to be processed by the scraper.</p>
+                <h2 id="visited">visited</h2>
+                <pre>var visited = make(map[string]bool)</pre>
+                <p>Map used for keeping track of URLs that have already been visited by the scraper.</p>
+                <h2 id="domainConfigurations">domainConfigurations</h2>
+                <pre>var domainConfigurations = map[string]DomainConfig{...}</pre>
+                <p>Maps domain names to their respective scraping configurations, specifying selectors and structures for each domain.</p>
+
+                <!-- Document each function in crawler.go -->
+                <h3 id="crawler-go-functions">Functions in crawler.go</h3>
+
+                <!-- InitializeCrawling Function -->
+                <h2 id="InitializeCrawling">InitializeCrawling</h2>
+                <pre>func InitializeCrawling()</pre>
+                <p>InitializeCrawling starts the web crawling process. It fetches URLs to crawl from a predefined list and initiates a threaded crawl process with a specified number of concurrent crawlers.</p>
+
+                <!-- getURLsToCrawl Function -->
+                <h2 id="getURLsToCrawl">getURLsToCrawl</h2>
+                <pre>func getURLsToCrawl() []URLData</pre>
+                <p>Returns a slice of URLData representing a list of URLs to be crawled. This function is used internally within the InitializeCrawling function.</p>
+
+                <!-- InsertData Function -->
+                <h2 id="InsertData">InsertData</h2>
+                <pre>func InsertData(data ItemData, filename string) error</pre>
+                <p>Takes structured data (ItemData) and a filename, marshals the data into JSON format, and writes it to the specified file. Returns an error if any occurs during the marshaling or file operations.</p>
+
+                <!-- crawlURL Function -->
+                <h2 id="crawlURL">crawlURL</h2>
+                <pre>func crawlURL(urlData URLData, ch chan<- URLData, wg *sync.WaitGroup)</pre>
+                <p>The core function responsible for crawling a single URL. It takes URLData, a channel to send crawled data, and a WaitGroup to handle concurrency. It uses the Colly library for crawling and processes each URL based on the received HTML content.</p>
+
+                <!-- createSiteMap Function -->
+                <h2 id="createSiteMap">createSiteMap</h2>
+                <pre>func createSiteMap(urls []URLData) error</pre>
+                <p>Generates a sitemap from the given slice of URLData. Each URLData contains links found at a specific URL. The function marshals this data into JSON format and writes it to a file named "siteMap.json". Returns an error if the marshaling or file operations fail.</p>
+
+                <!-- isURLAllowedByRobotsTXT Function -->
+                <h2 id="isURLAllowedByRobotsTXT">isURLAllowedByRobotsTXT</h2>
+                <pre>func isURLAllowedByRobotsTXT(urlStr string) bool</pre>
+                <p>Checks if the given URL is allowed by the site's robots.txt file. It parses the URL to extract the domain, fetches the robots.txt file from the domain, and tests if the URL is allowed. Returns true if allowed, false otherwise.</p>
+
+                <!-- threadedCrawl Function -->
+                <h2 id="threadedCrawl">threadedCrawl</h2>
+                <pre>func threadedCrawl(urls []URLData, concurrentCrawlers int)</pre>
+                <p>Manages the concurrent crawling of multiple URLs. It takes a slice of URLData and an integer specifying the number of concurrent crawlers. The function sets up each crawler with rate limiting and starts the crawling process. The resulting crawled data is used to create a sitemap.</p>
+
+
+
+                <h3 id="scarper-go-functions">Functions in scarper.go</h3>
+
+                <!-- ReadCSV Function -->
+                <h2 id="ReadCSV">ReadCSV</h2>
+                <pre>func ReadCSV(filePath string) ([]PropertyData, error)</pre>
+                <p>Reads a CSV file from the given file path, parses the data, and returns a slice of PropertyData. Returns an error if it fails to read or parse the CSV file.</p>
+
+                <!-- Scrape Function -->
+                <h2 id="Scrape">Scrape</h2>
+                <pre>func Scrape(startingURL string, domainConfig DomainConfig, wg *sync.WaitGroup)</pre>
+                <p>Performs the web scraping process for a given domain. Takes a URL to start scraping from, a DomainConfig for scraping rules, and a WaitGroup for concurrency control. Collects scraped data and saves it to a JSON file.</p>
+
+                <!-- testScrape Function -->
+                <h2 id="testScrape">testScrape</h2>
+                <pre>func testScrape(domainName string)</pre>
+                <p>A testing function for the scraper. Takes a domain name and triggers the Scrape function using predefined test URLs for the domain. Validates the scraping logic for different domains.</p>
+
+                <!-- airdatatest Function -->
+                <h2 id="airdatatest">airdatatest</h2>
+                <pre>func airdatatest()</pre>
+                <p>Specific scraper implementation for airfare data. Fetches data from a specific URL, processes it according to predefined scraping rules, then writes the scraped data to JSON files.</p>
+
+                <!-- scrapeInflationData Function -->
+                <h2 id="scrapeInflationData">scrapeInflationData</h2>
+                <pre>func scrapeInflationData()</pre>
+                <p>Scrapes inflation data from a specific website, processes it, and writes the data to a JSON file.</p>
+
+                <!-- scrapeGasInflationData Function -->
+                <h2 id="scrapeGasInflationData">scrapeGasInflationData</h2>
+                <pre>func scrapeGasInflationData()</pre>
+                <p>Scrapes gasoline price data and adjusts it for inflation. Writes the processed data to a JSON file.</p>
+
+                <!-- scrapeHousingData Function -->
+                <h2 id="scrapeHousingData">scrapeHousingData</h2>
+                <pre>func scrapeHousingData()</pre>
+                <p>Scrapes real estate data from a specific dataset. Processes the data and writes it to a JSON file for housing market analysis.</p>
+                <h2 id="scarper-go-variables">Variables in scarper.go</h2>
+
+                <pre>var urlQueue = make(chan string, 1000)</pre>
+                <p>A channel used for queuing URLs to be processed by the scraper.</p>
+
+                <pre>var visited = make(map[string]bool)</pre>
+                <p>A map used for keeping track of URLs that have already been visited by the scraper.</p>
+
+                <pre>var domainConfigurations = map[string]DomainConfig{ ... }</pre>
+                <p>Maps domain names to their respective scraping configurations, specifying selectors and structures for each domain.</p>
+
+                <h3 id="structs-go-types">Types in structs.go</h3>
+
+                <!-- URLData Type -->
+                <h2 id="URLData">URLData</h2>
+                <pre>type URLData struct { ... }</pre>
+                <p>Holds information about a specific URL to be crawled, including the URL itself, creation timestamp, and discovered links.</p>
+
+                <!-- MonthData Type -->
+                <h2 id="MonthData">MonthData</h2>
+                <pre>type MonthData struct { ... }</pre>
+                <p>Represents data for individual months, commonly used in time-series data analyses.</p>
+
+                <!-- AirfareData Type -->
+                <h2 id="AirfareData">AirfareData</h2>
+                <pre>type AirfareData struct { ... }</pre>
+                <p>Represents airfare data structure with details like domain, URL, title, year, location, and additional information.</p>
+
+                <!-- YearData Type -->
+                <h2 id="YearData">YearData</h2>
+                <pre>type YearData struct { ... }</pre>
+                <p>Represents data for each year with monthly breakdown and average values.</p>
+
+                <!-- GasolineData Type -->
+                <h2 id="GasolineData">GasolineData</h2>
+                <pre>type GasolineData struct { ... }</pre>
+                <p>Represents gasoline data structure including year, average prices, CPI, and adjusted prices for inflation.</p>
+
+                <!-- PropertyData Type -->
+                <h2 id="PropertyData">PropertyData</h2>
+                <pre>type PropertyData struct { ... }</pre>
+                <p>Represents property data structure with details like status, bedrooms, bathrooms, lot size, location, and pricing.</p>
+
+                <!-- ScraperConfig Type -->
+                <h2 id="ScraperConfig">ScraperConfig</h2>
+                <pre>type ScraperConfig struct { ... }</pre>
+                <p>Represents configuration for the scraper including starting URLs.</p>
+
+                <!-- DomainConfig Type -->
+                <h2 id="DomainConfig">DomainConfig</h2>
+                <pre>type DomainConfig struct { ... }</pre>
+                <p>Represents configuration for different domains with specific selectors and structures for scraping.</p>
+
+                <!-- Metadata Type -->
+                <h2 id="Metadata">Metadata</h2>
+                <pre>type Metadata struct { ... }</pre>
+                <p>Represents metadata for scraped data including source and timestamp.</p>
+
+                <!-- GenericData Type -->
+                <h2 id="GenericData">GenericData</h2>
+                <pre>type GenericData struct { ... }</pre>
+                <p>Represents a generic data structure for items with details like title, URL, description, and price.</p>
+
+                <!-- ItemData Type -->
+                <h2 id="ItemData">ItemData</h2>
+                <pre>type ItemData struct { ... }</pre>
+                <p>Represents data for an item including domain and an array of GenericData.</p>
+                <h3 id="user-agents-go-functions">Functions in user_agents.go</h3>
+
+                <!-- GetRandomUserAgent Function -->
+                <h2 id="GetRandomUserAgent">GetRandomUserAgent</h2>
+                <pre>func GetRandomUserAgent() string</pre>
+                <p>Selects and returns a random user agent string from a predefined list. This function is used to set the user agent in HTTP requests made by the crawler or scraper, helping to mimic real browser behavior and avoid detection by web servers.</p>
+
+                <!-- CARP Package documentation -->
+                <h2 id="carp-package">CARP Package</h2>
+                <p>Contains functions and types for the CARP web application module.</p>
+
+                <!-- Index for CARP Package -->
+                <div id="carp-package-index" class="toggleVisible">
+                    <div class="expanded">
+                        <h2 class="toggleButton" title="Click to hide Index section">CARP Package Index ▾</h2>
+                        <div id="manual-nav">
+                            <dl>
+                                <!-- Index for Server.go -->
+                                <dt>server.go Functions</dt>
+                                <dd><a href="#main">func main()</a></dd>
+                                <dd><a href="#setupServer">func setupServer()</a></dd>
+                                <dd><a href="#setupRoutes">func setupRoutes(tmpl *template.Template)</a></dd>
+                                <dd><a href="#makeHandler">func makeHandler(tmpl *template.Template, content string) http.HandlerFunc</a></dd>
+                                <dd><a href="#loginHandler">func loginHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request)</a></dd>
+                                <dd><a href="#registerHandler">func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request)</a></dd>
+                                <dd><a href="#predictionHandler">func predictionHandler(w http.ResponseWriter, r *http.Request)</a></dd>
+                                <dd><a href="#dashHandler">func dashHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request)</a></dd>
+                                <!-- More functions as needed... -->
+
+                                <!-- Index for Middleware.go -->
+                                <dt>middleware.go Functions</dt>
+                                <dd><a href="#serveTemplate">func serveTemplate(content string, loggedIn bool) http.HandlerFunc</a></dd>
+                                <dd><a href="#renderTemplate">func renderTemplate(w http.ResponseWriter, tmpl string, data *AuthData)</a></dd>
+                                <dd><a href="#handleLogin">func handleLogin(w http.ResponseWriter, r *http.Request)</a></dd>
+                                <dd><a href="#requireAdmin">func requireAdmin(next http.HandlerFunc) http.HandlerFunc</a></dd>
+                                <dd><a href="#logoutHandler">func logoutHandler(w http.ResponseWriter, r *http.Request)</a></dd>
+                                <dd><a href="#extractUserIDFromToken">func extractUserIDFromToken(r *http.Request) (string, error)</a></dd>
+                                <!-- More functions as needed... -->
+                            </dl>
+                        </div><!-- #manual-nav -->
+                    </div><!-- .expanded -->
+                </div><!-- #carp-package-index -->
+
+                <!-- CARP Package Detailed Documentation -->
+                <h3 id="server-go-functions">Functions in server.go</h3>
+                <!-- Detailed documentation for each function in server.go -->
+                <!-- Example for main function -->
+                <h2 id="main">func main()</h2>
+                <pre>func main()</pre>
+                <p>Main function sets up and starts the server.</p>
+                <!-- More detailed documentation for other functions... -->
+
+                <h3 id="middleware-go-functions">Functions in middleware.go</h3>
+                <!-- Detailed documentation for each function in middleware.go -->
+                <!-- Example for serveTemplate function -->
+                <h2 id="serveTemplate">serveTemplate</h2>
+                <pre>func serveTemplate(content string, loggedIn bool) http.HandlerFunc</pre>
+                <p>Returns an HTTP handler function that renders a template.</p>
+                <!-- More detailed documentation for other functions... -->
 
                 <div id="footer">
                     Build version go1.21.1.<br>

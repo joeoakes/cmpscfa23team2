@@ -1,4 +1,4 @@
-package main
+package cuda
 
 import (
 	"encoding/json"

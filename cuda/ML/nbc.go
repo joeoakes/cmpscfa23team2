@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -46,7 +47,28 @@ type NaiveBayesClassifier struct {
 	skillSets        map[string][]string
 }
 
+// DomainResult represents the result for a domain with top job matches and skill demand.
+type DomainResult struct {
+	Domain      string               `json:"domain"`
+	SkillDemand map[string]SkillData `json:"skill_demand"`
+	TopJobs     []jobMatch           `json:"top_jobs"`
+}
+
 // NewNaiveBayesClassifier creates a new Naive Bayes Classifier.
+//
+//	func NewNaiveBayesClassifier() *NaiveBayesClassifier {
+//		return &NaiveBayesClassifier{
+//			wordFrequencies:  make(map[string]map[string]int),
+//			categoryCounts:   make(map[string]int),
+//			totalWords:       0,
+//			totalUniqueWords: 0,
+//			skillSets: map[string][]string{
+//				"Tech":     {"Python", "Java", "React"},
+//				"Business": {"Management", "Finance", "marketing", "management", "Microsoft Office"},
+//				"Law":      {"school of law", "Litigation"},
+//			},
+//		}
+//	}
 func NewNaiveBayesClassifier() *NaiveBayesClassifier {
 	return &NaiveBayesClassifier{
 		wordFrequencies:  make(map[string]map[string]int),
@@ -54,9 +76,9 @@ func NewNaiveBayesClassifier() *NaiveBayesClassifier {
 		totalWords:       0,
 		totalUniqueWords: 0,
 		skillSets: map[string][]string{
-			"Tech":     {"design", "Python", "Java", "React"},
-			"Business": {"Management", "Finance", "marketing", "management", "Microsoft Office"},
-			"Law":      {"school of law", "Litigation"},
+			"SoftwareEng": {"Software", "Java", "React", "C++", "JavaScript", "DevOps", "Cloud", "AWS", "Backend", "Frontend", "Full Stack", "Angular", "Node.js", "SQL", "NoSQL", "Git", "Linux", "Embedded", "API", "Microservices"},
+			"Business":    {"Management", "Finance", "Marketing", "Sales", "Microsoft Office"},
+			"Law":         {"Law", "Litigation", "Legal", "Contract", "Compliance"},
 		},
 	}
 }
@@ -89,82 +111,78 @@ func (nbc *NaiveBayesClassifier) Train(data []JobData, domain string) {
 }
 
 // PredictWithProbabilities predicts the most likely category for a set of skills.
-func (nbc *NaiveBayesClassifier) PredictWithProbabilities(skills []string) []string {
-	// Assuming implementation of probability calculation
-	// Returns a list of categories sorted by their probability score
-	return []string{"Category1", "Category2"} // Placeholder
-}
+//func (nbc *NaiveBayesClassifier) PredictWithProbabilities(skills []string) []string {
+//	// Assuming implementation of probability calculation
+//	// Returns a list of categories sorted by their probability score
+//	return []string{"Category1", "Category2"} // Placeholder
+//}
 
 // LoadDataFromJSON updated to match the new GenericTextData structure.
-func LoadDataFromJSON(filename string) ([]JobData, error) {
+func LoadDataFromJSON(filename string) (JobDataContainer, error) {
+	var container JobDataContainer
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return nil, err
+		return container, err
 	}
 
-	var container JobDataContainer
 	err = json.Unmarshal(file, &container)
 	if err != nil {
-		return nil, err
+		return container, err
 	}
 
-	return container.Data, nil
+	return container, nil
 }
 
 type jobMatch struct {
-	job           JobData
-	count         int
-	matchedSkills []string
+	Job           JobData  `json:"job"`
+	Count         int      `json:"count"`
+	MatchedSkills []string `json:"matched_skills"`
 }
 
-// PredictBestMatchingJob predicts the best matching job based on skills.
-func (nbc *NaiveBayesClassifier) PredictBestMatchingJob(domain string, data []JobData) {
+func (nbc *NaiveBayesClassifier) PredictBestMatchingJob(domain string, data []JobData) []string {
 	skills := nbc.skillSets[domain]
-	skillDemand := make(map[string]SkillData)
+	jobSkills := make(map[string][]string)
 
-	// Initialize SkillData
-	for _, skill := range skills {
-		skillDemand[skill] = SkillData{Skill: skill, Demand: 0, Matches: make([]JobData, 0)}
-	}
-
-	// Count demand and find matching jobs
-	jobSkills := make(map[string][]string) // Map to store matched skills for each job
 	for _, job := range data {
-		for _, skill := range skills {
-			if strings.Contains(job.Description, skill) || strings.Contains(job.Title, skill) {
-				jobSkills[job.URL] = append(jobSkills[job.URL], skill)
+		jobDesc := strings.ToLower(job.Description)
+		jobTitle := strings.ToLower(job.Title)
 
-				// Update demand
-				skillData := skillDemand[skill]
-				skillData.Demand++
-				skillDemand[skill] = skillData
+		for _, skill := range skills {
+			skillLower := strings.ToLower(skill)
+			if strings.Contains(jobDesc, skillLower) || strings.Contains(jobTitle, skillLower) {
+				jobSkills[job.URL] = append(jobSkills[job.URL], skill)
 			}
 		}
 	}
 
-	// Find top 3 jobs with most matching skills
+	if len(jobSkills) == 0 {
+		fmt.Println("No jobs matched for the domain:", domain)
+		return []string{}
+	}
+
+	// Sorting and picking top jobs
 	var topJobs []jobMatch
-	for _, job := range data {
-		if matchedSkills, exists := jobSkills[job.URL]; exists {
-			topJobs = append(topJobs, jobMatch{job, len(matchedSkills), matchedSkills})
+	for url, matchedSkills := range jobSkills {
+		for _, job := range data {
+			if job.URL == url {
+				topJobs = append(topJobs, jobMatch{Job: job, Count: len(matchedSkills), MatchedSkills: matchedSkills})
+				break
+			}
 		}
 	}
 	sort.Slice(topJobs, func(i, j int) bool {
-		return topJobs[i].count > topJobs[j].count
+		return topJobs[i].Count > topJobs[j].Count
 	})
-	if len(topJobs) > 3 {
-		topJobs = topJobs[:3]
+
+	var topJobTitles []string
+	for i, match := range topJobs {
+		if i == 3 {
+			break
+		}
+		topJobTitles = append(topJobTitles, match.Job.Title)
 	}
 
-	// Display skill demand and top jobs
-	for _, skill := range skills {
-		fmt.Printf("Skill: %s, Demand: %d\n", skill, skillDemand[skill].Demand)
-	}
-	fmt.Printf("\nTop Jobs for '%s' Domain:\n", domain)
-	for _, match := range topJobs {
-		fmt.Printf("Job Title: %s, URL: %s, Company: %s, Location: %s, Salary: %s\nDescription: %s\nMatching Skills: %d [%s]\n\n",
-			match.job.Title, match.job.URL, match.job.Company, match.job.Location, match.job.Salary, match.job.Description, match.count, strings.Join(match.matchedSkills, ", "))
-	}
+	return topJobTitles
 }
 
 // SearchJobByTitle searches for a job by its title and prints its details.
@@ -184,45 +202,72 @@ func printJobDetails(job JobData) {
 		job.Title, job.URL, job.Company, job.Location, job.Salary, job.Description)
 }
 
-func main1() {
-	classifier := NewNaiveBayesClassifier()
+func main() {
+	// Define relative paths to the JSON files - later
+	//basePath := "../../output/" // Adjust this path according to your directory structure
+	//filePaths := []string{
+	//	filepath.Join(basePath, "Law_jobs.json"),
+	//	filepath.Join(basePath, "Business_jobs.json"),
+	//	filepath.Join(basePath, "SoftwareEng_jobs.json"),
+	//}
 
-	// File paths
+	classifier := NewNaiveBayesClassifier()
 	filePaths := []string{
 		"C:\\Users\\Public\\GoLandProjects\\JustAFork\\crab\\output\\Law_jobs.json",
-		"C:\\Users\\Public\\GoLandProjects\\JustAFork\\crab\\output\\Business_jobs.json",
 		"C:\\Users\\Public\\GoLandProjects\\JustAFork\\crab\\output\\SoftwareEng_jobs.json",
+		"C:\\Users\\Public\\GoLandProjects\\JustAFork\\crab\\output\\Business_jobs.json",
 	}
 
-	// Mapping of file names to their respective domains
-	domainMapping := map[string]string{
-		"Law_jobs.json":         "Law",
-		"Business_jobs.json":    "Business",
-		"SoftwareEng_jobs.json": "Tech",
+	//domainMapping := map[string]string{
+	//	"Law_jobs.json":         "Law",
+	//	"Business_jobs.json":    "Business",
+	//	"SoftwareEng_jobs.json": "Tech",
+	//}
+
+	// Create Nbc_output directory if it doesn't exist
+	//outputDir := filepath.Join(basePath, "Nbc_output")
+	//if _, err := os.Stat(outputDir); os.IsNotExist(err) {
+	//	os.Mkdir(outputDir, os.ModePerm)
+	//}
+
+	outputDir := "Nbc_output"
+	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
+		os.Mkdir(outputDir, os.ModePerm)
 	}
 
 	for _, filePath := range filePaths {
-		fmt.Printf("Processing file: %s\n", filePath)
-
-		data, err := LoadDataFromJSON(filePath)
+		container, err := LoadDataFromJSON(filePath)
 		if err != nil {
 			fmt.Printf("Error loading data from %s: %v\n", filePath, err)
 			continue
 		}
 
-		fileName := filepath.Base(filePath)
-		domain, ok := domainMapping[fileName]
-		if !ok {
-			fmt.Printf("Domain not found for file %s\n", fileName)
-			continue
-		}
-		fmt.Printf("Predicting best matching job for domain '%s'...\n", domain)
-		classifier.PredictBestMatchingJob(domain, data)
-		fmt.Println("--------------------------------------------------\n\n")
+		domain := filepath.Base(filePath)
+		domain = strings.Split(domain, "_")[0] // Extracting domain name from filename
 
-		// Example job title to search for
-		jobTitle := "Software Release DevOps Engineer" // replace with the title you want to search for
-		fmt.Printf("Searching for job title: %s\n", jobTitle)
-		SearchJobByTitle(data, jobTitle)
+		topJobTitles := classifier.PredictBestMatchingJob(domain, container.Data)
+		var topJobsData []JobData
+		for _, title := range topJobTitles {
+			for _, job := range container.Data {
+				if job.Title == title {
+					topJobsData = append(topJobsData, job)
+					break
+				}
+			}
+		}
+
+		result := JobDataContainer{
+			Domain:   domain,
+			URL:      container.URL, // Use the URL from the loaded JSON data
+			Data:     topJobsData,
+			Metadata: container.Metadata,
+		}
+
+		resultJSON, _ := json.MarshalIndent(result, "", "    ")
+		outputFilename := filepath.Join(outputDir, domain+"_top_jobs.json")
+		_ = ioutil.WriteFile(outputFilename, resultJSON, 0644)
+
+		fmt.Printf("Top 3 jobs for '%s' domain written to %s\n", domain, outputFilename)
+		fmt.Println("--------------------------------------------------\n\n")
 	}
 }

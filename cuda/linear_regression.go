@@ -379,7 +379,7 @@ func main() {
 
 		// Create and save the scatter plot with the extended x values
 		title := "Gas Price Prediction Scatter Plot (Extended)"
-		filename := "Gas Prices Query 1_scatter_plot.png"
+		filename := "Gas Prices Prediction for the year 2023_scatter_plot.png"
 		xLabel := "Year"
 		yLabel := "Average Gasoline Prices"
 		createScatterPlot(append(years, newX...), prices, a, b, title, filename, xLabel, yLabel)

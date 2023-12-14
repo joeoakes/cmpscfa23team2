@@ -1,4 +1,4 @@
-package main
+package crab
 
 import "fmt"
 
@@ -43,7 +43,7 @@ func main() {
 	}
 	//
 	//// Perform the scraping for the chosen domain
-	testScrape(domainName)
+	TestScrape(domainName)
 	//
 	////csvread
 	//filePath := "crab/csv"

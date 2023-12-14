@@ -1,4 +1,4 @@
-package main
+package crab
 
 import (
 	"encoding/json"
@@ -18,14 +18,14 @@ import (
 // and then initiates a threaded crawl process with a specified number of concurrent crawlers.
 func InitializeCrawling() {
 	log.Println("Fetching URLs to crawl...")
-	urlDataList := getURLsToCrawl()
+	urlDataList := GetURLsToCrawl()
 	log.Println("URLs to crawl:", urlDataList)
-	threadedCrawl(urlDataList, 10)
+	ThreadedCrawl(urlDataList, 10)
 }
 
 // / getURLsToCrawl returns a slice of URLData representing a list of URLs to be crawled.
 // This function is used internally within the InitializeCrawling function.
-func getURLsToCrawl() []URLData {
+func GetURLsToCrawl() []URLData {
 	return []URLData{
 		{URL: "https://www.kaggle.com/search?q=housing+prices"},
 		{URL: "http://books.toscrape.com/"},
@@ -53,7 +53,7 @@ func InsertData(data ItemData, filename string) error {
 // crawlURL is the core function responsible for crawling a single URL. It takes URLData, a channel to send
 // crawled data, and a WaitGroup to handle concurrency. It uses the Colly library for crawling and processes
 // each URL based on the received HTML content.
-func crawlURL(urlData URLData, ch chan<- URLData, wg *sync.WaitGroup) {
+func CrawlURL(urlData URLData, ch chan<- URLData, wg *sync.WaitGroup) {
 	defer wg.Done() // Ensure the WaitGroup counter is decremented on function exit
 	c := colly.NewCollector(
 		colly.UserAgent(GetRandomUserAgent()), // Set a random user agent
@@ -92,7 +92,7 @@ func crawlURL(urlData URLData, ch chan<- URLData, wg *sync.WaitGroup) {
 // createSiteMap generates a sitemap from the given slice of URLData. Each URLData contains links found
 // at a specific URL. The function marshals this data into JSON format and writes it to a file named "siteMap.json".
 // It returns an error if the marshaling or file operations fail.
-func createSiteMap(urls []URLData) error {
+func CreateSiteMap(urls []URLData) error {
 	siteMap := make(map[string][]string)
 	for _, u := range urls {
 		siteMap[u.URL] = u.Links
@@ -112,7 +112,7 @@ func createSiteMap(urls []URLData) error {
 // isURLAllowedByRobotsTXT checks if the given URL is allowed by the site's robots.txt file.
 // It parses the URL to extract the domain, fetches the robots.txt file from the domain, and tests
 // if the URL is allowed. It returns true if allowed, false otherwise.
-func isURLAllowedByRobotsTXT(urlStr string) bool {
+func IsURLAllowedByRobotsTXT(urlStr string) bool {
 	parsedURL, err := url.Parse(urlStr)
 	if err != nil {
 		log.Println("Error parsing URL:", err)
@@ -146,7 +146,7 @@ func isURLAllowedByRobotsTXT(urlStr string) bool {
 // threadedCrawl manages the concurrent crawling of multiple URLs. It takes a slice of URLData and
 // an integer specifying the number of concurrent crawlers. The function sets up each crawler with rate limiting
 // and starts the crawling process. The resulting crawled data is used to create a sitemap.
-func threadedCrawl(urls []URLData, concurrentCrawlers int) {
+func ThreadedCrawl(urls []URLData, concurrentCrawlers int) {
 	var wg sync.WaitGroup
 	ch := make(chan URLData, len(urls))
 
@@ -166,7 +166,7 @@ func threadedCrawl(urls []URLData, concurrentCrawlers int) {
 			)
 			c.Limit(rateLimitRule) // Set the rate limit rule
 
-			crawlURL(u, ch, &wg)
+			CrawlURL(u, ch, &wg)
 		}(urlData)
 
 		log.Println("Crawling URL:", urlData.URL)
@@ -186,7 +186,7 @@ func threadedCrawl(urls []URLData, concurrentCrawlers int) {
 	for urlData := range ch {
 		crawledURLs = append(crawledURLs, urlData)
 	}
-	if err := createSiteMap(crawledURLs); err != nil {
+	if err := CreateSiteMap(crawledURLs); err != nil {
 		log.Println("Error creating sitemap:", err)
 	}
 }

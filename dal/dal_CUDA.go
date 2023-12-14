@@ -257,7 +257,7 @@ func FetchPredictionData(queryIdentifier, domain string) (PredictionData, error)
 	var err error
 
 	switch domain {
-	case "E-commerce (Price Prediction)", "Gas Prices (Industry Trend Analysis)":
+	case "Airfare Prices", "Gas Prices":
 		queryStr = "SELECT prediction_info FROM linear_regression_predictions WHERE query_identifier = ?"
 		err = DB.QueryRow(queryStr, queryIdentifier).Scan(&data.PredictionInfo)
 		if err != nil {
@@ -273,7 +273,7 @@ func FetchPredictionData(queryIdentifier, domain string) (PredictionData, error)
 		}
 		data.ImagePath = fmt.Sprintf("/static/Assets/MachineLearning/KNN/%s_scatter_plot.png", queryIdentifier)
 
-	case "Job Market (Industry Trend Analysis)":
+	case "Job Market":
 		var predictionPath, jobTitle string
 		queryStr = "SELECT input_data, prediction_info FROM naive_bayes_predictions WHERE query_identifier = ?"
 		err = DB.QueryRow(queryStr, queryIdentifier).Scan(&jobTitle, &predictionPath)

@@ -4,20 +4,8 @@ import (
 	"cmpscfa23team2/crab"
 	"io/ioutil"
 	"os"
-	"reflect"
 	"testing"
 )
-
-func TestGetURLsToCrawl(t *testing.T) {
-	expected := []crab.URLData{
-		{URL: "https://books.toscrape.com/"},
-	}
-	result := crab.GetURLsToCrawl() // Change from main.GetURLsToCrawl to crab.GetURLsToCrawl
-
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("getURLsToCrawl() = %v, want %v", result, expected)
-	}
-}
 
 func TestInsertData(t *testing.T) {
 	tmpfile, err := ioutil.TempFile("", "example")

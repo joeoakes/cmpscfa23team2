@@ -5,7 +5,9 @@ import (
 	"time"
 )
 
-// GetRandomUserAgent is accessible because it starts with a capital letter
+// GetRandomUserAgent randomly selects and returns a user agent string from a predefined list. This function
+// is used to set the user agent in HTTP requests made by the crawler or scraper, helping to mimic real browser
+// behavior and avoid detection by web servers.
 func GetRandomUserAgent() string {
 	userAgents := []string{
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",

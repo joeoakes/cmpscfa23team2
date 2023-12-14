@@ -72,26 +72,32 @@ $(document).ready(function() {
         console.log("Response received:", response);
         $('#predictionResult').empty();
 
-        // Display skills if available
-        if (response.skills) {
+        // Display skills if available and if the domain is 'Job Market (Industry Trend Analysis)'
+        if (domain === 'Job Market (Industry Trend Analysis)' && response.skills) {
           $('#predictionResult').append($('<h2>').text("Skills: " + response.skills));
         }
 
-        // Display specific job if available
-        if (response.specificJob) {
+        // Display specific job if available and if the domain is 'Job Market (Industry Trend Analysis)'
+        if (domain === 'Job Market (Industry Trend Analysis)' && response.specificJob) {
           const specificJob = formatSpecificJob(response.specificJob);
           $('#predictionResult').append(specificJob);
         }
 
-        // Display general job listings
-        if (response.job_listings && response.job_listings.length > 0) {
+        // Display general job listings if the domain is 'Job Market (Industry Trend Analysis)'
+        if (domain === 'Job Market (Industry Trend Analysis)' && response.job_listings && response.job_listings.length > 0) {
           const jobListings = formatJobListing(response.job_listings);
           $('#predictionResult').append(jobListings);
+        } else if (domain !== 'Job Market (Industry Trend Analysis)') {
+          // Handle other predictions
+          if (response.prediction_info) {
+            var predictionText = $('<p>').text(response.prediction_info);
+            $('#predictionResult').append(predictionText);
+          }
         } else {
           $('#predictionResult').append($('<p>').text("No job listings found for the selected query."));
         }
 
-        // Handle image path
+        // Handle image path for predictions that include a visual component
         if (response.image_path) {
           var imagePath = response.image_path;
           var image = $('<img>', {
@@ -109,6 +115,7 @@ $(document).ready(function() {
       }
     });
   });
+
 
   function formatSpecificJob(job) {
     let jobHTML = `

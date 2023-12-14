@@ -1,8 +1,8 @@
 // Mapping of domains to queries
 const domainToQueries = {
-  "E-commerce": ["E-commerce Query 1 Used car", "E-commerce Query 2 Gold Price", "E-commerce Query 3 Silver Price"],
-  RealEstate: ["Real Estate Query 1 Philadelphia", "Real Estate Query 2 New York", "Real Estate Query 3 California"],
-  JobMarket: ["Job Market Query 1", "Job Market Query 2", "Job Market Query 3"],
+  "E-commerce (Price Prediction)": ["E-commerce Query 1 Used car", "E-commerce Query 2 Gold Price", "E-commerce Query 3 Silver Price"],
+  "Gas Prices (Industry Trend Analysis)": ["Gas Prices Prediction for the year 2023", "Gas Prices Query 2", "Gas Prices Query 3"],
+  "Job Market (Industry Trend Analysis)": ["Top 3 Tech Jobs with most demand skills", "Top 3 Law Jobs with most demand skills", "Top 3 Bus Jobs with most demand skills"],
   // Add other domains and queries as necessary
 };
 
@@ -58,102 +58,128 @@ $(document).ready(function() {
     });
   });
 
-  // Attach event listeners for settings buttons
-  $('.btn-settings').click(function () {
-    var action = $(this).text().trim();
-    var module = $(this).closest('.tab-pane').attr('id');
-    performAction(module, action);
-  });
 
-  // Logout functionality
-  $('#logoutBtn').click(function () {
-    logout();
-  });
-
-  // Handle AI Prediction Form submission
-  $('#aiPredictionForm').submit(function (event) {
+  $('#aiPredictionForm').submit(function(event) {
     event.preventDefault();
 
     var domain = $('#domainSelect').val();
-    var query = $('#querySelect').val();
+    var queryType = $('#querySelect').val();
 
-    // Define the base path for images
-    var basePath = 'static/Assets/MachineLearning/';
-
-
-    // Define a variable for the image path
-    var imagePath, imageDescription;
-
-
-    // Check domain and query combinations
-    if (domain === "E-commerce") {
-      switch (query) {
-        case "E-commerce Query 1 Used car":
-          imagePath = basePath + 'KNN/e-commerceQuery1Pic.png';
-          imageDescription = 'Description for E-commerce Query 1...';
-          break;
-        case "E-commerce Query 2 Gold Price":
-          imagePath = basePath + 'KNN/e-commerceQuery2Pic.png';
-          imageDescription = 'Description for E-commerce Query 2...';
-          break;
-        case "E-commerce Query 3 Silver Price":
-          imagePath = basePath + 'KNN/e-commerceQuery3Pic.png';
-          imageDescription = 'Description for E-commerce Query 3...';
-          break;
-      }
-    } else if (domain === "RealEstate") {
-      switch (query) {
-        case "Real Estate Query 1 Philadelphia":
-          imagePath = basePath + 'LinearRegression/realEstateQuery1Pic.png';
-          imageDescription = 'Description for Real Estate Query 1...';
-          break;
-        case "Real Estate Query 2 New York":
-          imagePath = basePath + 'LinearRegression/realEstateQuery2Pic.png';
-          imageDescription = 'Description for Real Estate Query 2...';
-          break;
-        case "Real Estate Query 3 California":
-          imagePath = basePath + 'LinearRegression/realEstateQuery3Pic.png';
-          imageDescription = 'Description for Real Estate Query 3...';
-          break;
-      }
-    }
-
-    // Display the image if a path is set, otherwise show the simulation result
-    if (imagePath) {
-      $('#predictionResult').html(`
-            <div id="image-description">${imageDescription}</div>
-            <img src="${imagePath}" alt="Result" style="width: 100%; height: auto; object-fit: contain;">
-        `);
-    } else {
-      // Simulation of the prediction result for other selections or Job Market
-      console.log("Selected Query: " + query + ", Domain: " + domain);
-      $('#predictionResult').text("Simulation of the prediction result.");
-    }
-  });
-
-// Function to handle settings actions
-  function performAction(module, action) {
     $.ajax({
-      url: '/settings/' + module + '/' + action.toLowerCase(),
-      type: 'POST',
-      success: function (response) {
-        console.log(response.message);
+      url: '/api/predictions?domain=' + encodeURIComponent(domain) + '&queryType=' + encodeURIComponent(queryType),
+      type: 'GET',
+      success: function(response) {
+        console.log("Response received:", response);
+        $('#predictionResult').empty();
+
+        // Display skills if available and if the domain is 'Job Market (Industry Trend Analysis)'
+        if (domain === 'Job Market (Industry Trend Analysis)' && response.skills) {
+          $('#predictionResult').append($('<h2>').text("Skills: " + response.skills));
+        }
+
+        // Display specific job if available and if the domain is 'Job Market (Industry Trend Analysis)'
+        if (domain === 'Job Market (Industry Trend Analysis)' && response.specificJob) {
+          const specificJob = formatSpecificJob(response.specificJob);
+          $('#predictionResult').append(specificJob);
+        }
+
+        // Display general job listings if the domain is 'Job Market (Industry Trend Analysis)'
+        if (domain === 'Job Market (Industry Trend Analysis)' && response.job_listings && response.job_listings.length > 0) {
+          const jobListings = formatJobListing(response.job_listings);
+          $('#predictionResult').append(jobListings);
+        } else if (domain !== 'Job Market (Industry Trend Analysis)') {
+          // Handle other predictions
+          if (response.prediction_info) {
+            var predictionText = $('<p>').text(response.prediction_info);
+            $('#predictionResult').append(predictionText);
+          }
+        } else {
+          $('#predictionResult').append($('<p>').text("No job listings found for the selected query."));
+        }
+
+        // Handle image path for predictions that include a visual component
+        if (response.image_path) {
+          var imagePath = response.image_path;
+          var image = $('<img>', {
+            src: imagePath,
+            alt: 'Prediction Result',
+            style: 'max-width: 100%; height: auto;'
+          }).on('error', function() {
+            $('#predictionResult').append($('<p>').text("Error loading prediction image."));
+          });
+          $('#predictionResult').append(image);
+        }
       },
-      error: function (xhr, status, error) {
-        console.error(module + ' ' + action + ' failed:', error);
+      error: function(xhr, status, error) {
+        $('#predictionResult').text("An error occurred while fetching the prediction.");
       }
     });
+  });
+
+
+  function formatSpecificJob(job) {
+    let jobHTML = `
+    <div class="specific-job">
+      <h3 class="job-title">${job.title}</h3>
+      <p><strong>Company:</strong> ${job.company}</p>
+      <p><strong>Location:</strong> ${job.location}</p>
+      <p><strong>Salary:</strong> ${job.salary}</p>
+      <p><strong>Description:</strong> ${job.description.replace(/\n/g, '<br>')}</p>
+      <a href="${job.url}" target="_blank" class="btn btn-primary">View Listing</a>
+    </div>`;
+    return jobHTML;
   }
 
-// Function to run on login success
-  function onLoginSuccess(token) {
-    $('#loginModal').modal('hide');
-    localStorage.setItem('token', token);
-  }
-
-// Function to logout
-  function logout() {
-    localStorage.removeItem('token');
-    window.location.href = '/';
+  function formatJobListing(jobListings) {
+    let formattedListings = '';
+    jobListings.forEach(listing => {
+      formattedListings += `
+    <div class="job-listing">
+      <h3 class="job-title">${listing.title}</h3>
+      <a href="${listing.url}" target="_blank" class="job-link">View Listing</a>
+      <p class="job-info">Company: ${listing.company}</p>
+      <p class="job-info">Location: ${listing.location}</p>
+      <p class="job-info">Salary: ${listing.salary}</p>
+      <p class="job-description">${listing.description.replace(/\n/g, '<br>')}</p>
+    </div>`;
+    });
+    return formattedListings;
   }
 });
+
+// // Attach event listeners for settings buttons
+// $('.btn-settings').click(function () {
+//   var action = $(this).text().trim();
+//   var module = $(this).closest('.tab-pane').attr('id');
+//   performAction(module, action);
+// });
+//
+// // Logout functionality
+// $('#logoutBtn').click(function () {
+//   logout();
+// });
+// // Function to handle settings actions
+// function performAction(module, action) {
+//   $.ajax({
+//     url: '/settings/' + module + '/' + action.toLowerCase(),
+//     type: 'POST',
+//     success: function (response) {
+//       console.log(response.message);
+//     },
+//     error: function (xhr, status, error) {
+//       console.error(module + ' ' + action + ' failed:', error);
+//     }
+//   });
+// }
+//
+// // Function to run on login success
+// function onLoginSuccess(token) {
+//   $('#loginModal').modal('hide');
+//   localStorage.setItem('token', token);
+// }
+//
+// // Function to logout
+// function logout() {
+//   localStorage.removeItem('token');
+//   window.location.href = '/';
+// }

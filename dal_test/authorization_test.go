@@ -6,12 +6,12 @@ import (
 )
 
 func TestAddPermission(t *testing.T) {
-	userRole := "ADM"           // Replace with a valid user role
+	userRole := "USR"           // Replace with a valid user role
 	action := "READ"            // Replace with a valid action
 	resource := "SOME_RESOURCE" // Replace with a valid resource
 	err := dal.AddPermission(userRole, action, resource)
 	if err != nil {
-		err := dal.InsertLog("400", "Failed to add permission", "TestAddPermission()")
+		dal.InsertLog("400", "Failed to add permission", "TestAddPermission()")
 		if err != nil {
 			return
 		}
@@ -21,7 +21,7 @@ func TestAddPermission(t *testing.T) {
 	// Add assertions to verify the permission is added in the database.
 	hasPermission, err := dal.CheckPermission(userRole, action, resource)
 	if err != nil {
-		err := dal.InsertLog("400", "Failed to check added permission", "TestAddPermission()")
+		dal.InsertLog("400", "Failed to check added permission", "TestAddPermission()")
 		if err != nil {
 			return
 		}
@@ -29,23 +29,23 @@ func TestAddPermission(t *testing.T) {
 	}
 
 	if !hasPermission {
-		err := dal.InsertLog("400", "Permission not found in database", "TestAddPermission()")
+		dal.InsertLog("400", "Permission not found in database", "TestAddPermission()")
 		if err != nil {
 			return
 		}
 		t.Errorf("Expected permission to be added, but it was not found in the database")
 	} else {
-		err := dal.InsertLog("200", "Successfully added and verified permission", "TestAddPermission()")
+		dal.InsertLog("200", "Successfully added and verified permission", "TestAddPermission()")
 		if err != nil {
 			return
 		}
 	}
 }
 func TestGetUserRole(t *testing.T) {
-	userID := "878ff80b-739a-11ee-b88a-30d042e80ac3" // Replace with a valid user ID
+	userID := "7e8e9aa4-8f2c-11ee-ae02-30d042e80ac3" // Replace with a valid user ID
 	role, err := dal.GetUserRole(userID)
 	if err != nil {
-		err := dal.InsertLog("400", "Failed to get user role", "TestGetUserRole()")
+		dal.InsertLog("400", "Failed to get user role", "TestGetUserRole()")
 		if err != nil {
 			return
 		}
@@ -63,7 +63,7 @@ func TestGetUserRole(t *testing.T) {
 }
 
 func TestIsUserActive(t *testing.T) {
-	userID := "878ff80b-739a-11ee-b88a-30d042e80ac3" // Replace with a valid user ID
+	userID := "7e8e9aa4-8f2c-11ee-ae02-30d042e80ac3" // Replace with a valid user ID
 	isActive, err := dal.IsUserActive(userID)
 	if err != nil {
 		dal.InsertLog("400", "Failed to check user's activity status", "TestIsUserActive()")
@@ -81,7 +81,7 @@ func TestIsUserActive(t *testing.T) {
 }
 
 func TestAuthorizeUser(t *testing.T) {
-	userID := "878ff80b-739a-11ee-b88a-30d042e80ac3" // Replace with a valid user ID
+	userID := "7e8e9aa4-8f2c-11ee-ae02-30d042e80ac3" // Replace with a valid user ID
 	requiredRole := "ADM"                            // Replace with the required role
 	isAuthorized, err := dal.AuthorizeUser(userID, requiredRole)
 	if err != nil {
@@ -136,7 +136,7 @@ func TestCheckPermission(t *testing.T) {
 	}
 }
 func TestHasPermission(t *testing.T) {
-	userID := "878ff80b-739a-11ee-b88a-30d042e80ac3" // Replace with a valid user ID
+	userID := "7e8e9aa4-8f2c-11ee-ae02-30d042e80ac3" // Replace with a valid user ID
 	action := "READ"                                 // Replace with a valid action
 	resource := "SOME_RESOURCE"                      // Replace with a valid resource
 	hasPermission, err := dal.HasPermission(userID, action, resource)
@@ -155,7 +155,7 @@ func TestHasPermission(t *testing.T) {
 	}
 }
 func TestUpdateUserRole(t *testing.T) {
-	userID := "878ff80b-739a-11ee-b88a-30d042e80ac3" // Replace with a valid user ID
+	userID := "7e8ec5d9-8f2c-11ee-ae02-30d042e80ac3" // Replace with a valid user ID
 	newRole := "DEV"                                 // Replace with the new role
 	err := dal.UpdateUserRole(userID, newRole)
 	if err != nil {
@@ -179,10 +179,10 @@ func TestUpdateUserRole(t *testing.T) {
 }
 
 func TestDeactivateUser(t *testing.T) {
-	userID := "878ff80b-739a-11ee-b88a-30d042e80ac3" // Replace with a valid user ID
+	userID := "7e8ec5d9-8f2c-11ee-ae02-30d042e80ac3" // Replace with a valid user ID
 	err := dal.DeactivateUser(userID)
 	if err != nil {
-		err := dal.InsertLog("400", "Failed to deactivate user", "TestDeactivateUser()")
+		dal.InsertLog("400", "Failed to deactivate user", "TestDeactivateUser()")
 		if err != nil {
 			return
 		}

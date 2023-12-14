@@ -13,8 +13,12 @@
 
                                     <!-- Begin Form -->
                                     <form class="mx-1 mx-md-4" method="POST" action="/register">
+
+                                        <!-- Error Message Display -->
 {{/*                                        {{ if .ErrorMessage }}*/}}
-{{/*                                            <div class="alert alert-danger">{{ .ErrorMessage }}</div>*/}}
+{{/*                                            <div class="alert alert-danger" role="alert">*/}}
+{{/*                                                {{ .ErrorMessage }}*/}}
+{{/*                                            </div>*/}}
 {{/*                                        {{ end }}*/}}
 
                                         <!-- Name Input -->
@@ -51,14 +55,6 @@
                                                 <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required />
                                                 <label class="form-label" for="confirmPassword">Repeat your password</label>
                                             </div>
-                                        </div>
-
-                                        <!-- Terms of Service Checkbox -->
-                                        <div class="form-check d-flex justify-content-center mb-5">
-                                            <input class="form-check-input me-2" type="checkbox" value="" id="form2Example3c" required />
-                                            <label class="form-check-label" for="form2Example3c">
-                                                I agree all statements in <a href="#!">Terms of service</a>
-                                            </label>
                                         </div>
 
                                         <!-- Submit Button -->

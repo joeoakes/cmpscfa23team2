@@ -51,16 +51,13 @@ package main
 //
 //// JSONData structure to match your data format
 //type JSONData struct {
-//	Domain string `json:"domain"`
-//	URL    string `json:"url"`
-//	Data   []struct {
-//		Title       string `json:"title"`
-//		URL         string `json:"url"`
-//		Description string `json:"description"`
-//		Company     string `json:"company"`
-//		Location    string `json:"location"`
-//		Salary      string `json:"salary"`
-//	} `json:"data"`
+//	Domain   string            `json:"domain"`
+//	URL      string            `json:"url"`
+//	Data     []GenericTextData `json:"data"`
+//	Metadata struct {
+//		Source    string `json:"source"`
+//		Timestamp string `json:"timestamp"`
+//	} `json:"metadata"`
 //}
 //
 //// NewNaiveBayesClassifier creates a new Naive Bayes Classifier.
@@ -120,31 +117,29 @@ package main
 //	uniqueWords := make(map[string]bool)
 //
 //	for _, item := range data {
-//		if item.Description != nil && item.Title != nil {
-//			text := *item.Title + " " + *item.Description
-//			words, err := preprocessText(text)
-//			if err != nil {
-//				fmt.Println("Error preprocessing text:", err)
-//				continue
-//			}
-//			category := item.Category
-//
-//			if nbc.wordFrequencies[category] == nil {
-//				nbc.wordFrequencies[category] = make(map[string]int)
-//			}
-//
-//			for _, word := range words {
-//				if !uniqueWords[word] {
-//					uniqueWords[word] = true
-//					nbc.totalUniqueWords++
-//				}
-//
-//				nbc.wordFrequencies[category][word]++
-//				nbc.totalWords++
-//			}
-//
-//			nbc.categoryCounts[category]++
+//		text := *item.Title + " " + *item.Description
+//		words, err := preprocessText(text)
+//		if err != nil {
+//			fmt.Println("Error preprocessing text:", err)
+//			continue
 //		}
+//		category := item.Category
+//
+//		if nbc.wordFrequencies[category] == nil {
+//			nbc.wordFrequencies[category] = make(map[string]int)
+//		}
+//
+//		for _, word := range words {
+//			if !uniqueWords[word] {
+//				uniqueWords[word] = true
+//				nbc.totalUniqueWords++
+//			}
+//
+//			nbc.wordFrequencies[category][word]++
+//			nbc.totalWords++
+//		}
+//
+//		nbc.categoryCounts[category]++
 //	}
 //}
 //
@@ -201,22 +196,16 @@ package main
 //	return sortedCategories
 //}
 //
-//// LoadDataFromJSON function updated to extract only title, description, and category
+//// LoadDataFromJSON function updated to match the JSON structure
 //func LoadDataFromJSON(filename string) ([]GenericTextData, error) {
-//	var jsonData JSONData
-//	var data []GenericTextData
-//
 //	file, err := os.Open(filename)
 //	if err != nil {
 //		return nil, err
 //	}
-//	defer func() {
-//		if cerror := file.Close(); cerror != nil && err == nil {
-//			err = cerror // only override err if it's nil
-//		}
-//	}()
+//	defer file.Close()
 //
-//	byteValue, err := io.ReadAll(file) // Updated to io.ReadAll
+//	var jsonData []JSONData
+//	byteValue, err := io.ReadAll(file)
 //	if err != nil {
 //		return nil, err
 //	}
@@ -226,12 +215,11 @@ package main
 //		return nil, err
 //	}
 //
-//	for _, item := range jsonData.Data {
-//		data = append(data, GenericTextData{
-//			Title:       &item.Title,
-//			Description: &item.Description,
-//			Category:    jsonData.Domain,
-//		})
+//	var data []GenericTextData
+//	for _, jData := range jsonData {
+//		for _, item := range jData.Data {
+//			data = append(data, item)
+//		}
 //	}
 //
 //	return data, nil
@@ -295,9 +283,7 @@ package main
 //	startTime := time.Now()
 //
 //	jsonFiles := []string{
-//		"C:\\Users\\Public\\GoLandProjects\\PredictAi\\crab\\indeed_jobs.json",
-//		"C:\\Users\\Public\\GoLandProjects\\PredictAi\\crab\\indeed_jobs2.json",
-//		"C:\\Users\\Public\\GoLandProjects\\PredictAi\\crab\\indeed_jobs3.json",
+//		"C:\\Users\\mathe\\GoLandProjects\\cmpscfa23team2\\crab\\output\\combined_jobs.json",
 //	}
 //
 //	// Load and combine data from all JSON files

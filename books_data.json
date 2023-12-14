@@ -1,0 +1,205 @@
+{
+  "domain": "books",
+  "data": [
+    {
+      "title": "Soumission",
+      "url": "http://books.toscrape.com/catalogue/soumission_998/index.html",
+      "description": "",
+      "price": "£50.10",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "Private Paris (Private #10)",
+      "url": "http://books.toscrape.com/catalogue/private-paris-private-10_958/index.html",
+      "description": "",
+      "price": "£47.61",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "We Love You, Charlie ...",
+      "url": "http://books.toscrape.com/catalogue/we-love-you-charlie-freeman_954/index.html",
+      "description": "",
+      "price": "£50.27",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "Thirst",
+      "url": "http://books.toscrape.com/catalogue/thirst_946/index.html",
+      "description": "",
+      "price": "£17.27",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "The Murder That Never ...",
+      "url": "http://books.toscrape.com/catalogue/the-murder-that-never-was-forensic-instincts-5_939/index.html",
+      "description": "",
+      "price": "£54.11",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "Tuesday Nights in 1980",
+      "url": "http://books.toscrape.com/catalogue/tuesday-nights-in-1980_870/index.html",
+      "description": "",
+      "price": "£21.04",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "The Vacationers",
+      "url": "http://books.toscrape.com/catalogue/the-vacationers_863/index.html",
+      "description": "",
+      "price": "£42.15",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "The Regional Office Is ...",
+      "url": "http://books.toscrape.com/catalogue/the-regional-office-is-under-attack_858/index.html",
+      "description": "",
+      "price": "£51.36",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "Finders Keepers (Bill Hodges ...",
+      "url": "http://books.toscrape.com/catalogue/finders-keepers-bill-hodges-trilogy-2_807/index.html",
+      "description": "",
+      "price": "£53.53",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "The Time Keeper",
+      "url": "http://books.toscrape.com/catalogue/the-time-keeper_766/index.html",
+      "description": "",
+      "price": "£27.88",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "The Testament of Mary",
+      "url": "http://books.toscrape.com/catalogue/the-testament-of-mary_765/index.html",
+      "description": "",
+      "price": "£52.67",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "The First Hostage (J.B. ...",
+      "url": "http://books.toscrape.com/catalogue/the-first-hostage-jb-collins-2_749/index.html",
+      "description": "",
+      "price": "£25.85",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "Take Me with You",
+      "url": "http://books.toscrape.com/catalogue/take-me-with-you_741/index.html",
+      "description": "",
+      "price": "£45.21",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "Still Life with Bread ...",
+      "url": "http://books.toscrape.com/catalogue/still-life-with-bread-crumbs_738/index.html",
+      "description": "",
+      "price": "£26.41",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "Shtum",
+      "url": "http://books.toscrape.com/catalogue/shtum_733/index.html",
+      "description": "",
+      "price": "£55.84",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "My Name Is Lucy ...",
+      "url": "http://books.toscrape.com/catalogue/my-name-is-lucy-barton_720/index.html",
+      "description": "",
+      "price": "£41.56",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "My Mrs. Brown",
+      "url": "http://books.toscrape.com/catalogue/my-mrs-brown_719/index.html",
+      "description": "",
+      "price": "£24.48",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "Mr. Mercedes (Bill Hodges ...",
+      "url": "http://books.toscrape.com/catalogue/mr-mercedes-bill-hodges-trilogy-1_717/index.html",
+      "description": "",
+      "price": "£28.90",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "I Am Pilgrim (Pilgrim ...",
+      "url": "http://books.toscrape.com/catalogue/i-am-pilgrim-pilgrim-1_703/index.html",
+      "description": "",
+      "price": "£10.60",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    },
+    {
+      "title": "Eligible (The Austen Project ...",
+      "url": "http://books.toscrape.com/catalogue/eligible-the-austen-project-4_692/index.html",
+      "description": "",
+      "price": "£27.09",
+      "metadata": {
+        "source": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+        "timestamp": "2023-11-19T22:19:30-05:00"
+      }
+    }
+  ]
+}

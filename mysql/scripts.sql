@@ -1,9 +1,9 @@
 /*
 ---------------------------------------------------
--- Produced By: 4Tekies LLC and Penn State Abington - CMPSC 488 Course
--- Author: Mahir Khan, Joshua Ferrell & Joseph Oakes and Team 2 Members
--- Date: 6/27/2023, 09/28/2023
--- Purpose: OurGo holds all necessary mysql code needed to establish the database
+-- Produced By: CMPSC 488 Fall 2023 Team 2
+-- Author: Matthew Assali, Sara Becker, Emily Carpenter, Matthew Finn, Hansi Seitaj, Evan Green, Binh Hoang, Eni Vejseli
+-- Date: 12/05/2023
+-- Purpose: holds all necessary mysql code needed to establish the database
 ---------------------------------------------------
 */
 -- Drop the database if it exists
@@ -56,20 +56,6 @@ CREATE TABLE IF NOT EXISTS log (
                                    date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Periodically clean the log (anything older than 30 days)
--- Temporarily disable safe update mode
-# SET SQL_SAFE_UPDATES = 0;
-# DELETE FROM log
-# WHERE date_time < DATE_SUB(NOW(), INTERVAL 30 DAY);
-#
-# -- Retrieve logs from the start of the day
-# SELECT* FROM log
-# WHERE date_time >= CURDATE();
-#
-# -- get logs from the start of the week
-# SELECT* FROM log
-# WHERE date_time >= SUBDATE(CURDATE(), DAYOFWEEK(CURDATE()) - 1);
-
 
 -- Creates the webservice table
 CREATE TABLE IF NOT EXISTS web_service(
@@ -89,21 +75,6 @@ CREATE TABLE IF NOT EXISTS urls (
                                     domain LONGTEXT, --
                                     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP() -- The timestamp of when the URL was created/added
 );
-
--- Stored Procedure to add a new prediction
--- DELIMITER //
--- CREATE PROCEDURE create_prediction(
--- 	IN p_engine_id CHAR(36),
--- 	IN p_prediction_info JSON
--- )
--- BEGIN
--- 	DECLARE v_prediction_id CHAR(36);
---     -- generate a unique identifier for the prediction and assign it to v_prediction_id
---     SET v_prediction_id = UUID();
---     INSERT INTO prerdictions (prediction_id, engine_id, prediction_info)
---     VALUES (v_prediction_id, p_engine_id, p_prediction_info);
--- END //
--- DELIMITER;
 
 CREATE TABLE scrapedData (
                              id INT AUTO_INCREMENT PRIMARY KEY,
@@ -143,24 +114,35 @@ CREATE TABLE IF NOT EXISTS webcrawlers (
                                            created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
--- Table for the scraper engine
-CREATE TABLE IF NOT EXISTS scraper_engine (
-                                              engine_id CHAR(36) PRIMARY KEY,
-                                              engine_name NVARCHAR(50),
-                                              engine_description VARCHAR(250),
-                                              time_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
-);
 
 -- Table for predictions
-CREATE TABLE IF NOT EXISTS predictions (
-                                           prediction_id INT PRIMARY KEY AUTO_INCREMENT,
-                                           engine_id CHAR(36),
-                                           prediction_tag CHAR(64),  -- New field for clustering similar predictions
-                                           input_data TEXT,
-                                           prediction_info JSON,
-                                           prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                           FOREIGN KEY (engine_id) REFERENCES scraper_engine (engine_id)
+-- Table for K-Nearest Neighbors Predictions
+CREATE TABLE IF NOT EXISTS knn_predictions (
+                                               prediction_id VARCHAR(36) PRIMARY KEY,
+                                               query_identifier VARCHAR(255),
+                                               input_data VARCHAR(255),
+                                               prediction_info VARCHAR(255),
+                                               prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
+
+-- Table for Linear Regression Predictions
+CREATE TABLE IF NOT EXISTS linear_regression_predictions (
+                                                             prediction_id VARCHAR(36) PRIMARY KEY,
+                                                             query_identifier VARCHAR(255),
+                                                             input_data TEXT(255),
+                                                             prediction_info VARCHAR(255),
+                                                             prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+);
+
+-- Table for Naive Bayes Predictions
+CREATE TABLE IF NOT EXISTS naive_bayes_predictions (
+                                                       prediction_id VARCHAR(36) PRIMARY KEY,
+                                                       query_identifier VARCHAR(255),
+                                                       input_data VARCHAR(255),
+                                                       prediction_info LONGTEXT,
+                                                       prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+);
+
 
 
 CREATE TABLE IF NOT EXISTS user_sessions (
@@ -208,6 +190,8 @@ CREATE TABLE ETFs (
                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+
+
 -- ================================================
 -- SECTION: TASK MANAGER SPROCS
 -- ================================================
@@ -245,18 +229,6 @@ DELIMITER ;
 -- SECTION: CUDA SPROCS
 -- ================================================
 
--- Stored Procedure to add a new prediction
-DELIMITER //
-CREATE PROCEDURE create_prediction(
-    IN p_engine_id CHAR(36),
-    IN p_prediction_tag CHAR(64),  -- New parameter
-    IN p_prediction_info JSON
-)
-BEGIN
-    INSERT INTO predictions (engine_id, prediction_tag, prediction_info)
-    VALUES (p_engine_id, p_prediction_tag, p_prediction_info);
-END //
-DELIMITER ;
 
 -- Stored Procedure to add a new machine learning model
 DELIMITER //
@@ -340,28 +312,6 @@ BEGIN
 END //
 DELIMITER ;
 
--- USE goengine;
-
--- DELIMITER //
-
--- DROP PROCEDURE IF EXISTS InsertLog;
--- CREATE PROCEDURE InsertLog(
---     IN pStatusCode VARCHAR(3),
---     IN pMessage VARCHAR(250),
---     IN pGoEngineArea VARCHAR(250)
--- )
--- BEGIN
---     DECLARE pLogID CHAR(36);
---     IF LENGTH(pStatusCode) > 3 THEN
---         SIGNAL SQLSTATE '45000'
---         SET MESSAGE_TEXT = 'Data too long for column pStatusCode';
---         RETURN;
---     END IF;
---     SET pLogID = UUID();
---     INSERT INTO log (logID, statusCode, message, goEngineArea)
---     VALUES (pLogID, pStatusCode, pMessage, pGoEngineArea);
--- END//
--- DELIMITER ;
 
 DELIMITER //
 
@@ -410,32 +360,6 @@ END //
 DELIMITER ;
 DELIMITER //
 
--- CREATE PROCEDURE PopulateLog()
--- BEGIN
---     DECLARE statusCodeExists INT;
-
---     SELECT COUNT(*) INTO statusCodeExists FROM logstatuscodes WHERE statusCode IN ('ERR', 'WAR', 'OPR');
-
---     IF statusCodeExists = 3 THEN
---         IF (SELECT COUNT(*) FROM log) = 0 THEN
---             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
---             VALUES (UUID(), 'ERR', 'An Error has occurred in the following area', 'CARP', NOW());
-
---             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
---             VALUES (UUID(), 'WAR', 'A Warning has been issued in the following area', 'CRAB', NOW());
-
---             INSERT INTO log (logID, statusCode, message, goEngineArea, dateTime)
---             VALUES (UUID(), 'OPR', 'Normal Operational Requirements have been met in the following area', 'CUDA', NOW());
---         END IF;
---     ELSE
---         -- If required code is missing from statusCodes, then this error is given
---         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Missing required status codes in logstatuscodes table.';
---     END IF;
--- END //
-
--- DELIMITER ;
-
--- CALL PopulateLog();
 
 select * from log
 -- Reset the delimiter back to default
@@ -563,22 +487,7 @@ BEGIN
     VALUES (v_crawler_id, p_source_url);
     SELECT v_crawler_id;
 END //
-DELIMITER ;
 
--- Stored Procedure to add a new scraper engine
-DELIMITER //
-CREATE PROCEDURE create_scraper_engine(
-    IN p_engine_name NVARCHAR(50),
-    IN p_engine_description VARCHAR(250)
-)
-BEGIN
-    DECLARE v_engine_id CHAR(36);
-    -- Generating a unique identifier and assigning it to v_engine_id
-    SET v_engine_id = UUID();
-    INSERT INTO scraper_engine(engine_id, engine_name, engine_description)
-    VALUES (v_engine_id, p_engine_name, p_engine_description);
-    SELECT v_engine_id;
-END //
 DELIMITER ;
 
 -- SPROC to insert URL records into the URLs table
@@ -904,28 +813,6 @@ BEGIN
 END //
 DELIMITER ;
 
-
-# Old method
-# DELIMITER //
-# CREATE PROCEDURE authenticate_user(
-#     IN p_user_login NVARCHAR(36),
-#     IN p_user_password VARBINARY(255)
-# )
-# BEGIN
-#     DECLARE v_user_id CHAR(36);
-#     DECLARE v_authenticated BOOLEAN;
-#
-#     -- Check if the login and hashed password match any user
-#     SELECT user_id INTO v_user_id FROM users
-#     WHERE user_login = p_user_login AND user_password = p_user_password;
-#
-#     -- Determine if the user is authenticated
-#     SET v_authenticated = (v_user_id IS NOT NULL);
-#
-#     SELECT v_authenticated, v_user_id;
-# END //
-# DELIMITER ;
-
 DELIMITER //
 -- Procedure to create a new session for a user
 CREATE PROCEDURE create_session(
@@ -952,26 +839,27 @@ END //
 DELIMITER ;
 
 DELIMITER  //
+-- Procedure to validate a user's token
 CREATE PROCEDURE validate_refresh_token(
-    IN p_token VARBINARY(255)
+    IN p_token VARCHAR(255)
 )
 BEGIN
-    SELECT user_id
+    SELECT user_id, token, expiry
     FROM refresh_tokens
-    WHERE token = p_token AND expiry > CURRENT_TIMESTAMP;
-
+    WHERE token = p_token;
 END //
-DELIMITER ;
 
-DELIMITER //
+-- Procedure to issue a new refresh token
 CREATE PROCEDURE issue_refresh_token(
     IN p_user_id CHAR(36),
     IN p_token VARBINARY(255)
 )
 BEGIN
+    DELETE FROM refresh_tokens WHERE user_id = p_user_id;
     INSERT INTO refresh_tokens (token_id, user_id, token, expiry)
     VALUES (UUID(), p_user_id, p_token, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 7 DAY));
 END //
+
 DELIMITER ;
 
 DELIMITER //
@@ -1049,12 +937,12 @@ VALUES
     ('USR', 'User'),
     ('DEV', 'Developer');
 
--- Inserting sample users into the users table
-INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
-VALUES
-    (UUID(), 'Joesph Oakes', 'jxo19', 'ADM', 'admin123', TRUE, CURRENT_TIMESTAMP()),
-    (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', 'dev789', TRUE, CURRENT_TIMESTAMP()),
-    (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', 'std447', TRUE, CURRENT_TIMESTAMP());
+# -- Inserting sample users into the users table
+# INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
+# VALUES
+#     (UUID(), 'Joesph Oakes', 'jxo19', 'ADM', 'admin123', TRUE, CURRENT_TIMESTAMP()),
+#     (UUID(), 'Mahir Khan', 'mrk5928', 'DEV', 'dev789', TRUE, CURRENT_TIMESTAMP()),
+#     (UUID(), 'Joshua Ferrell', 'jmf6913', 'DEV', 'std447', TRUE, CURRENT_TIMESTAMP());
 
 -- Inserting sample users into the users table
 INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
@@ -1062,6 +950,104 @@ VALUES
     ('9c0f0ac1-8d78-11ee-b6e0-4c796ed97681', 'test1', 'test1@test.com', 'USR', '$2a$10$6nsLKZMGjnG4osvBN3AbUOIvOnYXXZVrbcgdYY419OYUsGzqDlDMG', TRUE, '2023-11-27 17:59:24'),
     ('a2eb8427-8d78-11ee-b6e0-4c796ed97681', 'test2', 'test2@test.com', 'USR', '$2a$10$M8s0NhMKr24C6bSwlWBfY.4pPSnWtHIAAVY5qKRPfnoXZAFvzcmgW', TRUE, '2023-11-27 17:59:36'),
     (UUID(), 'hansi', 'hansi@hansi.com', 'USR', '$2a$10$C4ZoMvNpBqJ8MB9LMLzQye2uXvQKPujw1SXccnuLJ/frYoG6GUOZy', TRUE, CURRENT_TIMESTAMP());
+
+-- Inserting admin users into the users table with a hashed password
+INSERT INTO users (user_id, user_name, user_login, user_role, user_password, active_or_not, user_date_added)
+VALUES
+    (UUID(), 'Matthew Assali', 'mfa5498@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Hansi Seitaj', 'hjs5684@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Eni Vejseli', 'emv5319@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Sara Becker', 'sqb6198@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Emily Carpenter', 'esc5316@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Matthew Finn', 'mkf5480@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Evan M Green', 'emg5555@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Binh Thanh Hoang', 'bth5241@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP()),
+    (UUID(), 'Shiv Patel', 'sbp5769@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP());
+
+INSERT INTO linear_regression_predictions(prediction_id,query_identifier, input_data, prediction_info) VALUES (UUID(),'Gas Prices Prediction for the year 2023','(1978.000000, 51.900000, 0.652000),(1979.000000, 70.200000, 0.882000),(1980.000000, 97.500000, 1.221000),(1981.000000, 108.500000, 1.353000),(1982.000000, 102.800000, 1.281000),(1983.000000, 99.400000, 1.225000),(1984.000000, 97.800000, 1.198000),(1985.000000, 98.600000, 1.196000),(1986.000000, 77.000000, 0.931000),(1987.000000, 80.100000, 0.957000),(1988.000000, 80.800000, 0.964000),(1989.000000, 88.500000, 1.060000),(1990.000000, 101.000000, 1.217000),(1991.000000, 99.200000, 1.196000),(1992.000000, 99.000000, 1.190000),(1993.000000, 97.700000, 1.173000),(1994.000000, 98.200000, 1.174000),(1995.000000, 99.800000, 1.205000),(1996.000000, 105.900000, 1.288000),(1997.000000, 105.800000, 1.291000),(1998.000000, 91.600000, 1.115000),(1999.000000, 100.100000, 1.221000),(2000.000000, 128.600000, 1.563000),(2001.000000, 124.000000, 1.531000),(2002.000000, 116.000000, 1.441000),(2003.000000, 135.100000, 1.638000),(2004.000000, 159.700000, 1.923000),(2005.000000, 194.700000, 2.338000),(2006.000000, 219.900000, 2.635000),(2007.000000, 237.959000, 2.849000),(2008.000000, 277.457000, 3.317000),(2009.000000, 201.555000, 2.401000),(2010.000000, 238.594000, 2.836000),(2011.000000, 301.694000, 3.577000),(2012.000000, 311.470000, 3.695000),(2013.000000, 302.577000, 3.584000),(2014.000000, 290.889000, 3.425000),(2015.000000, 212.007000, 2.510000),(2016.000000, 187.602000, 2.204000),(2017.000000, 211.770000, 2.469000),(2018.000000, 240.599000, 2.794000),(2019.000000, 232.003000, 2.698000),(2020.000000, 194.130000, 2.242000),(2021.000000, 264.017000, 3.133000),(2022.000000, 347.747000, 4.192000)','The prediction for gas prices in the year 2023 is: $4.34');
+# INSERT INTO naive_bayes_predictions(prediction_id,query_identifier, input_data, prediction_info) VALUES (UUID(),'Top 3 Tech Jobs with most demand skills','','Most Demand Skills: Python, Java, React, Design
+# Top Jobs for ''Tech'' Domain:
+# Job Title: Software Engineer- Full Stack, URL: https://www.indeed.com/pagead/clk?mo=r&ad=-6NYlbfkN0DlG8eQ-E_eElbjQUAvh1Po9TMRdgcP7wLVIjfv-ORu9JgO3eKYfgel2s47D-0NuUWA6aOloEkMl1IgL2hYHZkjrYA-GpXd3cRH7rjuHefL0mCXddEQODNrSSFhAN_q86B
+# wYK24GFcTVHJEC9nRhV0RUcKYvwRjXScpZ009kyw4OR_v2YKKc2InCPsjDB7hyOIo_Ax-9w4_N3v8Lnog5GjG_5b7R8kFUkqoYV7j9pKCQeBa2xGWX7B2SiBMOaOevJdezWYuZzF382QPrFDp1LQKNJHr7HgjSBX2MaK-XwFGOxJ2wseNKBQtxnGof6uDnmPTaY0UaxiOcDjdWqNTkH7szpsZI4rMdJE0Ivm
+# XkoJdAhALHSscdNjYESTSZ-5H6mPpHLhVi0wM23pvfz3JZ-wZ-v0qzrEgXFswCZ_ozv4gyi7ImtWXRikSguzAilQVFSFY6LUCxOexrhW2Wjnlmb2x2Pe0zE8ZxslmEi5ffDuQ-1F4fWSMUjgqt3XVxc0NQ3i3Bs2pARaR_feRRS8Y9Q_yKr7UKDBkudRZysshrqCJB1msTCa3_8xMSlJbNb-GZToITyRSf2S
+# FQlkEm3PqNzJIHYoArF9cmBYA_Fbbpo6lpJuDBvAGXLQEuIyLGdlN0yL-xBZb1YVhB6_PsIuqxoM7HORIxfTO5bjc9fmr0M7SUXWDsJUzVF8CiNsj_PmPGaZ-q56kEz58-h251XPKu8eQBEC53k-B_uU-1Q9wBh8-SztED0XY2HUvxzIwwEkkmFTh6Cjy-ssztoSf9vpS1TGdmQzNg2xAPU9nCRUz5g8p4WN
+# Nyr3Y3MfnAmHgZ-6iKBfmMf7W0HQVyfNMJvFeTKD9RT5Zb0T-QCg-tfhLq8KMgHWO7APPnV0KQUDYct2MnioKi-HROkAVKOwwGOJl6mBZZ9wQg4c0dEWjzJjIjVCvC9KbY7SAVUphz5yYZ4lHASl_juQk7g26NewaVd2YgARC&xkcb=SoCT-_M3HcRK65RgW50IbzkdCdPP&p=3&fvj=0&vjs=3, Company: Motion Recruitment, Location: Location Not Found, Salary: $120,000 - $150,000 a year
+# Description: Proficiency in a range of programming languages and technologies such as JavaScript, Python, Java, Ruby, or others, for both front-end and back-end development.
+# Front-End Development: React, Angular, Vue.js and proficiency in HTML, CSS, and JavaScript.
+# Back-End Development: Node.js, Django, Flask, Spring,
+# Full Stack Proficiency: Ability to seamlessly work on both front-end and back-end components, understanding the interplay between them to build cohesive applications.
+# Proficiency in a range of programming languages and technologies such as JavaScript, Python, Java, Ruby, or others, for both front-end and back-end development.
+# Front-End Development: React, Angular, Vue.js and proficiency in HTML, CSS, and JavaScript.
+# Back-End Development: Node.js, Django, Flask, Spring,
+# Full Stack Proficiency: Ability to seamlessly work on both front-end and back-end components, understanding the interplay between them to build cohesive applications.
+# Database Knowledge: Familiarity with database systems like SQL, NoSQL, and the ability to design efficient data models.
+# Adaptability and Eagerness to Learn: Willingness to adapt to new technologies and learn continuously in a fast-paced environment.
+# 50% front end
+# 50% back end
+# 50% front end
+# 50% back end
+# Design, develop, and deploy scalable, efficient, and high-quality software applications across the full tech stack.
+# Design, develop, and deploy scalable, efficient, and high-quality software applications across the full tech stack.
+# Ensure code quality through best practices, testing, and code reviews.
+# Troubleshoot and debug issues to maintain the performance and reliability of software applications
+# Healthcare insurance, 100% company-paid premiums
+# Stock options
+# Work life balance, vacation time
+# Healthcare insurance, 100% company-paid premiums
+# Stock options
+# Work life balance, vacation time
+# Matching Skills: 4 [design, Python, Java, React]
+#
+# Job Title: Software Developer, URL: https://www.indeed.com/rc/clk?jk=62253a0443b245d8&bb=qX68GcmwpUT_7GZdeTpvaQzYU8YaOhuxU9Fif5hbMMSyOikzvNT_fXC6oyzz7zq0&xkcb=SoBC67M3HcRKiURSZR0PbzkdCdPP&fccid=3c871c128fb1bf83&vjs=3, Company: LifeLens Technologies, Location: Ivyland, PA 18974, Salary: Salary Not Found
+# Description: Java, JavaScript, Python or equivalent
+# Understanding of HITRUST, GDPR, and/or HIPAA security compliance.
+# Familiarity with React/Redux or equivalent interface frameworks.
+# Familiarity with Docker container runtime engine.
+# Helping support on-device application development and integration with back-end services.
+# Bachelor’s Degree in Computer Science, Computer Engineering, or a related technical discipline
+# Matching Skills: 3 [Python, Java, React]
+#
+# Job Title: URBN Platform Services Engineer, URL: https://www.indeed.com/rc/clk?jk=2cdad9fc6c68b401&bb=jcqAAeUUNaDqg-nH3cQUctIZ9ZoGo2H-L8MmmHGec9TsJ6NJ8bQwd-EeMKKAi_SE&xkcb=SoCn67M3HcRKspyU5p0KbzkdCdPP&fccid=a97e193d3b71f26b&vjs=3, Company: URBN, Location: Location Not Found, Salary: Salary Not Found
+# Description: Design and development of microservices and event driven systems
+# Develop new product features and advance the design of existing code for the Ecommerce applications
+# Develop functional designs while interacting with enterprise architects, developers, business partners as well as end users
+# React to possible production issues
+# Enjoys working in a collaborative team setting
+# Understanding of OO principles and design patterns
+# Self-starter, ready to learn new concepts and technologies. Willing to take on responsibility for new features and develop them from inception to completion
+# Proficient in Python/Golang
+# Strong understanding of RESTful services design
+# Strong understanding of asynchronous message processing technologies
+# Enjoys working across teams and sharing knowledge with other engineers
+# Familiarity with search solutions like Elastic Search, Solr
+# Demonstrated expertise with Unit Testing frameworks and mocking libraries
+# Familiar with Django or other ORM frameworks
+# Exposure to data science and Machine learning technologies
+# Understanding of cloud hosting platforms and infrastructure');
+
+INSERT INTO naive_bayes_predictions (prediction_id, query_identifier, input_data, prediction_info)
+VALUES (
+           UUID(),
+           'Top 3 Tech Jobs with most demand skills',
+           'Software Release DevOps Engineer',
+           'C:\\Users\\Public\\GoLandProjects\\JustAFork\\crab\\output\\SoftwareEng_jobs.json'
+       );
+
+INSERT INTO naive_bayes_predictions (prediction_id, query_identifier, input_data, prediction_info)
+VALUES (
+           UUID(),
+           'Top 3 Law Jobs with most demand skills',
+           'Law Related Skills', -- Replace with actual skills
+           'C:\\Users\\Public\\GoLandProjects\\JustAFork\\crab\\output\\Law_jobs.json'
+       );
+
+INSERT INTO naive_bayes_predictions (prediction_id, query_identifier, input_data, prediction_info)
+VALUES (
+           UUID(),
+           'Top 3 Bus Jobs with most demand skills',
+           'Business Related Skills', -- Replace with actual skills
+           'C:\\Users\\Public\\GoLandProjects\\JustAFork\\crab\\output\\Business_jobs.json'
+       );
 
 
 -- Inserting sample URLs into the URLs table

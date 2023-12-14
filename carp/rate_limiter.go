@@ -1,5 +1,0 @@
-package carp
-
-func main() {
-
-}

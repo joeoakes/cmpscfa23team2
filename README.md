@@ -3,7 +3,7 @@
  
 
 <div align="center">
-   <img src="PredictAi/frontend/Assets/PredictAi logo.png" alt=" Design of a modern and sleek logo for a project named 'PredictAI'. The logo features a stylized, abstract brain composed of interconnected nodes."/>
+   <img src="PredictAi/frontend/Assets/logo.jpg" alt=" Design of a modern and sleek logo for a project named 'PredictAI'. The logo features a stylized, abstract brain composed of interconnected nodes."/>
 </div>
 
 Hansi notes: (don't delete)
@@ -12,14 +12,16 @@ Hansi notes: (don't delete)
 
 <img src="https://github.com/hseitaj/PredictAi/assets/67917151/1ec4cb58-230f-493d-a248-d23931cbf204" alt="PredictAi logo" width="300" height="300" align="left"/>
 
-# PredictAI - The Future of Predictive Analytics
+# PredictAI - The Future of Predictiv![image](https://github.com/hseitaj/JustAFork/assets/67917151/3496daa8-3ece-48e5-9d25-1cc3b04b1890)
+e Analytics
 
 <div style="clear: both;"></div>
 <br clear="left"/>
+https://github.com/hseitaj/JustAFork/assets/67917151/417ca3f3-e63b-4dd3-aac5-3c113e9876d4
 
 -->
 <div align="center">
-  <img src="https://github.com/hseitaj/PredictAi/assets/67917151/1ec4cb58-230f-493d-a248-d23931cbf204" alt="PredictAi logo" width="300" height="300"/>
+  <img src="https://github.com/hseitaj/JustAFork/assets/67917151/417ca3f3-e63b-4dd3-aac5-3c113e9876d4" alt="PredictAi logo" width="300" height="300"/>
   <h1>PredictAI - The Future of Predictive Analytics</h1>
 </div>
 

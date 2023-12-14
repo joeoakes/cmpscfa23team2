@@ -1,4 +1,4 @@
-package cuda
+package main
 
 import (
 	"database/sql"
@@ -341,12 +341,14 @@ func main() {
 			newY = append(newY, yVal)
 		}
 
-		// Predict gas price for 2023
+		// Predict gas price for 2023 +++++++++++++++++++++++++++++++++
 		year2023 := 2023.0
 		cpi2023 := 349.189
-		price2023 := (0.10 * (a*year2023 + b*cpi2023 + c))
+		price2023 := 0.10 * (a*year2023 + b*cpi2023 + c)
+
 		// Format prediction output with descriptive text
 		descriptivePrediction := fmt.Sprintf("The prediction for gas prices in the year 2023 is: $%.2f", price2023)
+
 		// Collect input data from previous years
 		var inputDataStrings []string
 		for i := 0; i < len(years); i++ {
@@ -358,31 +360,111 @@ func main() {
 		inputData := strings.Join(inputDataStrings, ",")
 
 		// Connect to the database
-		db, err := sql.Open("mysql", "root:FJALkalim123@tcp(127.0.0.1:3306)/goengine")
+		db, err := sql.Open("mysql", "root:Pane1901.@tcp(127.0.0.1:3306)/goengine")
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer db.Close()
 
-		// Insert the prediction into the "predictions" table, including input_data
-		insertStatement := "INSERT INTO linear_regression_predictions (prediction_id,query_identifier, input_data, prediction_info) VALUES (?,?, ?, ?)"
-		// Insert the prediction with descriptive text into the database
-		_, err = db.Exec(insertStatement, 1, "Gas Prices Query 1", inputData, descriptivePrediction)
-		if err != nil {
-			log.Fatal(err)
+		var existingPredictionID int
+		err = db.QueryRow("SELECT prediction_id FROM linear_regression_predictions WHERE query_identifier = ? AND prediction_id = ?", "Gas Prices Query 1", 1).Scan(&existingPredictionID)
+		if err == nil {
+			// Prediction for 2023 already exists, update the record
+			updateStatement := "UPDATE linear_regression_predictions SET input_data = ?, prediction_info = ? WHERE query_identifier = ? AND prediction_id = ?"
+			_, err := db.Exec(updateStatement, inputData, descriptivePrediction, "Gas Prices Query 1", existingPredictionID)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			// Prediction for 2023 doesn't exist, insert a new record
+			insertStatement := "INSERT INTO linear_regression_predictions (query_identifier, input_data, prediction_info) VALUES (?, ?, ?)"
+			_, err = db.Exec(insertStatement, "Gas Prices Query 1", inputData, descriptivePrediction)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
-
-		fmt.Printf("Predicted Gas Price for 2023: %.2f\n", price2023)
 
 		// Append the predicted gas price to the existing prices slice
 		prices = append(prices, price2023)
 
 		// Create and save the scatter plot with the extended x values
 		title := "Gas Price Prediction Scatter Plot (Extended)"
-		filename := "Gas Prices Prediction for the year 2023_scatter_plot.png"
+		filename := "Gas Prices Query 1_scatter_plot.png"
 		xLabel := "Year"
 		yLabel := "Average Gasoline Prices"
 		CreateScatterPlot(append(years, newX...), prices, a, b, title, filename, xLabel, yLabel)
+
+		// Store predictions and data for 2023
+		predictions := []float64{price2023}
+		data := inputDataStrings
+
+		// predicting for 2024 nowww ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+		// Extend the time range for prediction (next year, 2024)
+		var newX2024 []float64
+		for i := 1; i <= 1; i++ {
+			newX2024 = append(newX2024, newX[len(newX)-1]+float64(i))
+		}
+
+		// Combine all data for linear regression
+		years24 := append(years, year2023)
+		cpi24 := append(cpiValues, cpi2023)
+		prices24 := append(prices, price2023)
+
+		// Perform linear regression
+		a4, b4, c4 := LinearRegressionThreeVariables(years24, cpi24, prices24)
+
+		// Predict gas price for 2024 based on the regression model
+		year2024 := 2024.0
+		cpi2024 := 340.1 // Use the CPI value from 2023 or update as needed
+		price2024 := 0.10 * (a4*year2024 + b4*cpi2024 + c4)
+
+		// Collect input data from previous years for 2024
+		var inputDataStrings24 []string
+		for i := 0; i < len(years); i++ {
+			inputDataString := fmt.Sprintf("(%f, %f, %f)", years[i], cpiValues[i], prices[i])
+			inputDataStrings24 = append(inputDataStrings24, inputDataString)
+		}
+
+		// Collect input data for the year 2024
+		inputDataString2024 := fmt.Sprintf("(%f, %f, %f)", year2024, cpi2024, price2024)
+		inputDataStrings24 = append(inputDataStrings24, inputDataString2024)
+
+		// Combine input data strings into a single string
+		inputData24 := strings.Join(inputDataStrings24, ",")
+
+		// Format prediction output with descriptive text
+		descriptivePrediction2024 := fmt.Sprintf("The prediction for gas prices in the year 2024 is: $%.2f", price2024)
+
+		err = db.QueryRow("SELECT prediction_id FROM linear_regression_predictions WHERE query_identifier = ? AND prediction_id = ?", "Gas Prices Query 2", 2).Scan(&existingPredictionID)
+		if err == nil {
+			// Prediction for 2024 already exists, update the record
+			updateStatement := "UPDATE linear_regression_predictions SET input_data = ?, prediction_info = ? WHERE query_identifier = ? AND prediction_id = ?"
+			_, err := db.Exec(updateStatement, inputData24, descriptivePrediction2024, "Gas Prices Query 2", existingPredictionID)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			// Prediction for 2024 doesn't exist, insert a new record
+			insertStatement := "INSERT INTO linear_regression_predictions (query_identifier, input_data, prediction_info) VALUES (?, ?, ?)"
+			_, err = db.Exec(insertStatement, "Gas Prices Query 2", inputData24, descriptivePrediction2024)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		fmt.Printf("Predicted Gas Price for 2024: %.2f\n", price2024)
+
+		// Append the predicted gas price to the existing prices slice
+		prices = append(prices, price2024)
+
+		// Create and save the scatter plot with the extended x values for 2024
+		title2024 := "Gas Price Prediction Scatter Plot"
+		filename2024 := "Gas Prices Query 2_scatter_plot.png"
+		CreateScatterPlot(append(append(years, newX...), newX2024...), append(prices, price2024), a, b, title2024, filename2024, xLabel, yLabel)
+
+		// Update predictions and data for 2024
+		predictions = append(predictions, price2024)
+		data = append(data, fmt.Sprintf("(%f, %f, %f)", year2024, cpi2024, price2024))
 
 	// case airfare ---------------------------------------------------
 	case "airfare":

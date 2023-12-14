@@ -418,7 +418,7 @@ func main() {
 			newY = append(newY, yVal)
 		}
 
-		// Connect to the database
+		// Connect to the database !
 		db, err := sql.Open("mysql", "root:Matthew@1499.@tcp(127.0.0.1:3306)/goengine")
 		if err != nil {
 			log.Fatal(err)

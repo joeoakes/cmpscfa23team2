@@ -448,7 +448,7 @@ func main() {
 			log.Fatal(err)
 		}
 
-		// Create and save the scatter plot with the extended x values
+		// Create and save the scatter plot with the extended x valuesf
 		title := "Airfare Price Prediction Scatter Plot"
 		filename := "airfare_scatter_plot.png"
 		xLabel := "Month"

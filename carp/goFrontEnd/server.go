@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 )
 
+// PageData struct holds data for rendering HTML pages.
 type PageData struct {
 	Title        string
 	Content      string
@@ -22,6 +23,7 @@ type PageData struct {
 	Users        []*dal.User
 }
 
+// main function sets up and starts the server.
 func main() {
 	dir, err := os.Getwd()
 	if err != nil {
@@ -32,6 +34,7 @@ func main() {
 	setupServer()
 }
 
+// setupServer configures and starts the HTTP server.
 func setupServer() {
 	dir, err := os.Getwd()
 	if err != nil {
@@ -56,7 +59,7 @@ func setupServer() {
 	}
 }
 
-// Web Page Routes (set up login as first page):
+// setupRoutes configures routes for the web server.
 func setupRoutes(tmpl *template.Template) {
 	http.HandleFunc("/", makeHandler(tmpl, "login"))
 	http.HandleFunc("/home", makeHandler(tmpl, "home"))
@@ -75,6 +78,7 @@ func setupRoutes(tmpl *template.Template) {
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 }
 
+// makeHandler returns a handler function for rendering HTML pages.
 func makeHandler(tmpl *template.Template, content string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" && content == "register" {
@@ -120,6 +124,7 @@ func makeHandler(tmpl *template.Template, content string) http.HandlerFunc {
 //	}
 //}
 
+// loginHandler handles user login requests.
 func loginHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 
@@ -153,6 +158,7 @@ func loginHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Reques
 	}
 }
 
+// renderLoginTemplate renders the login page template.
 func renderLoginTemplate(tmpl *template.Template, w http.ResponseWriter, errorMessage string) {
 	data := PageData{
 		Title:        "Login",
@@ -164,6 +170,8 @@ func renderLoginTemplate(tmpl *template.Template, w http.ResponseWriter, errorMe
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
+
+// registerHandler handles user registration requests.
 func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 
@@ -222,136 +230,7 @@ func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Req
 	}
 }
 
-//
-//func predictionHandler(w http.ResponseWriter, r *http.Request) {
-//	// Only allow GET requests for this endpoint
-//	if r.Method != http.MethodGet {
-//		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-//		return
-//	}
-//
-//	// Extract query parameters for 'domain' and 'queryType'
-//	domain := r.URL.Query().Get("domain")
-//	query_identifier := r.URL.Query().Get("queryType") // Changed from 'query' to 'queryType'
-//
-//	// Check if both 'domain' and 'queryType' parameters are provided
-//	if domain == "" || query_identifier == "" {
-//		http.Error(w, "Missing domain or queryType parameter", http.StatusBadRequest)
-//		return
-//	}
-//
-//	// Fetch prediction data
-//	predictionData, err := dal.FetchPredictionData(query_identifier, domain)
-//	if err != nil {
-//		log.Printf("Error fetching prediction data: %v", err)
-//		http.Error(w, "Internal server error", http.StatusInternalServerError)
-//		return
-//	}
-//
-//	// Respond with the fetched prediction data
-//	w.Header().Set("Content-Type", "application/json")
-//	json.NewEncoder(w).Encode(predictionData)
-//}
-//
-//func predictionHandler(w http.ResponseWriter, r *http.Request) {
-//	// Only allow GET requests for this endpoint
-//	if r.Method != http.MethodGet {
-//		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-//		return
-//	}
-//
-//	// Extract query parameters for 'domain' and 'queryType'
-//	domain := r.URL.Query().Get("domain")
-//	queryIdentifier := r.URL.Query().Get("queryType")
-//
-//	// Check if both 'domain' and 'queryType' parameters are provided
-//	if domain == "" || queryIdentifier == "" {
-//		http.Error(w, "Missing domain or queryType parameter", http.StatusBadRequest)
-//		return
-//	}
-//
-//	// Fetch prediction data
-//	predictionData, err := dal.FetchPredictionData(queryIdentifier, domain)
-//	if err != nil {
-//		log.Printf("Error fetching prediction data: %v", err)
-//		http.Error(w, "Internal server error", http.StatusInternalServerError)
-//		return
-//	}
-//
-//	// Load job data from the JSON file specified in 'prediction_info'
-//	jobData, err := dal.LoadDataFromJSON(predictionData.PredictionInfo)
-//	if err != nil {
-//		log.Printf("Error loading job data from JSON: %v", err)
-//		http.Error(w, "Internal server error", http.StatusInternalServerError)
-//		return
-//	}
-//
-//	// Create a response object to include both the skills and job listings
-//	response := struct {
-//		Skills      string        `json:"skills"`
-//		JobListings []dal.JobData `json:"job_listings"`
-//	}{
-//		Skills:      predictionData.InputData, // Assuming 'InputData' contains the skills
-//		JobListings: jobData,
-//	}
-//
-//	// Respond with the processed job data
-//	w.Header().Set("Content-Type", "application/json")
-//	json.NewEncoder(w).Encode(response)
-//}
-
-//	func predictionHandler(w http.ResponseWriter, r *http.Request) {
-//		if r.Method != http.MethodGet {
-//			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-//			return
-//		}
-//
-//		domain := r.URL.Query().Get("domain")
-//		queryIdentifier := r.URL.Query().Get("queryType")
-//
-//		if domain == "" || queryIdentifier == "" {
-//			http.Error(w, "Missing domain or queryType parameter", http.StatusBadRequest)
-//			return
-//		}
-//
-//		predictionData, err := dal.FetchPredictionData(queryIdentifier, domain)
-//		if err != nil {
-//			log.Printf("Error fetching prediction data: %v", err)
-//			http.Error(w, "Internal server error", http.StatusInternalServerError)
-//			return
-//		}
-//
-//		jobData, err := dal.LoadDataFromJSON(predictionData.PredictionInfo)
-//		if err != nil {
-//			log.Printf("Error loading job data from JSON: %v", err)
-//			http.Error(w, "Internal server error", http.StatusInternalServerError)
-//			return
-//		}
-//
-//		var specificJob *dal.JobData
-//		// Assuming "Software Release DevOps Engineer" is an example job title you are searching for.
-//		// You can replace it with a dynamic value based on the user's input if required.
-//		specificJobTitle := "Software Release DevOps Engineer"
-//		for _, job := range jobData {
-//			if job.Title == specificJobTitle {
-//				specificJob = &job
-//				break
-//			}
-//		}
-//
-//		response := struct {
-//			Skills      string        `json:"skills"`
-//			JobListings []dal.JobData `json:"job_listings"`
-//			SpecificJob *dal.JobData  `json:"specific_job"`
-//		}{
-//			Skills:      predictionData.Skills,
-//			JobListings: jobData,
-//			SpecificJob: specificJob,
-//		}
-//
-//		w.Header().Set("Content-Type", "application/json")
-//		json.NewEncoder(w).Encode(response)
-//	}
+// predictionHandler handles requests for predictions.
 func predictionHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -366,7 +245,7 @@ func predictionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fetch the prediction data, which includes the specific job and all job listings
+	// Fetch the prediction data
 	predictionData, err := dal.FetchPredictionData(queryIdentifier, domain)
 	if err != nil {
 		log.Printf("Error fetching prediction data: %v", err)
@@ -374,20 +253,9 @@ func predictionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Prepare the response with the obtained data
-	response := struct {
-		Skills      string        `json:"skills"`
-		JobListings []dal.JobData `json:"job_listings"`
-		SpecificJob *dal.JobData  `json:"specific_job"`
-	}{
-		Skills:      predictionData.Skills,
-		JobListings: predictionData.JobListings,
-		SpecificJob: predictionData.SpecificJob,
-	}
-
 	// Send the response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(predictionData)
 }
 
 // renderDashboardTemplate renders the dashboard with a potential error message.
@@ -404,6 +272,7 @@ func renderDashboardTemplate(tmpl *template.Template, w http.ResponseWriter, use
 	}
 }
 
+// dashHandler handles requests for the dashboard page.
 func dashHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	log.Printf("beginning of dashHandler\n")

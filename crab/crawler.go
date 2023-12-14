@@ -14,9 +14,8 @@ import (
 	"time"
 )
 
-// begin intialize crawling =============================================================================================
-//
-//	InitializeCrawling sets up and starts the crawling process.
+// InitializeCrawling starts the web crawling process. It first fetches URLs to crawl from a predefined list,
+// and then initiates a threaded crawl process with a specified number of concurrent crawlers.
 func InitializeCrawling() {
 	log.Println("Fetching URLs to crawl...")
 	urlDataList := getURLsToCrawl()
@@ -24,10 +23,8 @@ func InitializeCrawling() {
 	threadedCrawl(urlDataList, 10)
 }
 
-//end intialize crawling ===============================================================================================
-
-// begin crawl url ======================================================================================================
-// getURLsToCrawl retrieves a list of URLs to be crawled.
+// / getURLsToCrawl returns a slice of URLData representing a list of URLs to be crawled.
+// This function is used internally within the InitializeCrawling function.
 func getURLsToCrawl() []URLData {
 	return []URLData{
 		{URL: "https://www.kaggle.com/search?q=housing+prices"},
@@ -38,9 +35,8 @@ func getURLsToCrawl() []URLData {
 	}
 }
 
-//end crawl url ========================================================================================================
-
-// begin insert data ====================================================================================================
+// InsertData takes structured data (ItemData) and a filename, marshals the data into JSON format,
+// and writes it to the specified file. It returns an error if any occurs during the marshaling or file operations.
 func InsertData(data ItemData, filename string) error {
 	// Save data to JSON file
 	jsonData, err := json.MarshalIndent(data, "", "  ")
@@ -54,10 +50,9 @@ func InsertData(data ItemData, filename string) error {
 	return nil
 }
 
-//end insert data ======================================================================================================
-
-// begin crawlurl ======================================================================================================
-// crawlURL is responsible for crawling a single URL.
+// crawlURL is the core function responsible for crawling a single URL. It takes URLData, a channel to send
+// crawled data, and a WaitGroup to handle concurrency. It uses the Colly library for crawling and processes
+// each URL based on the received HTML content.
 func crawlURL(urlData URLData, ch chan<- URLData, wg *sync.WaitGroup) {
 	defer wg.Done() // Ensure the WaitGroup counter is decremented on function exit
 	c := colly.NewCollector(
@@ -94,9 +89,9 @@ func crawlURL(urlData URLData, ch chan<- URLData, wg *sync.WaitGroup) {
 	ch <- urlData
 }
 
-//end crawlurl ========================================================================================================
-
-// begin create sitemap =================================================================================================
+// createSiteMap generates a sitemap from the given slice of URLData. Each URLData contains links found
+// at a specific URL. The function marshals this data into JSON format and writes it to a file named "siteMap.json".
+// It returns an error if the marshaling or file operations fail.
 func createSiteMap(urls []URLData) error {
 	siteMap := make(map[string][]string)
 	for _, u := range urls {
@@ -114,10 +109,9 @@ func createSiteMap(urls []URLData) error {
 	return nil
 }
 
-//end create sitemap ===================================================================================================
-
-// begin robot.txt ======================================================================================================
-// isURLAllowedByRobotsTXT checks if the given URL is allowed by the site's robots.txt.
+// isURLAllowedByRobotsTXT checks if the given URL is allowed by the site's robots.txt file.
+// It parses the URL to extract the domain, fetches the robots.txt file from the domain, and tests
+// if the URL is allowed. It returns true if allowed, false otherwise.
 func isURLAllowedByRobotsTXT(urlStr string) bool {
 	parsedURL, err := url.Parse(urlStr)
 	if err != nil {
@@ -149,8 +143,9 @@ func isURLAllowedByRobotsTXT(urlStr string) bool {
 
 //end robot.txt ========================================================================================================
 
-// begin threaded crawl =================================================================================================
-// threadedCrawl starts crawling the provided URLs concurrently.
+// threadedCrawl manages the concurrent crawling of multiple URLs. It takes a slice of URLData and
+// an integer specifying the number of concurrent crawlers. The function sets up each crawler with rate limiting
+// and starts the crawling process. The resulting crawled data is used to create a sitemap.
 func threadedCrawl(urls []URLData, concurrentCrawlers int) {
 	var wg sync.WaitGroup
 	ch := make(chan URLData, len(urls))

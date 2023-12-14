@@ -2,14 +2,20 @@ package main
 
 import "time"
 
-// URLData represents the URL to be crawled and its related data.
+// URLData holds information about a specific URL to be crawled, including the URL itself, creation timestamp,
+// and any discovered links.
 type URLData struct {
 	URL     string    // The URL to be crawled
 	Created time.Time // Timestamp of URL creation or retrieval
 	Links   []string  // URLs found on this page
 }
 
-// MonthData represents data for each month.
+// MonthData, AirfareData, YearData, GasolineData, PropertyData, ScraperConfig, DomainConfig, Metadata,
+// GenericData, and ItemData are struct definitions used across the scraper and crawler functionalities.
+// Each struct is tailored to hold specific types of data, ranging from URL information to scraped data
+// for various domains.
+
+// MonthData represents data for individual months, commonly used in time-series data analyses.
 type MonthData struct {
 	Month string `json:"month"`
 	Rate  string `json:"rate"`

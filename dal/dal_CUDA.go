@@ -257,21 +257,53 @@ func FetchPredictionData(queryIdentifier, domain string) (PredictionData, error)
 	var err error
 
 	switch domain {
-	case "Airfare Prices", "Gas Prices":
+	case "Gas Prices":
+		// First try fetching from linear regression predictions
 		queryStr = "SELECT prediction_info FROM linear_regression_predictions WHERE query_identifier = ?"
 		err = DB.QueryRow(queryStr, queryIdentifier).Scan(&data.PredictionInfo)
-		if err != nil {
-			return handleDBError(err, queryIdentifier)
-		}
-		data.ImagePath = fmt.Sprintf("/static/Assets/MachineLearning/LinearRegression/%s_scatter_plot.png", queryIdentifier)
 
-	case "RealEstate":
+		if err != nil {
+			if err == sql.ErrNoRows {
+				// If not found, try fetching from KNN predictions
+				queryStr = "SELECT prediction_info FROM knn_predictions WHERE query_identifier = ?"
+				err = DB.QueryRow(queryStr, queryIdentifier).Scan(&data.PredictionInfo)
+
+				if err != nil {
+					return handleDBError(err, queryIdentifier)
+				}
+
+				// Set the image path for KNN
+				data.ImagePath = fmt.Sprintf("/static/Assets/MachineLearning/LinearRegression/%s_scatter_plot.png", queryIdentifier)
+			} else {
+				return handleDBError(err, queryIdentifier)
+			}
+		} else {
+			// Set the image path for linear regression
+			data.ImagePath = fmt.Sprintf("/static/Assets/MachineLearning/LinearRegression/%s_scatter_plot.png", queryIdentifier)
+		}
+
+	case "Airfare Prices":
 		queryStr = "SELECT prediction_info FROM knn_predictions WHERE query_identifier = ?"
 		err = DB.QueryRow(queryStr, queryIdentifier).Scan(&data.PredictionInfo)
 		if err != nil {
-			return handleDBError(err, queryIdentifier)
+			if err == sql.ErrNoRows {
+				// If not found, try fetching from KNN predictions
+				queryStr = "SELECT prediction_info FROM linear_regression_predictions WHERE query_identifier = ?"
+				err = DB.QueryRow(queryStr, queryIdentifier).Scan(&data.PredictionInfo)
+
+				if err != nil {
+					return handleDBError(err, queryIdentifier)
+				}
+
+				// Set the image path for KNN
+				data.ImagePath = fmt.Sprintf("/static/Assets/MachineLearning/LinearRegression/%s_scatter_plot.png", queryIdentifier)
+			} else {
+				return handleDBError(err, queryIdentifier)
+			}
+		} else {
+			// Set the image path for linear regression
+			data.ImagePath = fmt.Sprintf("/static/Assets/MachineLearning/LinearRegression/%s_scatter_plot.png", queryIdentifier)
 		}
-		data.ImagePath = fmt.Sprintf("/static/Assets/MachineLearning/KNN/%s_scatter_plot.png", queryIdentifier)
 
 	case "Job Market":
 		var predictionPath, jobTitle string

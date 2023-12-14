@@ -109,20 +109,21 @@ func (a ByDistance) Less(i, j int) bool {
 	return a.DistFunc(a.Target, a.Points[i]) < a.DistFunc(a.Target, a.Points[j])
 }
 
-// KNN performs the k-nearest neighbor classification
-func KNN(k int, data []Point, target Point) string {
+// KNN returns the predicted label and a list of the nearest neighbors
+func KNN(k int, data []Point, target Point) (string, []Point) {
 	sort.Sort(ByDistance{Points: data, Target: target, DistFunc: EuclideanDistance})
 
 	// Ensure there are enough points in the data slice
 	if len(data) < k {
 		fmt.Println("Error: Not enough data points for k-nearest neighbors")
-		return ""
+		return "", nil
 	}
 
 	labelVotes := make(map[string]int)
 
 	// Access the first k elements of the sorted data slice
-	for _, p := range data[:k] {
+	nearestNeighbors := data[:k]
+	for _, p := range nearestNeighbors {
 		labelVotes[p.Label]++
 	}
 
@@ -135,7 +136,7 @@ func KNN(k int, data []Point, target Point) string {
 		}
 	}
 
-	return predictedLabel
+	return predictedLabel, nearestNeighbors
 }
 
 // ConvertAirfareDataToPoints converts airfare data to points
@@ -144,15 +145,70 @@ func ConvertAirfareDataToPoints(airfareData AirfareData) []Point {
 	for _, monthData := range airfareData.AdditionalInfo.MonthsData {
 		// Assuming the structure of AirfareMonth, adjust the field names accordingly
 		features := []float64{
-			parseFloat(monthData.Year),
+			floatMonth(monthData.Month),
 			parseFloat(monthData.Rate),
-			// Add more features as needed
+		}
+
+		// Add "Year" feature if available
+		if monthData.Year != "" {
+			features = append(features, parseFloat(monthData.Year))
 		}
 
 		label := "airfare"
 		data = append(data, Point{Features: features, Label: label})
 	}
 	return data
+}
+
+// floatMonth converts a month string to a float64 representation
+func floatMonth(month string) float64 {
+	// You might want to map month names to numerical values if needed
+	// For simplicity, let's use the first three characters of the month name
+	switch month[:3] {
+	case "Jan":
+		return 1.0
+	case "Feb":
+		return 2.0
+	case "Mar":
+		return 3.0
+	case "Apr":
+		return 4.0
+	case "May":
+		return 5.0
+	case "Jun":
+		return 6.0
+	case "Jul":
+		return 7.0
+	case "Aug":
+		return 8.0
+	case "Sep":
+		return 9.0
+	case "Oct":
+		return 10.0
+	case "Nov":
+		return 11.0
+	case "Dec":
+		return 12.0
+	default:
+		return 0.0 // Handle unknown month values
+	}
+}
+
+// DecodeAirfareDataList decodes the JSON file containing airfare data and returns an AirfareDataList
+func DecodeAirfareDataList(filename string) (AirfareDataList, error) {
+	var airfareDataList AirfareDataList
+
+	fileContent, err := os.ReadFile(filename)
+	if err != nil {
+		return airfareDataList, err
+	}
+
+	err = json.Unmarshal(fileContent, &airfareDataList)
+	if err != nil {
+		return airfareDataList, err
+	}
+
+	return airfareDataList, nil
 }
 
 // ConvertGasolineDataToPoints converts gasoline data to points
@@ -294,7 +350,7 @@ func createScatterPlot(data []Point, target Point, predictedLabel string) error 
 		}
 	}
 
-	fmt.Printf("Target Point: X=%v, Y=%v\n", pts[0].X, pts[0].Y)
+	// fmt.Printf("Target Point: X=%v, Y=%v\n", pts[0].X, pts[0].Y)
 
 	scatter, err = plotter.NewScatter(pts)
 	if err != nil {
@@ -312,7 +368,7 @@ func createScatterPlot(data []Point, target Point, predictedLabel string) error 
 		return err
 	}
 
-	fmt.Printf("Scatter plot created and saved as '%s'\n", filename)
+	fmt.Printf("\n\nScatter plot created and saved as '%s'\n", filename)
 	return nil
 }
 
@@ -320,7 +376,11 @@ func main() {
 	// Get user input for selecting the dataset
 	var selectedDataset string
 	fmt.Print("Choose a dataset (gas, books, airfare): ")
-	fmt.Scanln(&selectedDataset)
+	// check the number of items scanned
+	if _, err := fmt.Scanln(&selectedDataset); err != nil {
+		log.Fatal(err)
+		return
+	}
 
 	// Load the selected dataset
 	var allPoints []Point
@@ -348,19 +408,17 @@ func main() {
 			log.Fatal(err)
 		}
 		allPoints = ConvertBookDataToPoints(bookData)
-
 	case "airfare":
-		airfareDataFile, err := os.ReadFile("airfare_data_price.json")
+		// Load airfare data using the new function
+		airfareDataList, err := DecodeAirfareDataList("airfare_data_price.json")
 		if err != nil {
 			log.Fatal(err)
 		}
-		var airfareDataList AirfareDataList
-		err = json.Unmarshal(airfareDataFile, &airfareDataList)
-		if err != nil {
-			log.Fatal(err)
-		}
+
+		// Convert airfare data to points
 		for _, airfareData := range airfareDataList.AirfareData {
-			allPoints = append(allPoints, ConvertAirfareDataToPoints(airfareData)...)
+			airfarePoints := ConvertAirfareDataToPoints(airfareData)
+			allPoints = append(allPoints, airfarePoints...)
 		}
 
 	default:
@@ -382,24 +440,14 @@ func main() {
 		target.Features = []float64{20}
 
 	case "airfare":
-		target.Features = []float64{1, 2023}
+		target.Features = []float64{floatMonth("Jan"), 2023}
 
 	default:
 		log.Fatal("Invalid dataset choice")
 	}
 
 	k := 3
-	predictedLabel := KNN(k, allPoints, target)
-
-	// Create and save scatter plot only if the selected dataset is "books"
-	if selectedDataset == "books" {
-		err := createScatterPlot(allPoints, target, predictedLabel)
-		if err != nil {
-			log.Fatal(err)
-		}
-	} else {
-		fmt.Println("Scatter plot is only supported for the 'books' dataset.")
-	}
+	predictedLabel, nearestNeighbors := KNN(k, allPoints, target)
 
 	// Calculate the dynamic middle value for each feature based on the predicted label
 	for i := range target.Features {
@@ -418,8 +466,22 @@ func main() {
 		}
 	}
 
-	fmt.Printf("Predicted Label: %s\n", predictedLabel)
-	fmt.Printf("Predicted Features: %v\n", target.Features)
+	// Print the predicted gas
+	if selectedDataset == "gas" {
+		// Print the nearest neighbors in a table-like format
+		fmt.Println()
+		fmt.Println("Nearest Neighbors:")
+		fmt.Printf("%-10s %-10s %-10s %-10s\n", "Label", "Year", "Price", "CPI")
+		for _, neighbor := range nearestNeighbors {
+			fmt.Printf("%-10s %-10.0f $%-10.2f %-10.3f\n", neighbor.Label, neighbor.Features[0], neighbor.Features[1], neighbor.Features[2])
+		}
+
+		// Print the predicted gas price for 2023 with dynamic middle value
+		predictedGasPrice := target.Features[1] // Extracting the gas price from the dynamic middle value
+		fmt.Printf("\nPredicted Target Price: $%.2f\n", predictedGasPrice)
+	} else {
+		fmt.Println("Table output is available only for the 'gas' dataset.")
+	}
 
 	// Create and save scatter plot
 	err := createScatterPlot(allPoints, target, predictedLabel)

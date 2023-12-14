@@ -1,4 +1,4 @@
-package main
+package cuda_test
 
 //
 //func main1() {

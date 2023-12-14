@@ -1028,27 +1028,29 @@ INSERT INTO linear_regression_predictions(prediction_id,query_identifier, input_
 INSERT INTO naive_bayes_predictions (prediction_id, query_identifier, input_data, prediction_info)
 VALUES (
            UUID(),
-           'Top 3 Tech Jobs with most demand skills',
+           'Top 3 Tech Jobs',
            'Software Release DevOps Engineer',
-           'C:\\Users\\Public\\GoLandProjects\\JustAFork\\crab\\output\\SoftwareEng_jobs.json'
+           'C:\\Users\\Public\\GoLandProjects\\JustAFork\\Nbc_output\\SoftwareEng_top_jobs.json'
        );
 
 INSERT INTO naive_bayes_predictions (prediction_id, query_identifier, input_data, prediction_info)
 VALUES (
            UUID(),
-           'Top 3 Law Jobs with most demand skills',
+           'Top 3 Law Jobs',
            'Law Related Skills', -- Replace with actual skills
-           'C:\\Users\\Public\\GoLandProjects\\JustAFork\\crab\\output\\Law_jobs.json'
+           'C:\\Users\\Public\\GoLandProjects\\JustAFork\\Nbc_output\\Law_top_jobs.json'
        );
 
 INSERT INTO naive_bayes_predictions (prediction_id, query_identifier, input_data, prediction_info)
 VALUES (
            UUID(),
-           'Top 3 Bus Jobs with most demand skills',
+           'Top 3 Business Jobs',
            'Business Related Skills', -- Replace with actual skills
-           'C:\\Users\\Public\\GoLandProjects\\JustAFork\\crab\\output\\Business_jobs.json'
+           'C:\\Users\\Public\\GoLandProjects\\JustAFork\\Nbc_output\\Business_top_jobs.json'
        );
-
+# C:\\Users\\Public\\GoLandProjects\\JustAFork\\Nbc_output\\Business_top_jobs.json
+# C:\\Users\\Public\\GoLandProjects\\JustAFork\\Nbc_output\\Law_top_jobs.json
+# C:\\Users\\Public\\GoLandProjects\\JustAFork\\Nbc_output\\SoftwareEng_top_jobs.json
 
 -- Inserting sample URLs into the URLs table
 INSERT INTO urls (id, url, tags)

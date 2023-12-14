@@ -1,4 +1,4 @@
-package main
+package crab
 
 import (
 	"encoding/csv"
@@ -236,7 +236,7 @@ func Scrape(startingURL string, domainConfig DomainConfig, wg *sync.WaitGroup) {
 // testScrape is a testing function for the scraper. It takes a domain name and triggers the Scrape
 // function using predefined test URLs for the domain. This function helps in validating the scraping logic
 // for different domains.
-func testScrape(domainName string) {
+func TestScrape(domainName string) {
 	domainConfig, exists := domainConfigurations[domainName]
 	if !exists {
 		fmt.Printf("Invalid domain name provided: %s\n", domainName)
@@ -271,7 +271,7 @@ func testScrape(domainName string) {
 // are specific scraper implementations for different types of data like airfare, inflation, gasoline prices,
 // and housing data. Each function fetches data from specific URLs and processes it according to predefined
 // scraping rules and selectors, then writes the scraped data to JSON files.
-func airdatatest() {
+func Airdatatest() {
 	scrapeurl := "https://www.usinflationcalculator.com/inflation/airfare-inflation/"
 	res, err := http.Get(scrapeurl)
 	if err != nil {
@@ -367,7 +367,7 @@ func airdatatest() {
 //end airfare scraper ==================================================================================================
 
 // begin inflation scraper ==============================================================================================
-func scrapeInflationData() {
+func ScrapeInflationData() {
 	scrapeurl := "https://www.usinflationcalculator.com/inflation/current-inflation-rates/"
 	res, err := http.Get(scrapeurl)
 	if err != nil {
@@ -444,7 +444,7 @@ func scrapeInflationData() {
 //end inflation scraper ================================================================================================
 
 // begin gasoline scraper =================================================================================================
-func scrapeGasInflationData() {
+func ScrapeGasInflationData() {
 	scrapeurl := "https://www.usinflationcalculator.com/gasoline-prices-adjusted-for-inflation/"
 	res, err := http.Get(scrapeurl)
 	if err != nil {
@@ -500,7 +500,7 @@ func scrapeGasInflationData() {
 //end gasoline scraper =================================================================================================
 
 // begin housing scraper =================================================================================================
-func scrapeHousingData() {
+func ScrapeHousingData() {
 	scrapeurl := "https://www.kaggle.com/datasets/ahmedshahriarsakib/usa-real-estate-dataset"
 	res, err := http.Get(scrapeurl)
 	if err != nil {

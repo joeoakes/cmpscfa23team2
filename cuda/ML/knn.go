@@ -145,13 +145,13 @@ func ConvertAirfareDataToPoints(airfareData AirfareData) []Point {
 	for _, monthData := range airfareData.AdditionalInfo.MonthsData {
 		// Assuming the structure of AirfareMonth, adjust the field names accordingly
 		features := []float64{
-			floatMonth(monthData.Month),
-			parseFloat(monthData.Rate),
+			FloatMonth(monthData.Month),
+			ParseFloat(monthData.Rate),
 		}
 
 		// Add "Year" feature if available
 		if monthData.Year != "" {
-			features = append(features, parseFloat(monthData.Year))
+			features = append(features, ParseFloat(monthData.Year))
 		}
 
 		label := "airfare"
@@ -160,8 +160,8 @@ func ConvertAirfareDataToPoints(airfareData AirfareData) []Point {
 	return data
 }
 
-// floatMonth converts a month string to a float64 representation
-func floatMonth(month string) float64 {
+// FloatMonth converts a month string to a float64 representation
+func FloatMonth(month string) float64 {
 	// You might want to map month names to numerical values if needed
 	// For simplicity, let's use the first three characters of the month name
 	switch month[:3] {
@@ -216,9 +216,9 @@ func ConvertGasolineDataToPoints(gasolineData []GasolineData) []Point {
 	var data []Point
 	for _, entry := range gasolineData {
 		// Check for missing values and handle them appropriately
-		year := parseFloat(entry.Year)
-		avgGas := parseFloat(entry.AverageGasolinePrices)
-		avgCPI := parseFloat(entry.AverageAnnualCPIForGas)
+		year := ParseFloat(entry.Year)
+		avgGas := ParseFloat(entry.AverageGasolinePrices)
+		avgCPI := ParseFloat(entry.AverageAnnualCPIForGas)
 
 		// Skip the entry if any of the required values is missing
 		if math.IsNaN(year) || math.IsNaN(avgGas) || math.IsNaN(avgCPI) {
@@ -238,7 +238,7 @@ func ConvertBookDataToPoints(bookData BookData) []Point {
 	for _, entry := range bookData.Data {
 		// Exclude timestamp from features
 		features := []float64{
-			parseFloat(entry.Price),
+			ParseFloat(entry.Price),
 		}
 
 		label := "books"
@@ -247,8 +247,8 @@ func ConvertBookDataToPoints(bookData BookData) []Point {
 	return data
 }
 
-// parseFloat parses a string to float64, handling special cases
-func parseFloat(s string) float64 {
+// ParseFloat parses a string to float64, handling special cases
+func ParseFloat(s string) float64 {
 	// Remove currency symbols, if any
 	s = strings.TrimPrefix(s, "£")
 
@@ -268,8 +268,8 @@ var colorMap = map[string]color.Color{
 	"books":   color.RGBA{R: 0, G: 255, B: 0, A: 255}, // Green
 }
 
-// createScatterPlot function for multi-dimensional plot
-func createScatterPlot(data []Point, target Point, predictedLabel string) error {
+// CreateScatterPlot function for multi-dimensional plot
+func CreateScatterPlot(data []Point, target Point, predictedLabel string) error {
 	p := plot.New()
 
 	p.Title.Text = "KNN Scatter Plot"
@@ -440,7 +440,7 @@ func main() {
 		target.Features = []float64{20}
 
 	case "airfare":
-		target.Features = []float64{floatMonth("Jan"), 2023}
+		target.Features = []float64{FloatMonth("Jan"), 2023}
 
 	default:
 		log.Fatal("Invalid dataset choice")
@@ -484,7 +484,7 @@ func main() {
 	}
 
 	// Create and save scatter plot
-	err := createScatterPlot(allPoints, target, predictedLabel)
+	err := CreateScatterPlot(allPoints, target, predictedLabel)
 	if err != nil {
 		log.Fatal(err)
 	}

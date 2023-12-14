@@ -51,8 +51,8 @@
         <h1>Documentation</h1>
         <!-- Your documentation content goes here -->
         <p>This is the documentation page for the PredictAI platform.</p>
-{{/*        <!DOCTYPE html>*/}}
-{{/*        <html>*/}}
+        {{/*        <!DOCTYPE html>*/}}
+        {{/*        <html>*/}}
         <head>
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -70,24 +70,24 @@
             <script>var goVersion = "go1.21.1";</script>
             <script src="/lib/godoc/godocs.js" defer></script>
         </head>
-{{/*        <body>*/}}
+        {{/*        <body>*/}}
 
         <div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
             ...
         </div><!-- #lowframe -->
 
-{{/*        <div id="topbar" class="wide"><div class="container">*/}}
-{{/*                <div class="top-heading" id="heading-wide"><a href="/pkg/">Go Documentation Server</a></div>*/}}
-{{/*                <div class="top-heading" id="heading-narrow"><a href="/pkg/">GoDoc</a></div>*/}}
-{{/*                <a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>*/}}
-{{/*                <form method="GET" action="/search">*/}}
-{{/*                    <div id="menu">*/}}
+        {{/*        <div id="topbar" class="wide"><div class="container">*/}}
+        {{/*                <div class="top-heading" id="heading-wide"><a href="/pkg/">Go Documentation Server</a></div>*/}}
+        {{/*                <div class="top-heading" id="heading-narrow"><a href="/pkg/">GoDoc</a></div>*/}}
+        {{/*                <a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>*/}}
+        {{/*                <form method="GET" action="/search">*/}}
+        {{/*                    <div id="menu">*/}}
 
-{{/*                        <span class="search-box"><input type="search" id="search" name="q" placeholder="Search" aria-label="Search" required><button type="submit"><span><!-- magnifying glass: --><svg width="24" height="24" viewBox="0 0 24 24"><title>submit search</title><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></span></button></span>*/}}
-{{/*                    </div>*/}}
-{{/*                </form>*/}}
+        {{/*                        <span class="search-box"><input type="search" id="search" name="q" placeholder="Search" aria-label="Search" required><button type="submit"><span><!-- magnifying glass: --><svg width="24" height="24" viewBox="0 0 24 24"><title>submit search</title><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></span></button></span>*/}}
+        {{/*                    </div>*/}}
+        {{/*                </form>*/}}
 
-{{/*            </div></div>*/}}
+        {{/*            </div></div>*/}}
 
         <h2>Package Overview</h2>
         <ul>
@@ -107,6 +107,12 @@
                 <a href="#carp-package">CARP Package</a>
                 <ul>
                     <li><a href="#carp-package-index">CARP Index</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#cuda-package">CUDA Package</a>
+                <ul>
+                    <li><a href="#cuda-package-index">CUDA Index</a></li>
                 </ul>
             </li>
         </ul>
@@ -614,7 +620,7 @@
                 <h2 id="InsertPrediction">func InsertPrediction</h2>
                 <pre>func InsertPrediction(engineID string, predictionInfo string) error</pre>
                 <p>Function to insert a new prediction
-                The function InsertPrediction, that checks the existence of an engineID, logs the result and inserts predictionInfo into a database table if the engineID exists, handling errors along the way</p>
+                    The function InsertPrediction, that checks the existence of an engineID, logs the result and inserts predictionInfo into a database table if the engineID exists, handling errors along the way</p>
 
                 <h2 id="InsertSampleEngine">func insertSampleEngine</h2>
                 <pre>func InsertSampleEngine(engineID, engineName, engineDescription string) error</pre>
@@ -1232,6 +1238,10 @@
                         <h2 class="toggleButton" title="Click to hide Index section">CARP Package Index ▾</h2>
                         <div id="manual-nav">
                             <dl>
+                                <dt>Structs</dt>
+                                <dd><a href="#PageData">type PageData struct</a></dd>
+                                <dd><a href="#AuthData">type AuthData struct</a></dd>
+                                <dd><a href="#RegistrationPageData">type RegistrationPageData struct</a></dd>
                                 <!-- Index for Server.go -->
                                 <dt>server.go Functions</dt>
                                 <dd><a href="#main">func main()</a></dd>
@@ -1257,23 +1267,278 @@
                         </div><!-- #manual-nav -->
                     </div><!-- .expanded -->
                 </div><!-- #carp-package-index -->
-
                 <!-- CARP Package Detailed Documentation -->
+                <!-- server.go Structures -->
+                <h3 id="server-go-structures">Structures in server.go</h3>
+
+                <!-- PageData Structure -->
+                <h2 id="PageData">type PageData struct</h2>
+                <pre>type PageData struct { ... }</pre>
+                <p>Holds data for rendering HTML pages, including title, content, error messages, and user data.</p>
+
+                <!-- middleware.go Structures -->
+                <h3 id="middleware-go-structures">Structures in middleware.go</h3>
+
+                <!-- AuthData Structure -->
+                <h2 id="AuthData">type AuthData struct</h2>
+                <pre>type AuthData struct { ... }</pre>
+                <p>Represents the authentication data structure, including title, action, user information, and authentication status.</p>
+
+                <!-- RegistrationPageData Structure -->
+                <h2 id="RegistrationPageData">type RegistrationPageData struct</h2>
+                <pre>type RegistrationPageData struct { ... }</pre>
+                <p>Represents the data structure for the registration page, including title and error messages.</p>
+
                 <h3 id="server-go-functions">Functions in server.go</h3>
                 <!-- Detailed documentation for each function in server.go -->
                 <!-- Example for main function -->
+                <!-- main Function -->
                 <h2 id="main">func main()</h2>
                 <pre>func main()</pre>
-                <p>Main function sets up and starts the server.</p>
-                <!-- More detailed documentation for other functions... -->
+                <p>The main function initializes and starts the server by calling setupServer.</p>
 
+                <!-- setupServer Function -->
+                <h2 id="setupServer">func setupServer()</h2>
+                <pre>func setupServer()</pre>
+                <p>Configures and starts the HTTP server, loading templates and setting up routes.</p>
+
+                <!-- setupRoutes Function -->
+                <h2 id="setupRoutes">func setupRoutes(tmpl *template.Template)</h2>
+                <pre>func setupRoutes(tmpl *template.Template)</pre>
+                <p>Defines the routes for the web server and associates handlers with each route.</p>
+
+                <!-- makeHandler Function -->
+                <h2 id="makeHandler">func makeHandler(tmpl *template.Template, content string) http.HandlerFunc</h2>
+                <pre>func makeHandler(tmpl *template.Template, content string) http.HandlerFunc</pre>
+                <p>Returns a handler function for rendering pages based on the provided content string.</p>
+
+                <!-- loginHandler Function -->
+                <h2 id="loginHandler">func loginHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request)</h2>
+                <pre>func loginHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request)</pre>
+                <p>Handles user login requests, authenticating users and managing session tokens.</p>
+
+                <!-- renderLoginTemplate Function -->
+                <h2 id="renderLoginTemplate">func renderLoginTemplate(tmpl *template.Template, w http.ResponseWriter, errorMessage string)</h2>
+                <pre>func renderLoginTemplate(tmpl *template.Template, w http.ResponseWriter, errorMessage string)</pre>
+                <p>Renders the login page template with potential error messages.</p>
+
+                <!-- registerHandler Function -->
+                <h2 id="registerHandler">func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request)</h2>
+                <pre>func registerHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request)</pre>
+                <p>Handles user registration requests, registering new users in the system.</p>
+
+                <!-- predictionHandler Function -->
+                <h2 id="predictionHandler">func predictionHandler(w http.ResponseWriter, r *http.Request)</h2>
+                <pre>func predictionHandler(w http.ResponseWriter, r *http.Request)</pre>
+                <p>Processes requests for making predictions based on provided criteria.</p>
+
+                <!-- renderDashboardTemplate Function -->
+                <h2 id="renderDashboardTemplate">func renderDashboardTemplate(tmpl *template.Template, w http.ResponseWriter, users []*dal.User, errorMessage string)</h2>
+                <pre>func renderDashboardTemplate(tmpl *template.Template, w http.ResponseWriter, users []*dal.User, errorMessage string)</pre>
+                <p>Renders the dashboard template with user data and potential error messages.</p>
+
+                <!-- dashHandler Function -->
+                <h2 id="dashHandler">func dashHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request)</h2>
+                <pre>func dashHandler(tmpl *template.Template, w http.ResponseWriter, r *http.Request)</pre>
+                <p>Handles requests for the dashboard page, fetching and displaying user data.</p>
+
+
+                <!-- middleware.go Functions -->
                 <h3 id="middleware-go-functions">Functions in middleware.go</h3>
-                <!-- Detailed documentation for each function in middleware.go -->
-                <!-- Example for serveTemplate function -->
-                <h2 id="serveTemplate">serveTemplate</h2>
+
+                <!-- serveTemplate Function -->
+                <h2 id="serveTemplate">func serveTemplate(content string, loggedIn bool) http.HandlerFunc</h2>
                 <pre>func serveTemplate(content string, loggedIn bool) http.HandlerFunc</pre>
-                <p>Returns an HTTP handler function that renders a template.</p>
-                <!-- More detailed documentation for other functions... -->
+                <p>Returns an HTTP handler function that renders a template based on the provided content and login status.</p>
+
+                <!-- renderTemplate Function -->
+                <h2 id="renderTemplate">func renderTemplate(w http.ResponseWriter, tmpl string, data *AuthData)</h2>
+                <pre>func renderTemplate(w http.ResponseWriter, tmpl string, data *AuthData)</pre>
+                <p>Renders the specified HTML template with authentication data.</p>
+
+                <!-- handleLogin Function -->
+                <h2 id="handleLogin">func handleLogin(w http.ResponseWriter, r *http.Request)</h2>
+                <pre>func handleLogin(w http.ResponseWriter, r *http.Request)</pre>
+                <p>Processes login requests, authenticating users and managing session tokens.</p>
+
+                <!-- requireAdmin Function -->
+                <h2 id="requireAdmin">func requireAdmin(next http.HandlerFunc) http.HandlerFunc</h2>
+                <pre>func requireAdmin(next http.HandlerFunc) http.HandlerFunc</pre>
+                <p>Middleware function that ensures the user is an admin before proceeding with the request.</p>
+
+                <!-- logoutHandler Function -->
+                <h2 id="logoutHandler">func logoutHandler(w http.ResponseWriter, r *http.Request)</h2>
+                <pre>func logoutHandler(w http.ResponseWriter, r *http.Request)</pre>
+                <p>Handles user logout requests, ending their session and removing authentication tokens.</p>
+
+                <!-- extractUserIDFromToken Function -->
+                <h2 id="extractUserIDFromToken">func extractUserIDFromToken(r *http.Request) (string, error)</h2>
+                <pre>func extractUserIDFromToken(r *http.Request) (string, error)</pre>
+                <p>Extracts the user ID from the JWT token in the request, verifying the token's validity.</p>
+
+
+                <!-- CUDA Package documentation -->
+                <h2 id="cuda-package">CUDA Package</h2>
+                <p>Contains functions and types for the CUDA prediction engine.</p>
+
+                <!-- Index for CUDA Package -->
+                <div id="cuda-package-index" class="toggleVisible">
+                    <div class="expanded">
+                        <h2 class="toggleButton" title="Click to hide Index section">CUDA Package Index ▾</h2>
+                        <div id="manual-nav">
+                            <dl>
+                                <dt>Structs</dt>
+                                <dd><a href="#JobData">JobData struct</a></dd>
+                                <dd><a href="#JobDataContainer">JobDataContainer struct</a></dd>
+                                <dd><a href="#SkillData">SkillData struct</a></dd>
+                                <dd><a href="#NaiveBayesClassifier">NaiveBayesClassifier struct</a></dd>
+                                <dd><a href="#DomainResult">DomainResult struct</a></dd>
+                                <dd><a href="#AirfareData">AirfareData struct</a></dd>
+                                <dd><a href="#GasolineData">GasolineData struct</a></dd>
+                                <dd><a href="#Item">Item struct</a></dd>
+                                <dd><a href="#BookData">BookData struct</a></dd>
+                                <dd><a href="#Point">Point struct</a></dd>
+
+                                <!-- Index for Functions -->
+                                <dt>Functions</dt>
+                                <dd><a href="#NewNaiveBayesClassifier">NewNaiveBayesClassifier</a></dd>
+                                <dd><a href="#Train">Train</a></dd>
+                                <dd><a href="#PredictBestMatchingJob">PredictBestMatchingJob</a></dd>
+                                <dd><a href="#SearchJobByTitle">SearchJobByTitle</a></dd>
+                                <dd><a href="#printJobDetails">printJobDetails</a></dd>
+                                <dd><a href="#LoadDataFromJSON">LoadDataFromJSON</a></dd>
+                                <dd><a href="#linearRegression">linearRegression</a></dd>
+                                <dd><a href="#linearRegressionThreeVariables">linearRegressionThreeVariables</a></dd>
+                                <dd><a href="#readAirfareJSON">readAirfareJSON</a></dd>
+                                <dd><a href="#readGasJSON">readGasJSON</a></dd>
+                                <dd><a href="#extractPricesYearsAndMonths">extractPricesYearsAndMonths</a></dd>
+                                <dd><a href="#extractPricesYearsAndCPI">extractPricesYearsAndCPI</a></dd>
+                                <dd><a href="#createScatterPlot">createScatterPlot</a></dd>
+                                <dd><a href="#KNN">KNN</a></dd>
+                                <dd><a href="#EuclideanDistance">EuclideanDistance</a></dd>
+                                <dd><a href="#ConvertAirfareDataToPoints">ConvertAirfareDataToPoints</a></dd>
+                                <dd><a href="#ConvertGasolineDataToPoints">ConvertGasolineDataToPoints</a></dd>
+                                <dd><a href="#ConvertBookDataToPoints">ConvertBookDataToPoints</a></dd>
+                                <dd><a href="#parseFloat">parseFloat</a></dd>
+                                <dd><a href="#createScatterPlotKNN">createScatterPlot (KNN)</a></dd>
+                            </dl>
+                        </div><!-- #manual-nav -->
+                    </div><!-- .expanded -->
+                </div><!-- #cuda-package-index -->
+                <!-- CUDA Package documentation -->
+                <h2 id="cuda-package">CUDA Package</h2>
+                <p>Contains functions and types for the CUDA prediction engine.</p>
+
+                <!-- Structures Defined in CUDA Package -->
+                <h3 id="cuda-structures">Structures in CUDA Package</h3>
+
+                <!-- JobData Structure -->
+                <h2 id="JobData">type JobData struct</h2>
+                <pre>type JobData struct { ... }</pre>
+                <p>Represents a single job entry with title, URL, description, salary, company, and location.</p>
+
+                <!-- JobDataContainer Structure -->
+                <h2 id="JobDataContainer">type JobDataContainer struct</h2>
+                <pre>type JobDataContainer struct { ... }</pre>
+                <p>Encapsulates the structure of a JSON file with job data, including domain, URL, and metadata.</p>
+
+                <!-- SkillData Structure -->
+                <h2 id="SkillData">type SkillData struct</h2>
+                <pre>type SkillData struct { ... }</pre>
+                <p>Represents the demand for a skill in a category, including the skill, demand, and matches.</p>
+
+                <!-- NaiveBayesClassifier Structure -->
+                <h2 id="NaiveBayesClassifier">type NaiveBayesClassifier struct</h2>
+                <pre>type NaiveBayesClassifier struct { ... }</pre>
+                <p>Struct to hold model data for the Naive Bayes Classifier, including word frequencies, category counts, total words, and skill sets.</p>
+
+                <!-- DomainResult Structure -->
+                <h2 id="DomainResult">type DomainResult struct</h2>
+                <pre>type DomainResult struct { ... }</pre>
+                <p>Represents the result for a domain with top job matches and skill demand.</p>
+
+                <!-- AirfareData, AirfareAdditional, AirfareMonth, AirfareMetadata Structures -->
+                <h2 id="AirfareData">type AirfareData struct</h2>
+                <pre>type AirfareData struct { ... }</pre>
+                <p>Represents the structure of each item in airfare JSON data, including title, year, location, features, additional info, and metadata.</p>
+
+                <!-- GasolineData Structure -->
+                <h2 id="GasolineData">type GasolineData struct</h2>
+                <pre>type GasolineData struct { ... }</pre>
+                <p>Represents each item in the gasoline JSON data, including year, average prices, CPI, and adjusted prices for inflation.</p>
+
+                <!-- Item Structure -->
+                <h2 id="Item">type Item struct</h2>
+                <pre>type Item struct { ... }</pre>
+                <p>Represents each item in a generic JSON data format, including title, URL, description, price, and metadata.</p>
+
+                <!-- BookData Structure -->
+                <h2 id="BookData">type BookData struct</h2>
+                <pre>type BookData struct { ... }</pre>
+                <p>Holds a collection of book-related data items.</p>
+
+                <!-- Point Structure -->
+                <h2 id="Point">type Point struct</h2>
+                <pre>type Point struct { ... }</pre>
+                <p>Represents a data point in a 2D space with features and a label, used in KNN algorithm.</p>
+
+                <!-- Functions Defined in CUDA Package -->
+                <h3 id="cuda-functions">Functions in CUDA Package</h3>
+
+                <!-- Functions in nbc.go -->
+                <h3 id="nbc-go-functions">Functions in nbc.go</h3>
+
+                <!-- NewNaiveBayesClassifier Function -->
+                <h2 id="NewNaiveBayesClassifier">func NewNaiveBayesClassifier()</h2>
+                <pre>func NewNaiveBayesClassifier() *NaiveBayesClassifier</pre>
+                <p>Initializes and returns a new Naive Bayes Classifier with default configurations.</p>
+
+                <!-- Train Function -->
+                <h2 id="Train">func Train(data []JobData, domain string)</h2>
+                <pre>func (nbc *NaiveBayesClassifier) Train(data []JobData, domain string)</pre>
+                <p>Trains the classifier for the specified domain using job data.</p>
+
+                <!-- PredictBestMatchingJob Function -->
+                <h2 id="PredictBestMatchingJob">func PredictBestMatchingJob(domain string, data []JobData)</h2>
+                <pre>func (nbc *NaiveBayesClassifier) PredictBestMatchingJob(domain string, data []JobData)</pre>
+                <p>Predicts the best matching job for a given domain based on the classifier.</p>
+
+                <!-- SearchJobByTitle Function -->
+                <h2 id="SearchJobByTitle">func SearchJobByTitle(data []JobData, title string)</h2>
+                <pre>func SearchJobByTitle(data []JobData, title string)</pre>
+                <p>Searches for a job by its title and prints its details.</p>
+
+                <!-- Linear Regression Functions in linear_regression.go -->
+                <h3 id="linear-regression-functions">Linear Regression Functions</h3>
+
+                <!-- linearRegression Function -->
+                <h2 id="linearRegression">func linearRegression(x, y []float64)</h2>
+                <pre>func linearRegression(x, y []float64) (a, b float64)</pre>
+                <p>Calculates the coefficients for a simple linear regression model.</p>
+
+                <!-- KNN Functions in knn.go -->
+                <h3 id="knn-functions">KNN Functions</h3>
+
+                <!-- KNN Function -->
+                <h2 id="KNN">func KNN(k int, data []Point, target Point)</h2>
+                <pre>func KNN(k int, data []Point, target Point) string</pre>
+                <p>Performs the k-nearest neighbors classification algorithm.</p>
+
+                <!-- ConvertAirfareDataToPoints Function -->
+                <h2 id="ConvertAirfareDataToPoints">func ConvertAirfareDataToPoints(airfareData AirfareData)</h2>
+                <pre>func ConvertAirfareDataToPoints(airfareData AirfareData) []Point</pre>
+                <p>Converts airfare data to a slice of Points for analysis.</p>
+
+                <!-- ConvertGasolineDataToPoints Function -->
+                <h2 id="ConvertGasolineDataToPoints">func ConvertGasolineDataToPoints(gasolineData []GasolineData)</h2>
+                <pre>func ConvertGasolineDataToPoints(gasolineData []GasolineData) []Point</pre>
+                <p>Converts gasoline data to a slice of Points for analysis.</p>
+
+                <!-- ConvertBookDataToPoints Function -->
+                <h2 id="ConvertBookDataToPoints">func ConvertBookDataToPoints(bookData BookData)</h2>
+                <pre>func ConvertBookDataToPoints(bookData BookData) []Point</pre>
+                <p>Converts book data to a slice of Points for analysis.</p>
+
 
                 <div id="footer">
                     Build version go1.21.1.<br>
@@ -1284,11 +1549,10 @@
                     <a href="https://golang.org/doc/tos.html">Terms of Service</a> |
                     <a href="https://www.google.com/intl/en/policies/privacy/">Privacy Policy</a>
                 </div>
-
             </div><!-- .container -->
         </div><!-- #page -->
-{{/*        </body>*/}}
-{{/*        </html>*/}}
+        {{/*        </body>*/}}
+        {{/*        </html>*/}}
     </div>
 {{ end }}
 <!--lol-->

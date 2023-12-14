@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS knn_predictions (
                                                prediction_id VARCHAR(36) PRIMARY KEY,
                                                query_identifier VARCHAR(255),
                                                input_data VARCHAR(255),
-                                               prediction_info VARCHAR(255),
+                                               prediction_info TEXT(255),
                                                prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS linear_regression_predictions (
                                                              prediction_id VARCHAR(36) PRIMARY KEY,
                                                              query_identifier VARCHAR(255),
                                                              input_data TEXT(255),
-                                                             prediction_info VARCHAR(255),
+                                                             prediction_info TEXT(255),
                                                              prediction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
@@ -964,73 +964,17 @@ VALUES
     (UUID(), 'Binh Thanh Hoang', 'bth5241@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP()),
     (UUID(), 'Shiv Patel', 'sbp5769@psu.edu', 'ADM', '$2a$10$hashedPasswordOfPassword', TRUE, CURRENT_TIMESTAMP());
 
-INSERT INTO linear_regression_predictions(prediction_id,query_identifier, input_data, prediction_info) VALUES (UUID(),'Gas Prices Prediction for the year 2023','(1978.000000, 51.900000, 0.652000),(1979.000000, 70.200000, 0.882000),(1980.000000, 97.500000, 1.221000),(1981.000000, 108.500000, 1.353000),(1982.000000, 102.800000, 1.281000),(1983.000000, 99.400000, 1.225000),(1984.000000, 97.800000, 1.198000),(1985.000000, 98.600000, 1.196000),(1986.000000, 77.000000, 0.931000),(1987.000000, 80.100000, 0.957000),(1988.000000, 80.800000, 0.964000),(1989.000000, 88.500000, 1.060000),(1990.000000, 101.000000, 1.217000),(1991.000000, 99.200000, 1.196000),(1992.000000, 99.000000, 1.190000),(1993.000000, 97.700000, 1.173000),(1994.000000, 98.200000, 1.174000),(1995.000000, 99.800000, 1.205000),(1996.000000, 105.900000, 1.288000),(1997.000000, 105.800000, 1.291000),(1998.000000, 91.600000, 1.115000),(1999.000000, 100.100000, 1.221000),(2000.000000, 128.600000, 1.563000),(2001.000000, 124.000000, 1.531000),(2002.000000, 116.000000, 1.441000),(2003.000000, 135.100000, 1.638000),(2004.000000, 159.700000, 1.923000),(2005.000000, 194.700000, 2.338000),(2006.000000, 219.900000, 2.635000),(2007.000000, 237.959000, 2.849000),(2008.000000, 277.457000, 3.317000),(2009.000000, 201.555000, 2.401000),(2010.000000, 238.594000, 2.836000),(2011.000000, 301.694000, 3.577000),(2012.000000, 311.470000, 3.695000),(2013.000000, 302.577000, 3.584000),(2014.000000, 290.889000, 3.425000),(2015.000000, 212.007000, 2.510000),(2016.000000, 187.602000, 2.204000),(2017.000000, 211.770000, 2.469000),(2018.000000, 240.599000, 2.794000),(2019.000000, 232.003000, 2.698000),(2020.000000, 194.130000, 2.242000),(2021.000000, 264.017000, 3.133000),(2022.000000, 347.747000, 4.192000)','The prediction for gas prices in the year 2023 is: $4.34');
-# INSERT INTO naive_bayes_predictions(prediction_id,query_identifier, input_data, prediction_info) VALUES (UUID(),'Top 3 Tech Jobs with most demand skills','','Most Demand Skills: Python, Java, React, Design
-# Top Jobs for ''Tech'' Domain:
-# Job Title: Software Engineer- Full Stack, URL: https://www.indeed.com/pagead/clk?mo=r&ad=-6NYlbfkN0DlG8eQ-E_eElbjQUAvh1Po9TMRdgcP7wLVIjfv-ORu9JgO3eKYfgel2s47D-0NuUWA6aOloEkMl1IgL2hYHZkjrYA-GpXd3cRH7rjuHefL0mCXddEQODNrSSFhAN_q86B
-# wYK24GFcTVHJEC9nRhV0RUcKYvwRjXScpZ009kyw4OR_v2YKKc2InCPsjDB7hyOIo_Ax-9w4_N3v8Lnog5GjG_5b7R8kFUkqoYV7j9pKCQeBa2xGWX7B2SiBMOaOevJdezWYuZzF382QPrFDp1LQKNJHr7HgjSBX2MaK-XwFGOxJ2wseNKBQtxnGof6uDnmPTaY0UaxiOcDjdWqNTkH7szpsZI4rMdJE0Ivm
-# XkoJdAhALHSscdNjYESTSZ-5H6mPpHLhVi0wM23pvfz3JZ-wZ-v0qzrEgXFswCZ_ozv4gyi7ImtWXRikSguzAilQVFSFY6LUCxOexrhW2Wjnlmb2x2Pe0zE8ZxslmEi5ffDuQ-1F4fWSMUjgqt3XVxc0NQ3i3Bs2pARaR_feRRS8Y9Q_yKr7UKDBkudRZysshrqCJB1msTCa3_8xMSlJbNb-GZToITyRSf2S
-# FQlkEm3PqNzJIHYoArF9cmBYA_Fbbpo6lpJuDBvAGXLQEuIyLGdlN0yL-xBZb1YVhB6_PsIuqxoM7HORIxfTO5bjc9fmr0M7SUXWDsJUzVF8CiNsj_PmPGaZ-q56kEz58-h251XPKu8eQBEC53k-B_uU-1Q9wBh8-SztED0XY2HUvxzIwwEkkmFTh6Cjy-ssztoSf9vpS1TGdmQzNg2xAPU9nCRUz5g8p4WN
-# Nyr3Y3MfnAmHgZ-6iKBfmMf7W0HQVyfNMJvFeTKD9RT5Zb0T-QCg-tfhLq8KMgHWO7APPnV0KQUDYct2MnioKi-HROkAVKOwwGOJl6mBZZ9wQg4c0dEWjzJjIjVCvC9KbY7SAVUphz5yYZ4lHASl_juQk7g26NewaVd2YgARC&xkcb=SoCT-_M3HcRK65RgW50IbzkdCdPP&p=3&fvj=0&vjs=3, Company: Motion Recruitment, Location: Location Not Found, Salary: $120,000 - $150,000 a year
-# Description: Proficiency in a range of programming languages and technologies such as JavaScript, Python, Java, Ruby, or others, for both front-end and back-end development.
-# Front-End Development: React, Angular, Vue.js and proficiency in HTML, CSS, and JavaScript.
-# Back-End Development: Node.js, Django, Flask, Spring,
-# Full Stack Proficiency: Ability to seamlessly work on both front-end and back-end components, understanding the interplay between them to build cohesive applications.
-# Proficiency in a range of programming languages and technologies such as JavaScript, Python, Java, Ruby, or others, for both front-end and back-end development.
-# Front-End Development: React, Angular, Vue.js and proficiency in HTML, CSS, and JavaScript.
-# Back-End Development: Node.js, Django, Flask, Spring,
-# Full Stack Proficiency: Ability to seamlessly work on both front-end and back-end components, understanding the interplay between them to build cohesive applications.
-# Database Knowledge: Familiarity with database systems like SQL, NoSQL, and the ability to design efficient data models.
-# Adaptability and Eagerness to Learn: Willingness to adapt to new technologies and learn continuously in a fast-paced environment.
-# 50% front end
-# 50% back end
-# 50% front end
-# 50% back end
-# Design, develop, and deploy scalable, efficient, and high-quality software applications across the full tech stack.
-# Design, develop, and deploy scalable, efficient, and high-quality software applications across the full tech stack.
-# Ensure code quality through best practices, testing, and code reviews.
-# Troubleshoot and debug issues to maintain the performance and reliability of software applications
-# Healthcare insurance, 100% company-paid premiums
-# Stock options
-# Work life balance, vacation time
-# Healthcare insurance, 100% company-paid premiums
-# Stock options
-# Work life balance, vacation time
-# Matching Skills: 4 [design, Python, Java, React]
-#
-# Job Title: Software Developer, URL: https://www.indeed.com/rc/clk?jk=62253a0443b245d8&bb=qX68GcmwpUT_7GZdeTpvaQzYU8YaOhuxU9Fif5hbMMSyOikzvNT_fXC6oyzz7zq0&xkcb=SoBC67M3HcRKiURSZR0PbzkdCdPP&fccid=3c871c128fb1bf83&vjs=3, Company: LifeLens Technologies, Location: Ivyland, PA 18974, Salary: Salary Not Found
-# Description: Java, JavaScript, Python or equivalent
-# Understanding of HITRUST, GDPR, and/or HIPAA security compliance.
-# Familiarity with React/Redux or equivalent interface frameworks.
-# Familiarity with Docker container runtime engine.
-# Helping support on-device application development and integration with back-end services.
-# Bachelor’s Degree in Computer Science, Computer Engineering, or a related technical discipline
-# Matching Skills: 3 [Python, Java, React]
-#
-# Job Title: URBN Platform Services Engineer, URL: https://www.indeed.com/rc/clk?jk=2cdad9fc6c68b401&bb=jcqAAeUUNaDqg-nH3cQUctIZ9ZoGo2H-L8MmmHGec9TsJ6NJ8bQwd-EeMKKAi_SE&xkcb=SoCn67M3HcRKspyU5p0KbzkdCdPP&fccid=a97e193d3b71f26b&vjs=3, Company: URBN, Location: Location Not Found, Salary: Salary Not Found
-# Description: Design and development of microservices and event driven systems
-# Develop new product features and advance the design of existing code for the Ecommerce applications
-# Develop functional designs while interacting with enterprise architects, developers, business partners as well as end users
-# React to possible production issues
-# Enjoys working in a collaborative team setting
-# Understanding of OO principles and design patterns
-# Self-starter, ready to learn new concepts and technologies. Willing to take on responsibility for new features and develop them from inception to completion
-# Proficient in Python/Golang
-# Strong understanding of RESTful services design
-# Strong understanding of asynchronous message processing technologies
-# Enjoys working across teams and sharing knowledge with other engineers
-# Familiarity with search solutions like Elastic Search, Solr
-# Demonstrated expertise with Unit Testing frameworks and mocking libraries
-# Familiar with Django or other ORM frameworks
-# Exposure to data science and Machine learning technologies
-# Understanding of cloud hosting platforms and infrastructure');
-
+INSERT INTO linear_regression_predictions(prediction_id,query_identifier, input_data, prediction_info) VALUES (UUID(),'Gas Prices Prediction 2023','(1978.000000, 51.900000, 0.652000),(1979.000000, 70.200000, 0.882000),(1980.000000, 97.500000, 1.221000),(1981.000000, 108.500000, 1.353000),(1982.000000, 102.800000, 1.281000),(1983.000000, 99.400000, 1.225000),(1984.000000, 97.800000, 1.198000),(1985.000000, 98.600000, 1.196000),(1986.000000, 77.000000, 0.931000),(1987.000000, 80.100000, 0.957000),(1988.000000, 80.800000, 0.964000),(1989.000000, 88.500000, 1.060000),(1990.000000, 101.000000, 1.217000),(1991.000000, 99.200000, 1.196000),(1992.000000, 99.000000, 1.190000),(1993.000000, 97.700000, 1.173000),(1994.000000, 98.200000, 1.174000),(1995.000000, 99.800000, 1.205000),(1996.000000, 105.900000, 1.288000),(1997.000000, 105.800000, 1.291000),(1998.000000, 91.600000, 1.115000),(1999.000000, 100.100000, 1.221000),(2000.000000, 128.600000, 1.563000),(2001.000000, 124.000000, 1.531000),(2002.000000, 116.000000, 1.441000),(2003.000000, 135.100000, 1.638000),(2004.000000, 159.700000, 1.923000),(2005.000000, 194.700000, 2.338000),(2006.000000, 219.900000, 2.635000),(2007.000000, 237.959000, 2.849000),(2008.000000, 277.457000, 3.317000),(2009.000000, 201.555000, 2.401000),(2010.000000, 238.594000, 2.836000),(2011.000000, 301.694000, 3.577000),(2012.000000, 311.470000, 3.695000),(2013.000000, 302.577000, 3.584000),(2014.000000, 290.889000, 3.425000),(2015.000000, 212.007000, 2.510000),(2016.000000, 187.602000, 2.204000),(2017.000000, 211.770000, 2.469000),(2018.000000, 240.599000, 2.794000),(2019.000000, 232.003000, 2.698000),(2020.000000, 194.130000, 2.242000),(2021.000000, 264.017000, 3.133000),(2022.000000, 347.747000, 4.192000)','Based on a comprehensive analysis of gas prices trends over the years, our linear regression model predicts that gas prices in the year 2023 is anticipated to be: $4.34');
+INSERT INTO linear_regression_predictions(prediction_id,query_identifier, input_data, prediction_info) VALUES (UUID(),'Gas Prices Prediction 2024','','Based on a comprehensive analysis of gas prices trends over the years, our linear regression model predicts that the gas prices for the year 2024 is anticipated to be: $4.59.');
+INSERT INTO linear_regression_predictions(prediction_id,query_identifier, input_data, prediction_info) VALUES (UUID(),'Airfare Prices Prediction 2024','','Based on a comprehensive analysis of airfare prices trends over the years, our linear regression model predicts that the average price for domestic flights within the USA for the year 2024 is anticipated to be: $461.');
+INSERT INTO linear_regression_predictions(prediction_id,query_identifier, input_data, prediction_info) VALUES (UUID(),'Airfare Prices Prediction 2025','','Based on a comprehensive analysis of airfare prices trends over the years, our linear regression model predicts that the average price for domestic flights within the USA for the year 2025 is anticipated to be: $484.');
+INSERT INTO linear_regression_predictions(prediction_id,query_identifier, input_data, prediction_info) VALUES (UUID(),'Airfare Prices Prediction 2030','','Based on a comprehensive analysis of airfare prices trends over the years, our linear regression model predicts that the average price for domestic flights within the USA for the year 2030 is anticipated to be: $527.07.');
 INSERT INTO naive_bayes_predictions (prediction_id, query_identifier, input_data, prediction_info)
 VALUES (
            UUID(),
            'Top 3 Tech Jobs',
            'Software Release DevOps Engineer',
-           'C:\\Users\\Public\\GoLandProjects\\JustAFork\\Nbc_output\\SoftwareEng_top_jobs.json'
+           'C:\\Users\\mathe\\GolandProjects\\MatthewA\\Nbc_output\\SoftwareEng_top_jobs.json'
        );
 
 INSERT INTO naive_bayes_predictions (prediction_id, query_identifier, input_data, prediction_info)
@@ -1038,7 +982,7 @@ VALUES (
            UUID(),
            'Top 3 Law Jobs',
            'Law Related Skills', -- Replace with actual skills
-           'C:\\Users\\Public\\GoLandProjects\\JustAFork\\Nbc_output\\Law_top_jobs.json'
+           'C:\\Users\\mathe\\GolandProjects\\MatthewA\\Nbc_output\\Law_top_jobs.json'
        );
 
 INSERT INTO naive_bayes_predictions (prediction_id, query_identifier, input_data, prediction_info)
@@ -1046,8 +990,22 @@ VALUES (
            UUID(),
            'Top 3 Business Jobs',
            'Business Related Skills', -- Replace with actual skills
-           'C:\\Users\\Public\\GoLandProjects\\JustAFork\\Nbc_output\\Business_top_jobs.json'
+           'C:\\Users\\mathe\\GolandProjects\\MatthewA\\Nbc_output\\Business_top_jobs.json'
        );
+INSERT INTO knn_predictions(prediction_id, query_identifier, input_data, prediction_info)
+    VALUES (
+           UUID(),
+           'Gas prices target prediction for years similar to 2023 prediction',
+           'Business Related Skills', -- Replace with actual skills
+           'Nearest Years:
+Year    Price   CPI
+2022    $4.19   347.747
+2012    $3.69   311.470
+2011    $3.58   301.694
+
+Predicted Target Price closest to Year 2023: $3.82, Year: 2015'
+       );
+
 # C:\\Users\\Public\\GoLandProjects\\JustAFork\\Nbc_output\\Business_top_jobs.json
 # C:\\Users\\Public\\GoLandProjects\\JustAFork\\Nbc_output\\Law_top_jobs.json
 # C:\\Users\\Public\\GoLandProjects\\JustAFork\\Nbc_output\\SoftwareEng_top_jobs.json

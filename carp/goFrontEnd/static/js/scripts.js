@@ -2,9 +2,11 @@ $(document).ready(function() {
   const $domainSelect = $('#domainSelect');
   const $querySelect = $('#querySelect');
   const domainToQueries = {
-    "E-commerce (Price Prediction)": ["E-commerce Query 1 Used car", "E-commerce Query 2 Gold Price", "E-commerce Query 3 Silver Price"],
-    "Gas Prices (Industry Trend Analysis)": ["Gas Prices Prediction for the year 2023", "Gas Prices Query 2", "Gas Prices Query 3"],
-    "Job Market (Industry Trend Analysis)": ["Top 3 Tech Jobs", "Top 3 Law Jobs", "Top 3 Business Jobs"]
+    "Job Market": ["Top 3 Tech Jobs", "Top 3 Law Jobs", "Top 3 Business Jobs"],
+    "Gas Prices": ["Gas Prices Prediction for the year 2023", "Gas Prices Query 2", "Gas Prices Query 3"],
+    "Airfare Prices": ["Airfare Prices Query 1", "Airfare Prices Query 2", "Airfare Prices Query 3"],
+
+
   };
 
   $domainSelect.change(function() {
@@ -36,7 +38,7 @@ $(document).ready(function() {
 
   function displayPredictionResults(domain, queryType, response) {
     // Display skills for "Job Market (Industry Trend Analysis)"
-    if (domain === "Job Market (Industry Trend Analysis)") {
+    if (domain === "Job Market") {
       const skillsMapping = {
         "Top 3 Tech Jobs": "Skills: Software, Java, React, C++, JavaScript, DevOps, Cloud, AWS, Backend",
         "Top 3 Law Jobs": "Skills: Law, Litigation, Legal, Contract, Compliance",

@@ -1,4 +1,4 @@
-package main
+package cuda
 
 import (
 	"database/sql"
@@ -106,7 +106,7 @@ type GasolineData struct {
 }
 
 // read gas
-func readGasJSON(filePath string) []GasolineData {
+func ReadGasJSON(filePath string) []GasolineData {
 	file, err := os.Open(filePath)
 	if err != nil {
 		log.Fatal(err)
@@ -123,7 +123,7 @@ func readGasJSON(filePath string) []GasolineData {
 }
 
 // extractPricesAndYears extracts numerical values from price strings and returns prices, years, and cpiValues.
-func extractPricesYearsAndCPI(items []GasolineData) ([]float64, []float64, []float64) {
+func ExtractPricesYearsAndCPI(items []GasolineData) ([]float64, []float64, []float64) {
 	var prices []float64
 	var years []float64
 	var cpiValues []float64
@@ -212,9 +212,8 @@ func extractPrices(items []Item) []float64 {
 }
 
 // LINEAR REGRESSION ----------------------------------------------------------------------------------
-
 // linearRegression calculates the coefficients for a simple linear regression model (y = ax + b).
-func linearRegression(x, y []float64) (a, b float64) {
+func LinearRegression(x, y []float64) (a, b float64) {
 	var sumX, sumY, sumXY, sumX2 float64
 	n := float64(len(x))
 
@@ -321,10 +320,10 @@ func main() {
 	switch domain {
 	case "gas":
 		filePath := "gasoline_data.json"
-		GasolineData := readGasJSON(filePath)
+		GasolineData := ReadGasJSON(filePath)
 
 		// Extract prices, years, and CPI values
-		prices, years, cpiValues := extractPricesYearsAndCPI(GasolineData)
+		prices, years, cpiValues := ExtractPricesYearsAndCPI(GasolineData)
 
 		// Perform linear regression
 		a, b, c := linearRegressionThreeVariables(years, cpiValues, prices)
@@ -472,7 +471,7 @@ func main() {
 			indices[i] = float64(i + 1)
 		}
 		// Perform linear regression
-		a, b := linearRegression(indices, prices)
+		a, b := LinearRegression(indices, prices)
 
 		// Output the prediction for new x values
 		newX := indices // Example new x values for prediction
@@ -505,4 +504,5 @@ func main() {
 	default:
 		log.Fatal("Unknown domain:", domain)
 	}
+
 }

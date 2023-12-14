@@ -231,7 +231,7 @@ func LinearRegression(x, y []float64) (a, b float64) {
 }
 
 // linearRegressionThreeVariables calculates the coefficients for a multiple linear regression model (y = ax1 + bx2 + c).
-func linearRegressionThreeVariables(x1, x2, y []float64) (a, b, c float64) {
+func LinearRegressionThreeVariables(x1, x2, y []float64) (a, b, c float64) {
 	var sumX1, sumX2, sumY, sumX1Y, sumX2Y, sumX1X2, sumX1Squared, sumX2Squared float64
 	n := float64(len(x1))
 
@@ -265,7 +265,7 @@ func linearRegressionThreeVariables(x1, x2, y []float64) (a, b, c float64) {
 // SCATTER PLOT --------------------------------------------------------------------------------
 
 // createScatterPlot creates and saves a scatter plot with the linear regression line.
-func createScatterPlot(x, y []float64, a, b float64, title, filename, xLabel, yLabel string) {
+func CreateScatterPlot(x, y []float64, a, b float64, title, filename, xLabel, yLabel string) {
 	p := plot.New()
 
 	p.Title.Text = title
@@ -326,7 +326,7 @@ func main() {
 		prices, years, cpiValues := ExtractPricesYearsAndCPI(GasolineData)
 
 		// Perform linear regression
-		a, b, c := linearRegressionThreeVariables(years, cpiValues, prices)
+		a, b, c := LinearRegressionThreeVariables(years, cpiValues, prices)
 
 		// Extend the time range for prediction (next year)
 		var newX []float64
@@ -382,7 +382,7 @@ func main() {
 		filename := "Gas Prices Prediction for the year 2023_scatter_plot.png"
 		xLabel := "Year"
 		yLabel := "Average Gasoline Prices"
-		createScatterPlot(append(years, newX...), prices, a, b, title, filename, xLabel, yLabel)
+		CreateScatterPlot(append(years, newX...), prices, a, b, title, filename, xLabel, yLabel)
 
 	// case airfare ---------------------------------------------------
 	case "airfare":
@@ -405,7 +405,7 @@ func main() {
 		}
 
 		// Perform linear regression
-		a, b, c := linearRegressionThreeVariables(indices, prices, numericYears)
+		a, b, c := LinearRegressionThreeVariables(indices, prices, numericYears)
 
 		// Output the prediction for new x values (months)
 		// Example new x values for prediction
@@ -452,7 +452,7 @@ func main() {
 		filename := "airfare_scatter_plot.png"
 		xLabel := "Month"
 		yLabel := "Average Airfare Prices"
-		createScatterPlot(indices, prices, a, b, title, filename, xLabel, yLabel)
+		CreateScatterPlot(indices, prices, a, b, title, filename, xLabel, yLabel)
 
 	// case books __________________________________________________________________________________
 	case "books":
@@ -499,7 +499,7 @@ func main() {
 		filename := "book_scatter_plot.png"
 		xLabel := "Book Index"
 		yLabel := "Price"
-		createScatterPlot(indices, prices, a, b, title, filename, xLabel, yLabel)
+		CreateScatterPlot(indices, prices, a, b, title, filename, xLabel, yLabel)
 
 	default:
 		log.Fatal("Unknown domain:", domain)

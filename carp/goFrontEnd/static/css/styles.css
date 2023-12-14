@@ -4,8 +4,6 @@ html, body {
   font-family: Arial, sans-serif;
 }
 
-
-
 /* Custom styles for the navbar */
 .navbar {
   background-color: darkblue; /* Change navbar color to dark blue */
@@ -238,11 +236,44 @@ footer.bg-dark .text-muted {
   font-size: 0.8rem;
   padding: 0.25rem 0.5rem;
   margin-right: 10px;}
+
+/*.job-listing {*/
+/*  margin-bottom: 20px;*/
+/*  padding: 15px;*/
+/*  border: 1px solid #ddd;*/
+/*  border-radius: 4px;*/
+/*}*/
+
+/*.job-title {*/
+/*  font-size: 1.2em;*/
+/*  margin-bottom: 5px;*/
+/*}*/
+
+/*.job-link {*/
+/*  display: inline-block;*/
+/*  margin-bottom: 10px;*/
+/*  color: #007bff;*/
+/*}*/
+
+/*.job-info {*/
+/*  font-size: 0.9em;*/
+/*  line-height: 1.4;*/
+/*}*/
+
+/*.job-link:hover {*/
+/*  text-decoration: underline;*/
+/*}*/
 .job-listing {
   margin-bottom: 20px;
   padding: 15px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  line-height: 25px;
+  text-align: center; /* Align text to the left */
+}
+
+.job-title, .job-link, .job-info {
+  text-align: center; /* Center these elements */
 }
 
 .job-title {
@@ -251,16 +282,40 @@ footer.bg-dark .text-muted {
 }
 
 .job-link {
-  display: inline-block;
-  margin-bottom: 10px;
+  display: block; /* Make link block level to ensure it starts on a new line */
+  margin-bottom: 20px;
   color: #007bff;
 }
 
 .job-info {
   font-size: 0.9em;
   line-height: 1.4;
+  margin-bottom: 10px; /* Add space between each info field */
+}
+
+.job-description, .description-label {
+  text-align: center; /* Align description text and label to the left */
+}
+
+.description-label {
+  margin-top: 10px; /* Add some space above the label */
+  font-weight: bold;
+}
+
+.job-description {
+  white-space: pre-line; /* Respect new lines in the job description */
 }
 
 .job-link:hover {
   text-decoration: underline;
+}
+
+.description-list {
+  list-style-type: disc; /* Bullet style */
+  padding-left: 20px; /* Indent the list */
+}
+
+.description-list li {
+  text-align: left; /* Align list items to the left */
+  margin-bottom: 5px; /* Space between list items */
 }

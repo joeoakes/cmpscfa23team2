@@ -76,9 +76,9 @@ func NewNaiveBayesClassifier() *NaiveBayesClassifier {
 		totalWords:       0,
 		totalUniqueWords: 0,
 		skillSets: map[string][]string{
-			"Tech":     {"Software", "Java", "React", "C++", "JavaScript", "DevOps", "Cloud", "AWS", "Backend", "Frontend", "Full Stack", "Angular", "Node.js", "SQL", "NoSQL", "Git", "Linux", "Embedded", "API", "Microservices"},
-			"Business": {"Management", "Finance", "Marketing", "Sales", "Microsoft Office"},
-			"Law":      {"Law", "Litigation", "Legal", "Contract", "Compliance"},
+			"SoftwareEng": {"Software", "Java", "React", "C++", "JavaScript", "DevOps", "Cloud", "AWS", "Backend", "Frontend", "Full Stack", "Angular", "Node.js", "SQL", "NoSQL", "Git", "Linux", "Embedded", "API", "Microservices"},
+			"Business":    {"Management", "Finance", "Marketing", "Sales", "Microsoft Office"},
+			"Law":         {"Law", "Litigation", "Legal", "Contract", "Compliance"},
 		},
 	}
 }
